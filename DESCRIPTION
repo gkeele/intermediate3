@@ -1,12 +1,11 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.2-4
-Date: 2017-02-03
-Author: Petr Simecek, Steven Munger, Gary Churchill
+Version: 0.3-1
+Date: 2018-02-26
+Author: Petr Simecek, Steven Munger, Gary Churchill, Brian Yandell
 Maintainer: Petr Simecek <petrs@jax.org>
 Description: It searches for a mediator M that would explain Q->T relationship
-Depends: magrittr
 Imports: ggplot2,
          dplyr,
          plotly,
@@ -15,4 +14,4 @@ Imports: ggplot2,
 License: GPL-3
 LazyData: TRUE
 URL: https://github.com/simecek/intermediate
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1

@@ -19,7 +19,7 @@
 #' 
 #' @examples
 #' data(Tmem68)
-#' med <- mediation.scan(target = Tmem68$target,
+#' med <- mediation_scan(target = Tmem68$target,
 #'                       mediator = Tmem68$mediator,
 #'                       annotation = Tmem68$annotation,
 #'                       covar = Tmem68$covar,
@@ -28,7 +28,7 @@
 #' plot(med)
 #' @export
 
-mediation.scan <- function(target, 
+mediation_scan <- function(target, 
                            mediator, 
                            annotation, 
                            qtl.geno, 
@@ -60,18 +60,20 @@ mediation.scan <- function(target,
   mediator <- cbind(mediator) # to ensure 'mediator' is a matrix
   N <- ncol(mediator) # number of points to scan
   if (is.null(covar)) covar <- cbind(rep(1, N)) # if no covariates, use just intercept
-  LOD <- rep(NA, N) # prepare output
 
   if (method == "double-lod-diff") {
     no.na <- !is.na(target)
     LOD0 <- LL(target[no.na], cbind(covar, qtl.geno)[no.na,]) - LL(target[no.na], covar[no.na,])
   }
-  
+
+  med_pur <- 
+    purrr::transpose(
+      list(mediator = as.data.frame(mediator),
+           annotation = split(annotation, rownames(annotation))))
   lodfn <- 
     switch(
       method,
       ignore = function(loglik, LOD0) {
-        # "double-lod-diff" for no missing observation is identical to "ignore"
         loglik[2] - loglik[1]
       },
       "lod-diff" = function(loglik, LOD0) {
@@ -83,21 +85,18 @@ mediation.scan <- function(target,
       "lod-ratio" = function(loglik, LOD0) {
         (10^loglik[2]-10^loglik[1]) / (10^loglik[4] - 10^loglik[3])
       })
-
-  # for-loop comparing M0: target~covar+mediator[,i] vs M1: target~covar+mediator[,i]+qtl.geno
-  for (i in 1:N) {
-    if (verbose & i %% 1000 == 0) print(i)
-    no.na <- !is.na(target) & !is.na(mediator[,i])
-    loglik <- c(LL(target[no.na], cbind(covar[no.na,], mediator[no.na,i])),
-                LL(target[no.na], cbind(covar[no.na,], mediator[no.na,i], 
+  
+  mapfn <- function(x, target, covar, qtl.geno, LOD0) {
+    no.na <- !is.na(target) & !is.na(x$mediator)
+    loglik <- c(LL(target[no.na], cbind(covar[no.na,], x$mediator[no.na])),
+                LL(target[no.na], cbind(covar[no.na,], x$mediator[no.na], 
                                         qtl.geno[no.na,])),
                 LL(target[no.na], covar[no.na,]),
                 LL(target[no.na], cbind(covar[no.na,], qtl.geno[no.na,])))
-    LOD[i] <- lodfn(loglik, LOD0)
+    lodfn(loglik, LOD0)
   }
-
   output <- annotation
-  output$LOD <- LOD
+  output$LOD <- unlist(purrr::map(med_pur, mapfn, target, covar, qtl.geno, LOD0))
   class(output) <- c("mediation", "data.frame")
   return(output)
 }
