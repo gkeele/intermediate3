@@ -25,10 +25,10 @@ plot.mediation <- function(med,
   names(med) = toupper(names(med))
 
   #Check input
-  stopifnot(c("CHR", "POS","LOD") %in% names(med))
+  stopifnot(c("CHR", "MIDDLE_POINT","LOD") %in% names(med))
 
   if (!("GMB" %in% names(med)))
-    med$GMB <- gmb.coordinates(med$CHR, med$POS, chrlen=chrlen)
+    med$GMB <- gmb.coordinates(med$CHR, med$MIDDLE_POINT, chrlen=chrlen)
 
   # reorganize chr-lengths as in gmb.coordinates
   max.chr <- max(as.numeric(med$CHR[grep("[0-9]+", med$CHR)]))

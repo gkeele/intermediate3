@@ -53,7 +53,7 @@ mediation.scan <- function(target,
   stopifnot(all(is.numeric(mediator)))
   stopifnot(all(is.numeric(qtl.geno)))
   stopifnot(all(is.numeric(covar)))
-  stopifnot(c("CHR", "POS") %in% toupper(names(annotation)))
+  stopifnot(c("CHR", "MIDDLE_POINT") %in% toupper(names(annotation)))
   method = match.arg(method)
 
   # data preparation

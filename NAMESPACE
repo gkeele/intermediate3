@@ -2,6 +2,10 @@
 
 S3method(identify,mediation)
 S3method(plot,mediation)
+export(get.allele.probs)
+export(get.snp.probs)
+export(get_ensembl_genes)
 export(gmb.coordinates)
 export(kplot)
 export(mediation.scan)
+export(synch.samples)
