@@ -31,6 +31,8 @@ synch.samples = function(pheno, probs, expr, covar) {
     covar = covar[samples,,drop = FALSE]
   }
 
+  message(paste("Scanning with", nrow(pheno), "samples."))
+  
   return(list(pheno = pheno, probs = probs, expr = expr, covar = covar))
 
 } # synch.samples()
