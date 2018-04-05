@@ -42,6 +42,14 @@ mediation.scan <- function(target,
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
 
+  # Synch sample IDs.
+  tmp = synch.samples(pheno = target, probs = qtl.geno, expr = mediator, covar = covar)
+  target   = tmp$pheno
+  qtl.geno = tmp$probs
+  mediator = tmp$expr
+  covar    = tmp$covar
+  rm(tmp)
+  
   # check input
   stopifnot(NROW(target) == NROW(mediator))
   stopifnot(NROW(annotation) == NCOL(mediator))
@@ -49,7 +57,7 @@ mediation.scan <- function(target,
   stopifnot(is.null(covar) | NROW(target) == NROW(covar))
   stopifnot(!any(is.na(covar)))
   stopifnot(!any(is.na(qtl.geno)))
-  stopifnot(all(is.numeric(target)))
+  stopifnot(all(is.numeric(target[,1])))
   stopifnot(all(is.numeric(mediator)))
   stopifnot(all(is.numeric(qtl.geno)))
   stopifnot(all(is.numeric(covar)))
@@ -69,7 +77,9 @@ mediation.scan <- function(target,
 
   # for-loop comparing M0: target~covar+mediator[,i] vs M1: target~covar+mediator[,i]+qtl.geno
   for (i in 1:N) {
+    
     if (verbose & i %% 1000 == 0) print(i)
+    
     no.na <- !is.na(target) & !is.na(mediator[,i])
     loglik0 <- LL(target[no.na], cbind(covar[no.na,], mediator[no.na,i]))
     loglik1 <- LL(target[no.na], cbind(covar[no.na,], mediator[no.na,i], qtl.geno[no.na,]))
