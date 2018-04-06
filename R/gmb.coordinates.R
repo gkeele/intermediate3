@@ -21,7 +21,7 @@ gmb.coordinates <- function(chr, pos, chrlen = mouse.chrlen) {
 
   # chr must be numeric or X or Y or M
   chr <- as.character(chr)
-  stopifnot(grepl("[0-9]+", chr) | chr %in% c("X", "Y", "M") )
+  stopifnot(grepl("[0-9]+", chr) | chr %in% c("X", "Y", "MT") )
 
   # length of all chromosomes must be given
   stopifnot(chr %in% names(chrlen))
@@ -36,7 +36,7 @@ gmb.coordinates <- function(chr, pos, chrlen = mouse.chrlen) {
   max.chr <- max(as.numeric(chr[grep("[0-9]+", chr)]))
 
   # all chromosomes, ordered 1..max.chr,X,Y,M
-  unique.chr <- levels(factor(factor(chr, levels=c(1:max.chr, "X", "Y", "M"))))
+  unique.chr <- levels(factor(factor(chr, levels=c(1:max.chr, "X", "Y", "MT"))))
 
   # chrlen ordered as unique.chr
   chrlen = chrlen[unique.chr]

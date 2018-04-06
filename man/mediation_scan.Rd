@@ -32,7 +32,7 @@ i.e. \code{m} is a mediator of causal relationship from \code{qtl.geno} to \code
 }
 \examples{
 data(Tmem68)
-med <- mediation.scan(target = Tmem68$target,
+med <- mediation_scan(target = Tmem68$target,
                       mediator = Tmem68$mediator,
                       annotation = Tmem68$annotation,
                       covar = Tmem68$covar,

@@ -40,15 +40,15 @@ kplot <- function(med, symbol.col="symbol", chrlen=mouse.chrlen, ...){
   symbol.col =  toupper(symbol.col)
   
   #Check input
-  stopifnot(c("CHR", "POS","LOD") %in% names(med))
+  stopifnot(c("CHR", "MIDDLE_POINT","LOD") %in% names(med))
   
   if (!("GMB" %in% names(med)))
-    med$GMB <- gmb.coordinates(med$CHR, med$POS, chrlen=chrlen)
+    med$GMB <- gmb.coordinates(med$CHR, med$MIDDLE_POINT, chrlen=chrlen)
   if (symbol.col %in% names(med)) symbols <- med[,symbol.col] else symbols <- med[,1]
   
   # coloring of chromosomes
   max.chr <- max(as.numeric(med$CHR[grep("[0-9]+", med$CHR)])) # number of autosomes
-  unique.chr <- levels(factor(factor(med$CHR, levels=c(1:max.chr, "X", "Y", "M")))) # all chromosomes, ordered 1..max.chr,X,Y,M
+  unique.chr <- levels(factor(factor(med$CHR, levels=c(1:max.chr, "X", "Y", "MT")))) # all chromosomes, ordered 1..max.chr,X,Y,M
   chrcolor <- rep(1, length(unique.chr))
   chrcolor[1:length(unique.chr) %% 2 == 0] <- 2
   chrcolor <- factor(chrcolor, levels=1:6)
@@ -76,7 +76,7 @@ kplot <- function(med, symbol.col="symbol", chrlen=mouse.chrlen, ...){
     return(sort(gmb.breakpoints))
   }
   
-  chrs <- c(as.character(1:19), "X", "Y", "M")
+  chrs <- c(as.character(1:19), "X", "Y", "MT")
   chrs <- chrs[chrs %in% unique(med$CHR)]
   gene.breaks <- get_chr_breaks(med$CHR, med$GMB)
   gene.mid <- get_chr_middle_points(med$CHR, med$GMB)
