@@ -1,8 +1,8 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.3-2
-Date: 2018-04-06
+Version: 0.3-3
+Date: 2018-04-08
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti, Brian Yandell
 Maintainer: Daniel Gatti <dan.gatti@jax.org>
 Description: It searches for a mediator M that would explain Q->T relationship

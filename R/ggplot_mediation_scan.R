@@ -3,7 +3,7 @@
 #' Plot LOD statistics calculated by \code{mediation.scan} against genomic positions
 #' using ggplot2.
 #'
-#' @param med mediation object
+#' @param x mediation object
 #' @param col color of points (default "firebrick4")
 #' @param cex character expansion (default 2)
 #' @param ylab Y axis label (default "Conditioned LOD")
@@ -22,27 +22,33 @@
 #' 
 #' @export
 #' @importFrom qtl2ggplot ggplot_scan1
+#' @importFrom ggplot2 geom_hline
 
-ggplot_mediation <- function(med, 
+ggplot_mediation_scan <- function(x, 
                            col="firebrick4",
-                           cex = 2,
+                           cex = 1,
                            ylab = "Conditioned LOD",
+                           col_target = "blue",
                            ...){
-  map <- split(med$pos, factor(med$chr, unique(med$chr)))
-  qtl2ggplot::ggplot_scan1(as.matrix(med[,"LOD", drop = FALSE]), 
+  map <- split(x$pos, factor(x$chr, unique(x$chr)))
+  p <- qtl2ggplot::ggplot_scan1(as.matrix(x[,"lod", drop = FALSE]), 
                            map, 
                            lines = FALSE,
                            col = col, cex = cex, 
                            ylab = ylab,
                            ...)
+  targetFit <- attr(x, "targetFit")
+  if(!is.null(targetFit))
+    p <- p + ggplot2::geom_hline(yintercept = targetFit, col = col_target)
+  p
 }
 #' @export
-#' @export autoplot.mediation
-#' @method autoplot mediation
-#' @rdname ggplot_mediation
+#' @export autoplot.mediation_scan
+#' @method autoplot mediation_scan
+#' @rdname ggplot_mediation_scan
 #'
 #' @importFrom ggplot2 autoplot
 #'
-autoplot.mediation <- function(x, ...) {
-  ggplot_mediation(x, ...)
+autoplot.mediation_scan <- function(x, ...) {
+  ggplot_mediation_scan(x, ...)
 }
