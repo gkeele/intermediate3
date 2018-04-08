@@ -2,7 +2,10 @@
 #' 
 #' Triad plot. Currently relies on \code{sdp} to provide lines, but want to use
 #' coefficients from model fit with \code{\link{mediation_test}} to get lines for
-#' each column of driver.
+#' each column of driver. Note that the plot uses column \code{info} to provide
+#' additional information, which here is the \code{chr} of mediator. The plot uses
+#' the mediator position on its home chromosome, which is not really what is wanted.
+#' See package \code{qtl2shiny} for a more elegant use.
 #' 
 #' @param target vector or 1-column matrix with target values
 #' @param mediator vector or 1-column matrix with mediator values
