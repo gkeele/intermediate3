@@ -21,13 +21,16 @@
 #' data(Tmem68)
 #' # Pick Abhd17a as strongest mediator.
 #' m <- match("Abhd17a", Tmem68$annotation$symbol)
-#' Tmem68$annotation[m,]
+#' mediator <- Tmem68$mediator[, m, drop = FALSE]
+#' # Reconstruct 8-allele genotype probabilities.
+#' driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+#' rownames(driver) <- rownames(Tmem68$qtl.geno)
 #' 
 #' med_triad <- mediation_triad(target = Tmem68$target,
-#'                       mediator = Tmem68$mediator[,m, drop = FALSE],
-#'                       driver = Tmem68$qtl.geno,
+#'                       mediator = mediator,
+#'                       driver = driver,
 #'                       covar_tar = Tmem68$covar,
-#'                       sdp = 1)
+#'                       sdp = 2)
 #' ggplot2::autoplot(med_triad)
 #' 
 #' @export

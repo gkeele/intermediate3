@@ -51,19 +51,25 @@ ggplot_mediation_triad(x, ..., type = c("by_mediator", "by_target",
 \description{
 Triad plot. Currently relies on \code{sdp} to provide lines, but want to use
 coefficients from model fit with \code{\link{mediation_test}} to get lines for
-each column of driver.
+each column of driver. Note that the plot uses column \code{info} to provide
+additional information, which here is the \code{chr} of mediator. The plot uses
+the mediator position on its home chromosome, which is not really what is wanted.
+See package \code{qtl2shiny} for a more elegant use.
 }
 \examples{
 data(Tmem68)
 # Pick Abhd17a as strongest mediator.
 m <- match("Abhd17a", Tmem68$annotation$symbol)
-Tmem68$annotation[m,]
+mediator <- Tmem68$mediator[, m, drop = FALSE]
+# Reconstruct 8-allele genotype probabilities.
+driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+rownames(driver) <- rownames(Tmem68$qtl.geno)
 
 med_triad <- mediation_triad(target = Tmem68$target,
-                      mediator = Tmem68$mediator[,m, drop = FALSE],
-                      driver = Tmem68$qtl.geno,
+                      mediator = mediator,
+                      driver = driver,
                       covar_tar = Tmem68$covar,
-                      sdp = 1)
+                      sdp = 2)
 ggplot2::autoplot(med_triad)
 
 }
