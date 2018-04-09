@@ -9,9 +9,8 @@ mediation_triad(target, mediator, driver, covar_tar = NULL,
   covar_med = NULL, kinship = NULL, fitFunction = fitQtl2, sdp = NULL,
   allele = TRUE, label_fn = pattern_label, group_fn = pattern_sdp)
 
-ggplot_mediation_triad(x, ..., type = c("by_mediator", "by_target",
-  "driver_offset", "driver"), tname = "target", mname = "mediator",
-  dname = "driver", centerline = 0, main = tname)
+ggplot_mediation_triad(x, tname = "target", mname = "mediator",
+  dname = "driver", centerline = 0, fitline = TRUE, main = tname, ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}
@@ -34,10 +33,6 @@ ggplot_mediation_triad(x, ..., type = c("by_mediator", "by_target",
 
 \item{x}{object of class \code{mediation_triad}}
 
-\item{\dots}{additional parameters for plotting}
-
-\item{type}{type of plot: one of \code{("by_mediator", "by_target", "driver_offset", "driver")}}
-
 \item{tname}{target name (default \code{"target"})}
 
 \item{mname}{mediator name (default \code{"mediator"})}
@@ -46,7 +41,11 @@ ggplot_mediation_triad(x, ..., type = c("by_mediator", "by_target",
 
 \item{centerline}{horizontal line at value (default = \code{0}); set to \code{NA} for no line or \code{NULL} for mean}
 
+\item{fitline}{include fit line from coefficients in \code{x} if \code{TRUE}}
+
 \item{main}{main title (defautl \code{tname})}
+
+\item{\dots}{additional parameters for plotting}
 }
 \description{
 Triad plot. Currently relies on \code{sdp} to provide lines, but want to use
@@ -61,6 +60,7 @@ data(Tmem68)
 # Pick Abhd17a as strongest mediator.
 m <- match("Abhd17a", Tmem68$annotation$symbol)
 mediator <- Tmem68$mediator[, m, drop = FALSE]
+colnames(mediator) <- "Abhd17a"
 # Reconstruct 8-allele genotype probabilities.
 driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
 rownames(driver) <- rownames(Tmem68$qtl.geno)

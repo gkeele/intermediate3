@@ -22,6 +22,7 @@
 #' # Pick Abhd17a as strongest mediator.
 #' m <- match("Abhd17a", Tmem68$annotation$symbol)
 #' mediator <- Tmem68$mediator[, m, drop = FALSE]
+#' colnames(mediator) <- "Abhd17a"
 #' # Reconstruct 8-allele genotype probabilities.
 #' driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
 #' rownames(driver) <- rownames(Tmem68$qtl.geno)
@@ -84,86 +85,85 @@ mediation_triad <- function(target, mediator, driver,
   # Fit target and target|mediator models
   fit <- med_fits(driver, target, mediator,
                   fitFunction, kinship, covar_tar, covar_med)
+  
   for(i in names(fit$coef)[1:2]) {
     tmp <- fit$coef[[i]][seq_len(ncol(driver))]
     dat[[i]] <- c(as.matrix(dat[names(tmp)]) %*% tmp)
   }
   
-  class(dat) <- c("mediation_triad", class(dat))
+  # Need to account for covariates and sex.
+  out <- list(data = dat, coef = fit$coef[[1]], coef_med = fit$coef[[2]],
+              drivers = colnames(driver), med_name = colnames(mediator))
   
-  dat
+  class(out) <- c("mediation_triad", class(dat))
+  
+  out
 }
 #' @param x object of class \code{mediation_triad}
-#' @param \dots additional parameters for plotting
-#' @param type type of plot: one of \code{("by_mediator", "by_target", "driver_offset", "driver")}
 #' @param tname target name (default \code{"target"})
 #' @param mname mediator name (default \code{"mediator"})
 #' @param dname driver name (default \code{"driver"})
 #' @param centerline horizontal line at value (default = \code{0}); set to \code{NA} for no line or \code{NULL} for mean
+#' @param fitline include fit line from coefficients in \code{x} if \code{TRUE}
 #' @param main main title (defautl \code{tname})
+#' @param \dots additional parameters for plotting
 #' 
 #' @rdname mediation_triad
 #' @export
-ggplot_mediation_triad <- function(x, ..., 
-                             type = c("by_mediator", "by_target", "driver_offset", "driver"),
+ggplot_mediation_triad <- function(x, 
                              tname = "target", mname = "mediator", dname = "driver",
-                             centerline = 0,
-                             main = tname) {
+                             centerline = 0, fitline = FALSE,
+                             main = tname, ...) {
   
-  type <- match.arg(type)
+  p <- ggplot2::ggplot(x$data) +
+    ggplot2::aes(col = group) +
+    ggplot2::scale_color_discrete(name = dname) +
+    ggplot2::ggtitle(main)
   
-  p <- ggplot2::ggplot(x) +
-    ggplot2::aes(col = group, label = label) +
-    ggplot2::scale_color_discrete(name = dname)
-
-  switch(type,
-         by_mediator = {
-           p <- p + 
-             ggplot2::aes(mediator, target) +
-             ggplot2::xlab(mname) +
-             ggplot2::ylab(tname)
-         },
-         by_target = {
-           p <- p + 
-             ggplot2::aes(target, mediator) +
-             ggplot2::xlab(tname) +
-             ggplot2::ylab(mname)
-         },
-         driver_offset = {
-           p <- p + 
-             ggplot2::aes(mediator, t.d_t - t.md_t.m) +
-             ggplot2::xlab(mname) +
-             ggplot2::ylab(paste(dname, "effect offset"))
-         },
-         driver = {
-           p <- p + 
-             ggplot2::aes(t.d_t, t.d_t - t.md_t.m) +
-             ggplot2::xlab(paste(dname, "effect")) +
-             ggplot2::ylab(paste(dname, "effect offset"))
-         })
-  if(is.null(centerline)) {
-    switch(type,
-           by_mediator = {
-             centerline <- mean(x$target, na.rm = TRUE)
-           },
-           by_target = {
-             centerline <- mean(x$mediator, na.rm = TRUE)
-           },
-           driver_offset, driver = {
-             centerline <- mean(x$t.d_t - x$t.md_t.m, na.rm = TRUE)
-           })
+  if("label" %in% names(x$data)) {
+    p <- p + 
+      ggplot2::aes(label = label) +
+      ggplot2::geom_text(size=3)
+  } else {
+    p <- p +
+      ggplot2::geom_point(alpha = 0.2)
   }
   
+  if("Sex" %in% names(x$data)) {
+    p <- p +
+      ggplot2::facet_wrap(~ Sex)
+  }
+  
+  # set up mediator and target.
+  p <- p + 
+    ggplot2::aes(mediator, target) +
+    ggplot2::xlab(mname) +
+    ggplot2::ylab(tname)
+
+  if(is.null(centerline)) {
+    centerline <- mean(x$target, na.rm = TRUE)
+  }
   if(!is.na(centerline)) {
     p <- p +
       ggplot2::geom_hline(yintercept = centerline)
   }
-    
-  p + 
-    ggplot2::geom_smooth(method = "lm", se=FALSE) +
-    ggplot2::geom_text(size=3) +
-    ggplot2::facet_wrap(~ Sex) +
-    ggplot2::ggtitle(main)
+
+  if(fitline) {
+    dat <- data.frame(slope = x$coef_med[x$med_name],
+                      intercept = x$coef_med[x$drivers],
+                      col = x$drivers,
+                      row.names = x$drivers)
+    p <- p +
+      ggplot2::geom_abline(
+        ggplot2::aes(slope = slope,
+                     intercept = intercept,
+                     col = col),
+        data = dat)
+  } else {
+    p <- p + 
+      ggplot2::geom_smooth(method = "lm", se=FALSE)
+  }
+  p
 }
 #' @export
 autoplot.mediation_triad <- function(x, ...) {
