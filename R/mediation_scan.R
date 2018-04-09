@@ -47,7 +47,8 @@ mediation_scan <- function(target,
   }
   
   # Synch sample IDs.
-  tmp = synch.samples(pheno = target, probs = driver, expr = mediator, covar = covar)
+  tmp = synch.samples(pheno = as.matrix(target),
+                      probs = driver, expr = mediator, covar = covar)
   target   = tmp$pheno
   driver   = tmp$probs
   mediator = tmp$expr

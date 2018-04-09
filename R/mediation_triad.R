@@ -109,21 +109,22 @@ mediation_triad <- function(target, mediator, driver,
 #' @param tname target name (default \code{"target"})
 #' @param mname mediator name (default \code{"mediator"})
 #' @param dname driver name (default \code{"driver"})
-#' @param centerline horizontal line at value (default = \code{0}); set to \code{NA} for no line or \code{NULL} for mean
+#' @param centerline horizontal line at value (default = \code{NULL}); set to \code{NA} for no line or \code{NULL} for mean
 #' @param fitline include fit line from coefficients in \code{x} if \code{TRUE}
 #' @param main main title (defautl \code{tname})
+#' @param colors named colors to use if \code{fitline} is \code{TRUE}
 #' @param \dots additional parameters for plotting
 #' 
 #' @rdname mediation_triad
 #' @export
 ggplot_mediation_triad <- function(x, 
                              tname = "target", mname = "mediator", dname = "driver",
-                             centerline = 0, fitline = FALSE,
-                             main = tname, ...) {
+                             centerline = NULL, fitline = FALSE,
+                             main = paste(tname, "by", mname, "and", dname),
+                             colors = qtl2::CCcolors,
+                             ...) {
   
   p <- ggplot2::ggplot(x$data) +
-    ggplot2::aes(col = group) +
-    ggplot2::scale_color_discrete(name = dname) +
     ggplot2::ggtitle(main)
   
   if("label" %in% names(x$data)) {
@@ -147,26 +148,41 @@ ggplot_mediation_triad <- function(x,
     ggplot2::ylab(tname)
 
   if(is.null(centerline)) {
-    centerline <- mean(x$target, na.rm = TRUE)
+    centerline <- mean(x$data$target, na.rm = TRUE)
   }
   if(!is.na(centerline)) {
     p <- p +
-      ggplot2::geom_hline(yintercept = centerline)
+      ggplot2::geom_hline(yintercept = centerline, linetype = "dashed", col = "grey60")
   }
 
   if(fitline) {
+    # Add fitted model line.
     dat <- data.frame(slope = x$coef_med[x$med_name],
                       intercept = x$coef_med[x$drivers],
                       col = x$drivers,
                       row.names = x$drivers)
+    if(nrow(dat) == length(colors)) {
+      if(!is.null(names(colors)))
+        dat$col <- names(colors)
+      else
+        names(colors) <- dat$col
+    }
     p <- p +
       ggplot2::geom_abline(
         ggplot2::aes(slope = slope,
                      intercept = intercept,
                      col = col),
         data = dat)
+    if(nrow(dat) == length(colors)) {
+      p <- p +
+        ggplot2::scale_color_manual(name = dname,
+                                    values = colors)
+    }
+    
   } else {
     p <- p + 
+      ggplot2::aes(col = group) +
+      ggplot2::scale_color_discrete(name = dname) +
       ggplot2::geom_smooth(method = "lm", se=FALSE)
   }
   p

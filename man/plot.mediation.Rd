@@ -4,7 +4,8 @@
 \alias{plot.mediation}
 \title{Plots conditioned LOD scores against genomic positions}
 \usage{
-plot.mediation(med, col = "firebrick4", chrlen = mouse.chrlen, ...)
+\method{plot}{mediation}(med, col = "firebrick4", chrlen = mouse.chrlen,
+  ...)
 }
 \arguments{
 \item{med}{A mediation object}
