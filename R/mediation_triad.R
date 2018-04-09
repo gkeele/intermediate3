@@ -66,8 +66,14 @@ mediation_triad <- function(target, mediator, driver,
   for(i in c("target","mediator"))
     colnames(commons[[i]]) <- i
 
+  # Set up point labels and groups.
+  if(is.null(label_fn))
+    label_fn <- function(driver, allele) as.character(round(2 * driver))
   label <- label_fn(commons$driver, allele)
+  if(is.null(group_fn))
+    group_fn = function(label, a, b) label
   group <- as.character(group_fn(label, sdp, colnames(commons$driver)))
+
   dat <- data.frame(commons$driver, commons$target, commons$mediator,
                     commons$covar_tar, commons$covar_med,
                     label = label, group = group)
@@ -95,7 +101,7 @@ mediation_triad <- function(target, mediator, driver,
   out <- list(data = dat, coef = fit$coef[[1]], coef_med = fit$coef[[2]],
               drivers = colnames(driver), med_name = colnames(mediator))
   
-  class(out) <- c("mediation_triad", class(dat))
+  class(out) <- c("mediation_triad", class(out))
   
   out
 }

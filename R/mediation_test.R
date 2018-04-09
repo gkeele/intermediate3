@@ -180,7 +180,7 @@ summary.mediation_test <- function(object, ...) {
     dplyr::mutate(
       dplyr::arrange(
         object$best,
-        mediation),
+        triad, mediation),
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
       pos = round(pos, 2),

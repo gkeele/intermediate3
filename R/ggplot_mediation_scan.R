@@ -29,8 +29,13 @@ ggplot_mediation_scan <- function(x,
                            cex = 1,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
-                           ...){
-  map <- split(x$pos, factor(x$chr, unique(x$chr)))
+                           ...) {
+  if(!is.factor(x$chr))
+    x$chr <- factor(x$chr, unique(x$chr))
+  x <- dplyr::arrange(x, chr, pos)
+  map <- x$pos
+  rownames(x) <- names(map) <- x$id
+  map <- split(map, x$chr)
   p <- qtl2ggplot::ggplot_scan1(as.matrix(x[,"lod", drop = FALSE]), 
                            map, 
                            lines = FALSE,

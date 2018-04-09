@@ -10,7 +10,7 @@ mediation_triad(target, mediator, driver, covar_tar = NULL,
   allele = TRUE, label_fn = pattern_label, group_fn = pattern_sdp)
 
 ggplot_mediation_triad(x, tname = "target", mname = "mediator",
-  dname = "driver", centerline = 0, fitline = TRUE, main = tname, ...)
+  dname = "driver", centerline = 0, fitline = FALSE, main = tname, ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}

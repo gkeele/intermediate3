@@ -45,6 +45,14 @@ mediation_scan <- function(target,
   LL <- function(y, X) {
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
+  
+  # Synch sample IDs.
+  tmp = synch.samples(pheno = target, probs = driver, expr = mediator, covar = covar)
+  target   = tmp$pheno
+  driver   = tmp$probs
+  mediator = tmp$expr
+  covar    = tmp$covar
+  rm(tmp)
 
   # check input
   stopifnot(NROW(target) == NROW(mediator))

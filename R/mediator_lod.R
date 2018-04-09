@@ -38,6 +38,13 @@ mediator_lod <- function(mediator,
   LL <- function(y, X) {
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
+  
+  # Synch sample IDs.
+  tmp = synch.samples(pheno = mediator[,1, drop=FALSE], probs = driver, expr = mediator, covar = covar_med)
+  driver   = tmp$probs
+  mediator = tmp$expr
+  covar_med    = tmp$covar
+  rm(tmp)
 
   # check input
   stopifnot(NROW(annotation) == NCOL(mediator))
