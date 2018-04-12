@@ -5,43 +5,22 @@ common_data <- function(target, mediator, driver,
                         minN = 100, minCommon = 0.9) {
 
   # Make sure all are matrices
-  target <- as.matrix(target)
-  if(is.null(colnames(target)))
-    colnames(target) <- "T"
-  if(is.null(rownames(target)))
-    rownames(target) <- seq_len(nrow(target))
-
-  driver <- as.matrix(driver)
-  if(is.null(rownames(driver)))
-    rownames(driver) <- rownames(target)
-  if(is.null(colnames(driver)))
-    colnames(driver) <- "D"
-
-  mediator <- as.matrix(mediator)
-  if(is.null(rownames(mediator)))
-    rownames(mediator) <- rownames(target)
-  if(is.null(colnames(mediator)))
-    colnames(mediator) <- "M"
-
-  if(!is.null(covar_tar)) {
-    covar_tar <- as.matrix(covar_tar)
-    if(is.null(colnames(covar_tar)))
-      colnames(covar_tar) <- paste0("covT", seq_len(ncol(covar_tar)))
-  }
-  if(!is.null(covar_med)) {
-    covar_med <- as.matrix(covar_med)
-    if(is.null(colnames(covar_med)))
-      colnames(covar_med) <- paste0("covM", seq_len(ncol(covar_med)))
-  }
-  if(!is.null(driver_med)) {
-    driver_med <- as.matrix(driver_med)
-    if(is.null(colnames(driver_med)))
-      colnames(driver_med) <- paste0("driverM", seq_len(ncol(driver_med)))
-  }
+  target <- convert_matrix(target, "T")
+  driver <- convert_matrix(driver, "D", rownames(target))
+  mediator <- convert_matrix(mediator, "M", rownames(target))
   
+  covar_tar <- convert_matrix(covar_tar,
+                              paste0("covT", seq_len(ncol(covar_tar))), 
+                              rownames(target))
+  covar_med <- convert_matrix(covar_med,
+                              paste0("covM", seq_len(ncol(covar_med))), 
+                              rownames(mediator))
+  driver_med <- convert_matrix(driver_med,
+                              paste0("driverM", seq_len(ncol(driver_med))), 
+                              rownames(mediator))
+
   # Keep individuals with full records.
-  ind2keep <-
-    qtl2::get_common_ids(driver, target, covar_tar, covar_med, kinship, driver_med,
+  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, kinship, driver_med,
                              complete.cases = TRUE)
   
   # Drop mediator columns with too few non-missing data.
@@ -97,4 +76,17 @@ common_data <- function(target, mediator, driver,
        covar_med = covar_med,
        driver_med = driver_med,
        common = common)
+}
+convert_matrix <- function(object, 
+                           col_names = "",
+                           row_names = seq_len(nrow(object))) {
+  if(is.null(object))
+    return(NULL)
+  
+  object <- as.matrix(object)
+  if(is.null(colnames(object)) & !is.null(col_names))
+    colnames(object) <- col_names
+  if(is.null(rownames(object)) & !is.null(row_names))
+    rownames(object) <- row_names
+  object
 }

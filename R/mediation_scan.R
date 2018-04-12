@@ -46,22 +46,19 @@ mediation_scan <- function(target,
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
   
-  # Synch sample IDs.
-  tmp = synch.samples(pheno = as.matrix(target),
-                      probs = driver, expr = mediator, covar = covar)
-  target   = tmp$pheno
-  driver   = tmp$probs
-  mediator = tmp$expr
-  covar    = tmp$covar
-  rm(tmp)
+  # Get common data.
+  commons <- common_data(target, mediator, driver, covar)
+  if(is.null(commons))
+    return(NULL)
+  
+  driver <- commons$driver
+  target <- commons$target
+  kinship <- commons$kinship
+  covar <- commons$covar_tar
+  common <- commons$common
+  rm(commons)
 
   # check input
-  stopifnot(NROW(target) == NROW(mediator))
-  stopifnot(NROW(annotation) == NCOL(mediator))
-  stopifnot(NROW(driver) == NROW(target))
-  stopifnot(is.null(covar) | NROW(target) == NROW(covar))
-  stopifnot(!any(is.na(covar)))
-  stopifnot(!any(is.na(driver)))
   stopifnot(all(is.numeric(target)))
   stopifnot(all(is.numeric(mediator)))
   stopifnot(all(is.numeric(driver)))
@@ -117,4 +114,15 @@ mediation_scan <- function(target,
   attr(output, "targetFit") <- loglik0
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
+}
+#'
+#' @export
+#' @rdname mediation_scan
+#' @method subset mediation_scan
+#' 
+subset.mediation_scan <- function(object, chrs=NULL, ...) {
+  if(is.null(chrs))
+    return(object)
+  
+  modify_object(object, dplyr::filter(object, chr %in% chrs))
 }

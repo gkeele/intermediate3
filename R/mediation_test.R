@@ -94,6 +94,7 @@ mediation_test <- function(target, mediator, driver, annotation,
   if(use_1_driver & !is.null(driver_med))
     driver_med <- NULL
   
+  # Get common data.
   commons <- common_data(target, mediator, driver,
                          covar_tar, NULL, kinship,
                          common = use_1_driver)
@@ -105,7 +106,8 @@ mediation_test <- function(target, mediator, driver, annotation,
   kinship <- commons$kinship
   covar_tar <- commons$covar_tar
   common <- commons$common
-
+  rm(commons)
+  
   # Two reasons not to put covar_med in common_data call:
   # 1: different mediators may have different covariates
   # 2: covar_med is data frame, so need to be careful.

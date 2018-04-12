@@ -13,47 +13,66 @@
 #' 
 #' @examples
 #' data(Tmem68)
-#' med <- mediation.scan(target=Tmem68$target,
-#'                       mediator=Tmem68$mediator,
-#'                       annotation=Tmem68$annotation,
-#'                       covar=Tmem68$covar,
-#'                       qtl.geno=Tmem68$qtl.geno)
-#' ggplot2::autoplot(med)
+#' # Find and remove Tmem68 from mediators because it is target.
+#' m <- match("Tmem68", Tmem68$annotation$symbol)
+#' Tmem68$annotation[m,]
+#' med_scan <- mediation_scan(target = Tmem68$target,
+#'                       mediator = Tmem68$mediator[,-m],
+#'                       driver = Tmem68$qtl.geno,
+#'                       annotation = Tmem68$annotation[-m,],
+#'                       covar = Tmem68$covar,
+#'                       method = "double-lod-diff")
+#' ggplot2::autoplot(med_scan)
 #' 
 #' @export
-#' @importFrom qtl2ggplot ggplot_scan1
-#' @importFrom ggplot2 geom_hline
+#' @importFrom ggplot2 aes autoplot element_blank element_rect facet_grid geom_hline geom_point ggplot theme
+#' @importFrom grid unit
 
 ggplot_mediation_scan <- function(x, 
                            col="firebrick4",
                            cex = 1,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
+                           gap = 25,
                            ...) {
   if(!is.factor(x$chr))
     x$chr <- factor(x$chr, unique(x$chr))
   x <- dplyr::arrange(x, chr, pos)
-  map <- x$pos
-  rownames(x) <- names(map) <- x$id
-  map <- split(map, x$chr)
-  p <- qtl2ggplot::ggplot_scan1(as.matrix(x[,"lod", drop = FALSE]), 
-                           map, 
-                           lines = FALSE,
-                           col = col, cex = cex, 
-                           ylab = ylab,
-                           ...)
+
+  p <- ggplot2::ggplot(x) +
+    ggplot2::aes(pos, lod, symbol = symbol) +
+    ggplot2::geom_point(col = col, alpha = 0.5) +
+    ggplot2::facet_grid( ~ chr, scales = "free_x", space = "free")
+
+  # gap between chromosomes
+  p <- p +
+    ggplot2::theme(panel.spacing = grid::unit(gap / 10000, "npc")) +
+    ggplot2::theme(
+      panel.border = ggplot2::element_rect(colour = "black",
+                                           fill=NA))
+  
+  # X axis
+  if(length(unique(x$chr)) > 1) {
+    p <- p + 
+      ggplot2::theme(
+        axis.text.x = ggplot2::element_blank(), 
+        axis.ticks.x = ggplot2::element_blank())
+  }
+  
   targetFit <- attr(x, "targetFit")
   if(!is.null(targetFit))
     p <- p + ggplot2::geom_hline(yintercept = targetFit, col = col_target)
   p
 }
 #' @export
-#' @export autoplot.mediation_scan
-#' @method autoplot mediation_scan
 #' @rdname ggplot_mediation_scan
 #'
-#' @importFrom ggplot2 autoplot
-#'
 autoplot.mediation_scan <- function(x, ...) {
+  ggplot_mediation_scan(x, ...)
+}
+#' @export
+#' @rdname ggplot_mediation_scan
+#'
+plot.mediation_scan <- function(x, ...) {
   ggplot_mediation_scan(x, ...)
 }

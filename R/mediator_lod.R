@@ -39,12 +39,16 @@ mediator_lod <- function(mediator,
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
   
-  # Synch sample IDs.
-  tmp = synch.samples(pheno = mediator[,1, drop=FALSE], probs = driver, expr = mediator, covar = covar_med)
-  driver   = tmp$probs
-  mediator = tmp$expr
-  covar_med    = tmp$covar
-  rm(tmp)
+  # Get common data.
+  commons <- common_data(target, mediator, driver,, covar_med)
+  if(is.null(commons))
+    return(NULL)
+  
+  driver <- commons$driver
+  target <- commons$target
+  covar_med <- commons$covar_med
+  common <- commons$common
+  rm(commons)
 
   # check input
   stopifnot(NROW(annotation) == NCOL(mediator))

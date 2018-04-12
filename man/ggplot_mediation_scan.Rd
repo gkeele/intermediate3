@@ -3,12 +3,15 @@
 \name{ggplot_mediation_scan}
 \alias{ggplot_mediation_scan}
 \alias{autoplot.mediation_scan}
+\alias{plot.mediation_scan}
 \title{GG plot of conditioned LOD scores against genomic positions}
 \usage{
 ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
-  ylab = "Conditioned LOD", col_target = "blue", ...)
+  ylab = "Conditioned LOD", col_target = "blue", gap = 25, ...)
 
 \method{autoplot}{mediation_scan}(x, ...)
+
+\method{plot}{mediation_scan}(x, ...)
 }
 \arguments{
 \item{x}{mediation object}
@@ -27,12 +30,16 @@ using ggplot2.
 }
 \examples{
 data(Tmem68)
-med <- mediation.scan(target=Tmem68$target,
-                      mediator=Tmem68$mediator,
-                      annotation=Tmem68$annotation,
-                      covar=Tmem68$covar,
-                      qtl.geno=Tmem68$qtl.geno)
-ggplot2::autoplot(med)
+# Find and remove Tmem68 from mediators because it is target.
+m <- match("Tmem68", Tmem68$annotation$symbol)
+Tmem68$annotation[m,]
+med_scan <- mediation_scan(target = Tmem68$target,
+                      mediator = Tmem68$mediator[,-m],
+                      driver = Tmem68$qtl.geno,
+                      annotation = Tmem68$annotation[-m,],
+                      covar = Tmem68$covar,
+                      method = "double-lod-diff")
+ggplot2::autoplot(med_scan)
 
 }
 \seealso{

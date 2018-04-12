@@ -1,5 +1,9 @@
 #' @export
 #' @rdname mediation_test
+plot.mediation_test <- function(x, ...)
+  ggplot_mediation_test(x, ...)
+#' @export
+#' @rdname mediation_test
 autoplot.mediation_test <- function(x, ...)
   ggplot_mediation_test(x, ...)
 #' @export

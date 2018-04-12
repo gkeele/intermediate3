@@ -2,11 +2,14 @@
 % Please edit documentation in R/mediation_scan.R
 \name{mediation_scan}
 \alias{mediation_scan}
+\alias{subset.mediation_scan}
 \title{Mediation Scan}
 \usage{
 mediation_scan(target, mediator, driver, annotation, covar = NULL,
   method = c("double-lod-diff", "ignore", "lod-diff", "lod-ratio"),
   verbose = TRUE)
+
+\method{subset}{mediation_scan}(object, chrs = NULL, ...)
 }
 \arguments{
 \item{target}{A numeric vector with gene/protein expression}
