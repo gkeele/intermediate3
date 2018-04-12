@@ -1,15 +1,15 @@
-#' GG plot of conditioned LOD scores against genomic positions
+#' @title Plot of conditioned LOD scores against genomic positions
 #'
-#' Plot LOD statistics calculated by \code{mediation.scan} against genomic positions
+#' @description Plot LOD statistics calculated by [mediation_scan()] against genomic positions
 #' using ggplot2.
 #'
 #' @param x mediation object
 #' @param col color of points (default "firebrick4")
 #' @param cex character expansion (default 2)
 #' @param ylab Y axis label (default "Conditioned LOD")
-#' @param ... additional arguments to \code{\link[qtl2ggplot]{ggplot_scan1}}
-#' 
-#' @seealso \code{\link{identify.mediation}}, \code{\link{kplot}}
+#' @param col_target color for target LOD line
+#' @param gap gap between facets (default `25`)
+#' @param facet_name name of facet column (default `chr`)
 #' 
 #' @examples
 #' data(Tmem68)
@@ -23,10 +23,13 @@
 #'                       covar = Tmem68$covar,
 #'                       method = "double-lod-diff")
 #' ggplot2::autoplot(med_scan)
+#' ggplot2::autoplot(subset(med_scan, "4")) +
+#'   ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
 #' 
 #' @export
 #' @importFrom ggplot2 aes autoplot element_blank element_rect facet_grid geom_hline geom_point ggplot theme
 #' @importFrom grid unit
+#' @importFrom dplyr arrange_at
 
 ggplot_mediation_scan <- function(x, 
                            col="firebrick4",
@@ -34,17 +37,17 @@ ggplot_mediation_scan <- function(x,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
                            gap = 25,
-                           ...) {
-  if(!is.factor(x$chr))
-    x$chr <- factor(x$chr, unique(x$chr))
-  x <- dplyr::arrange(x, chr, pos)
+                           facet_name = "chr") {
+  if(!is.factor(x[[facet_name]]))
+    x[[facet_name]] <- factor(x[[facet_name]], unique(x[[facet_name]]))
+  x <- dplyr::arrange_at(x, c(facet_name, "pos"))
 
   p <- ggplot2::ggplot(x) +
     ggplot2::aes(pos, lod, symbol = symbol) +
     ggplot2::geom_point(col = col, alpha = 0.5) +
-    ggplot2::facet_grid( ~ chr, scales = "free_x", space = "free")
+    ggplot2::facet_grid(formula(paste("~", facet_name)), scales = "free_x", space = "free")
 
-  # gap between chromosomes
+  # gap between facets
   p <- p +
     ggplot2::theme(panel.spacing = grid::unit(gap / 10000, "npc")) +
     ggplot2::theme(
@@ -52,7 +55,7 @@ ggplot_mediation_scan <- function(x,
                                            fill=NA))
   
   # X axis
-  if(length(unique(x$chr)) > 1) {
+  if(length(unique(x[[facet_name]])) > 1) {
     p <- p + 
       ggplot2::theme(
         axis.text.x = ggplot2::element_blank(), 

@@ -45,6 +45,8 @@ med_scan <- mediation_scan(target = Tmem68$target,
                       covar = Tmem68$covar,
                       method = "double-lod-diff")
 ggplot2::autoplot(med_scan)
+ggplot2::autoplot(subset(med_scan, "4")) +
+  ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
 
 }
 \seealso{

@@ -4,10 +4,11 @@
 \alias{ggplot_mediation_scan}
 \alias{autoplot.mediation_scan}
 \alias{plot.mediation_scan}
-\title{GG plot of conditioned LOD scores against genomic positions}
+\title{Plot of conditioned LOD scores against genomic positions}
 \usage{
 ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
-  ylab = "Conditioned LOD", col_target = "blue", gap = 25, ...)
+  ylab = "Conditioned LOD", col_target = "blue", gap = 25,
+  facet_name = "chr")
 
 \method{autoplot}{mediation_scan}(x, ...)
 
@@ -22,10 +23,14 @@ ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
 
 \item{ylab}{Y axis label (default "Conditioned LOD")}
 
-\item{...}{additional arguments to \code{\link[qtl2ggplot]{ggplot_scan1}}}
+\item{col_target}{color for target LOD line}
+
+\item{gap}{gap between facets (default `25`)}
+
+\item{facet_name}{name of facet column (default `chr`)}
 }
 \description{
-Plot LOD statistics calculated by \code{mediation.scan} against genomic positions
+Plot LOD statistics calculated by [mediation_scan()] against genomic positions
 using ggplot2.
 }
 \examples{
@@ -40,8 +45,7 @@ med_scan <- mediation_scan(target = Tmem68$target,
                       covar = Tmem68$covar,
                       method = "double-lod-diff")
 ggplot2::autoplot(med_scan)
+ggplot2::autoplot(subset(med_scan, "4")) +
+  ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
 
-}
-\seealso{
-\code{\link{identify.mediation}}, \code{\link{kplot}}
 }

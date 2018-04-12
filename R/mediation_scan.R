@@ -29,6 +29,8 @@
 #'                       covar = Tmem68$covar,
 #'                       method = "double-lod-diff")
 #' ggplot2::autoplot(med_scan)
+#' ggplot2::autoplot(subset(med_scan, "4")) +
+#'   ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
 #' 
 #' @export
 
@@ -46,14 +48,17 @@ mediation_scan <- function(target,
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
   
+  # Make sure covariates are numeric
+  covar <- covar_df_mx(covar)
+  
   # Get common data.
   commons <- common_data(target, mediator, driver, covar)
   if(is.null(commons))
     return(NULL)
   
-  driver <- commons$driver
   target <- commons$target
-  kinship <- commons$kinship
+  mediator <- commons$mediator
+  driver <- commons$driver
   covar <- commons$covar_tar
   common <- commons$common
   rm(commons)

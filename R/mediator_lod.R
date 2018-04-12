@@ -39,6 +39,9 @@ mediator_lod <- function(mediator,
     -length(y)/2*log10(sum(qr.resid(qr(cbind(X,1)),y)^2))
   }
   
+  # Make sure covariates are numeric
+  covar_med <- covar_df_mx(covar_med)
+  
   # Get common data.
   commons <- common_data(target, mediator, driver,, covar_med)
   if(is.null(commons))
