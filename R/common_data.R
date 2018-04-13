@@ -1,6 +1,6 @@
-common_data <- function(target, mediator, driver,
-                        covar_tar=NULL, covar_med=NULL, kinship=NULL,
-                        driver_med=NULL,
+common_data <- function(target = NULL, mediator = NULL, driver = NULL,
+                        covar_tar = NULL, covar_med = NULL, kinship = NULL,
+                        driver_med = NULL,
                         common = TRUE,
                         minN = 100, minCommon = 0.9) {
 

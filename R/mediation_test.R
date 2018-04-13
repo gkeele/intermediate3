@@ -101,13 +101,14 @@ mediation_test <- function(target, mediator, driver, annotation,
   if(is.null(commons))
     return(NULL)
   
-  driver <- commons$driver
   target <- commons$target
+  mediator <- commons$mediator
+  driver <- commons$driver
   kinship <- commons$kinship
   covar_tar <- commons$covar_tar
   common <- commons$common
   rm(commons)
-  
+
   # Two reasons not to put covar_med in common_data call:
   # 1: different mediators may have different covariates
   # 2: covar_med is data frame, so need to be careful.
@@ -117,7 +118,6 @@ mediation_test <- function(target, mediator, driver, annotation,
   
   # Reorganize annotation and mediator data.
   # Need to make sure elements of mediator have same ids.
-  mediator <- as.data.frame(commons$mediator)
   annotation <- dplyr::filter(
     annotation,
     id %in% colnames(mediator))
@@ -130,6 +130,7 @@ mediation_test <- function(target, mediator, driver, annotation,
   annotation <- annotation[m,]
 
   # Workhorse: CMST on each mediator.
+  mediator <- as.data.frame(mediator)
   best <- purrr::map(
     purrr::transpose(list(
       mediator = mediator,

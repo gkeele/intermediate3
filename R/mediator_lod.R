@@ -43,12 +43,12 @@ mediator_lod <- function(mediator,
   covar_med <- covar_df_mx(covar_med)
   
   # Get common data.
-  commons <- common_data(target, mediator, driver,, covar_med)
+  commons <- common_data(, mediator, driver,, covar_med)
   if(is.null(commons))
     return(NULL)
   
+  mediator <- commons$mediator
   driver <- commons$driver
-  target <- commons$target
   covar_med <- commons$covar_med
   common <- commons$common
   rm(commons)
