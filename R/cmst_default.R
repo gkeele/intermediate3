@@ -1,6 +1,6 @@
 cmst_default <- function(object, driver, target, 
                          kinship, cov_tar, cov_med,
-                         driver_med,
+                         driver_med, intcovar,
                          fitFunction, testFunction,
                          common = TRUE) {
   
@@ -17,7 +17,7 @@ cmst_default <- function(object, driver, target,
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
                    kinship, cov_tar, cov_med, driver_med,
-                   common = common)
+                   intcovar, common = common)
   
   combos <- combo_models()
   models <-
@@ -81,7 +81,7 @@ combine_models <- function(combos, fits) {
 
 cmst_pheno <- function(object, driver, target, 
                        kinship, cov_tar, cov_med,
-                       driver_med,
+                       driver_med, intcovar,
                        fitFunction, testFunction,
                        common = TRUE) {
   
@@ -97,7 +97,7 @@ cmst_pheno <- function(object, driver, target,
   
   cmst_default(object, driver, target, 
                kinship, cov_tar, cov_med,
-               driver_med,
+               driver_med, intcovar,
                fitFunction, testFunction,
                common)
 }  

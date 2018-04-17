@@ -1,6 +1,6 @@
 common_data <- function(target = NULL, mediator = NULL, driver = NULL,
                         covar_tar = NULL, covar_med = NULL, kinship = NULL,
-                        driver_med = NULL,
+                        driver_med = NULL, intcovar = NULL,
                         common = TRUE,
                         minN = 100, minCommon = 0.9) {
 
@@ -18,9 +18,12 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
   driver_med <- convert_matrix(driver_med,
                               paste0("driverM", seq_len(ncol(driver_med))), 
                               rownames(mediator))
-
+  intcovar <- convert_matrix(intcovar,
+                             paste0("intcov", seq_len(ncol(intcovar))), 
+                             rownames(target))
+  
   # Keep individuals with full records.
-  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, kinship, driver_med,
+  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, kinship, driver_med, intcovar,
                              complete.cases = TRUE)
   
   # Drop mediator columns with too few non-missing data.
@@ -62,6 +65,9 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
     covar_med <- covar_med[ind2keep,, drop = FALSE]
   if(!is.null(driver_med))
     driver_med <- driver_med[ind2keep,, drop = FALSE]
+  if(!is.null(intcovar))
+    intcovar <- intcovar[ind2keep,, drop = FALSE]
+  
   if(!is.null(kinship)) {
     kinship <- kinship[ind2keep, ind2keep]
     # Decompose kinship if all in common.
@@ -75,6 +81,7 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
        covar_tar = covar_tar,
        covar_med = covar_med,
        driver_med = driver_med,
+       intcovar = intcovar,
        common = common)
 }
 convert_matrix <- function(object, 

@@ -16,7 +16,7 @@ ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
   local_only = FALSE, significant = TRUE, lod = TRUE, ...)
 
 mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
-  covar_med = NULL, kinship = NULL, driver_med = NULL,
+  covar_med = NULL, kinship = NULL, driver_med = NULL, intcovar = NULL,
   test = c("wilcoxon", "binomial", "joint", "normal"), pos = NULL,
   fitFunction = fitQtl2, data_type = c("phenotype", "expression"), ...)
 }
@@ -38,6 +38,8 @@ mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
 \item{kinship}{optional kinship matrix among individuals}
 
 \item{driver_med}{optional driver matrix for mediators}
+
+\item{intcovar}{optional interactive covariates (assumed same for `mediator`` and `target``)}
 
 \item{test}{Type of CMST test.}
 

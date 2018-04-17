@@ -10,6 +10,7 @@
 #' @param covar_med optional covariates for mediator
 #' @param kinship optional kinship matrix among individuals
 #' @param driver_med optional driver matrix for mediators
+#' @param intcovar optional interactive covariates (assumed same for `mediator`` and `target``)
 #' @param test Type of CMST test.
 #' @param pos Position of driver.
 #' @param fitFunction function to fit models with driver, target and mediator
@@ -55,7 +56,7 @@
 #'
 mediation_test <- function(target, mediator, driver, annotation,
                           covar_tar=NULL, covar_med=NULL, kinship=NULL,
-                          driver_med = NULL,
+                          driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
                           pos = NULL,
                           fitFunction = fitQtl2,
@@ -96,7 +97,7 @@ mediation_test <- function(target, mediator, driver, annotation,
   
   # Get common data.
   commons <- common_data(target, mediator, driver,
-                         covar_tar, NULL, kinship,
+                         covar_tar, NULL, kinship, intcovar = intcovar,
                          common = use_1_driver)
   if(is.null(commons))
     return(NULL)
@@ -106,6 +107,7 @@ mediation_test <- function(target, mediator, driver, annotation,
   driver <- commons$driver
   kinship <- commons$kinship
   covar_tar <- commons$covar_tar
+  intcovar <- commons$intcovar
   common <- commons$common
   rm(commons)
 
@@ -142,7 +144,7 @@ mediation_test <- function(target, mediator, driver, annotation,
             id = factor(id, id))))),
     cmstfn, driver, target, 
     kinship, covar_tar, covar_med,
-    driver_med,
+    driver_med, intcovar,
     fitFunction, testfn, common)
 
   best <- dplyr::rename(
