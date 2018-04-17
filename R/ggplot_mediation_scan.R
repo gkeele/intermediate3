@@ -37,7 +37,7 @@ ggplot_mediation_scan <- function(x,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
                            gap = 25,
-                           facet_name = "chr") {
+                           facet_name = attr(x, "facet_name")) {
   if(!is.factor(x[[facet_name]]))
     x[[facet_name]] <- factor(x[[facet_name]], unique(x[[facet_name]]))
   x <- dplyr::arrange_at(x, c(facet_name, "pos"))

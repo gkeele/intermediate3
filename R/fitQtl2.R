@@ -1,8 +1,10 @@
 #' @export
 fitQtl2 <- function(driver,
                     target,
-                    kinship,
-                    addcovar) {
+                    kinship = NULL,
+                    addcovar = NULL,
+                    intcovar = NULL, weights=NULL,
+                    ...) {
   out <- qtl2::fit1(driver,
              target,
              kinship,

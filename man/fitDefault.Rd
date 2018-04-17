@@ -31,6 +31,7 @@ A list containing
 * `LR` - The overall likelihood ratio.
 * `indLR` - Vector of individual contributions to the likelihood ratio.
 * `df` - Model degrees of freedom.
+Currently `kinship` and `weights` are ignored.
 }
 \description{
 Fit a model for a target and get detailed results

@@ -4,7 +4,8 @@
 \alias{mediator_lod}
 \title{Mediator LOD}
 \usage{
-mediator_lod(mediator, driver, annotation, covar_med = NULL, verbose = TRUE)
+mediator_lod(mediator, driver, annotation, covar_med = NULL,
+  intcovar = NULL, kinship = NULL, facet_name = "chr", verbose = TRUE)
 }
 \arguments{
 \item{mediator}{A matrix, each column is one gene/protein's expression}
@@ -13,13 +14,15 @@ mediator_lod(mediator, driver, annotation, covar_med = NULL, verbose = TRUE)
 
 \item{annotation}{A data frame with mediators' annotation, must include columns "chr" and "pos"}
 
+\item{covar_med}{A matrix with additive covariates}
+
+\item{intcovar}{A matrix of covariate interacting with driver}
+
+\item{kinship}{kinship object}
+
+\item{facet_name}{name of facet column (default `chr`)}
+
 \item{verbose}{If TRUE display information about the progress}
-
-\item{target}{A numeric vector with gene/protein expression}
-
-\item{covar}{A matrix with additive covariates}
-
-\item{method}{A method to handle missing cases}
 }
 \description{
 For a given QTL haplotype probabilities \code{driver} and target \code{target},

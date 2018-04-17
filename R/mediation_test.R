@@ -178,8 +178,8 @@ subset.mediation_test <- function(object, not_type, ...) {
   object
 }
 #' @export
-summary.mediation_test <- function(object, ...) {
-  dplyr::select(
+summary.mediation_test <- function(object, ..., lod = FALSE) {
+  out <- dplyr::select(
     dplyr::mutate(
       dplyr::arrange(
         object$best,
@@ -191,4 +191,16 @@ summary.mediation_test <- function(object, ...) {
       LRmed = signif(LRmed, 3)),
     id, symbol, chr, pos, mediation, triad, pvalue, LRmed,
     dplyr::everything())
+  
+  if(lod) {
+    out <- 
+      dplyr::rename(
+        dplyr::mutate(
+          out,
+          mediation = mediation / log(10),
+          LRmed = LRmed / log(10)),
+        lodMediator = "LRmed")
+  }
+  
+  out
 }

@@ -8,7 +8,7 @@
 \usage{
 ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
   ylab = "Conditioned LOD", col_target = "blue", gap = 25,
-  facet_name = "chr")
+  facet_name = attr(x, "facet_name"))
 
 \method{autoplot}{mediation_scan}(x, ...)
 

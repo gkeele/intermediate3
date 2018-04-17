@@ -26,6 +26,7 @@
 #' * `LR` - The overall likelihood ratio.
 #' * `indLR` - Vector of individual contributions to the likelihood ratio.
 #' * `df` - Model degrees of freedom.
+#' Currently `kinship` and `weights` are ignored.
 #' 
 #' @export
 fitDefault <- function(driver,
@@ -34,15 +35,38 @@ fitDefault <- function(driver,
                   addcovar = NULL,
                   intcovar=NULL, weights=NULL,
                   ...) {
-
+  
+  # Routine below does not incorporate kinship. Use routine from R/qtl2 instead.
+  if(!is.null(kinship))
+    return(fitQtl2(driver, target, kinship, addcovar, intcovar, weights, ...))
+  
+  # Original code fit T|D,C but want T|D,C - T|C
+  full <- fitDefault_internal(driver, target, kinship, addcovar, intcovar, weights, ...) 
+  red  <- fitDefault_internal(NULL,   target, kinship, addcovar, intcovar, weights, ...) 
+  full$LR <- full$LR - red$LR
+  full$indLR <- full$indLR - red$indLR
+  full$df <- full$df - red$df
+  full$RSS <- full$RSS - red$RSS
+  full
+}
+fitDefault_internal <- function(driver,
+                       target,
+                       kinship = NULL,
+                       addcovar = NULL,
+                       intcovar=NULL, weights=NULL,
+                       ...) {
+  
   # Construct design matrix X
   if(is.null(driver))
     driver <- matrix(1, length(target), 1)
   
   # Form model matrix from additive covariates.
   if(!is.null(addcovar)) {
-    form <- as.formula(paste(" ~ ", paste(colnames(addcovar), collapse = "+")))
-    X <- model.matrix(form, data = addcovar)[,-1]
+    if(is.data.frame(addcovar)) {
+      form <- as.formula(paste(" ~ ", paste(colnames(addcovar), collapse = "+")))
+      addcovar <- model.matrix(form, data = addcovar)[,-1]
+    }
+    X <- addcovar
     if(is.null(dim(X))) {
       X <- as.matrix(X)
     }
@@ -69,14 +93,12 @@ fitDefault <- function(driver,
   
   # Calculate log likelihood components
   n <- length(target)
-  dX <- ncol(X)
-  qrX <- qr(X)
-  b <- qr.coef(qrX, target)
-  RSS <- target - X %*% b
-  RSS <- crossprod(RSS, RSS)
+  qrX <- qr(cbind(X,1))
+  dX <- qrX$rank
+  RSS <- sum(qr.resid(qrX, target) ^ 2)
 
-  list(LR = as.vector(- (n/2) - (n/2) * log(2 * pi) - (n/2) * log(RSS/n)),
-       indLR = dnorm(target, X %*% b, sqrt(RSS / n), log = TRUE),
+  list(LR = as.vector(- (n/2) * (log(RSS))), #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
+       indLR = dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
        df = dX,
        RSS = RSS)
 }

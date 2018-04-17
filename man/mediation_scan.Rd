@@ -2,14 +2,12 @@
 % Please edit documentation in R/mediation_scan.R
 \name{mediation_scan}
 \alias{mediation_scan}
-\alias{subset.mediation_scan}
 \title{Mediation Scan}
 \usage{
 mediation_scan(target, mediator, driver, annotation, covar = NULL,
-  method = c("double-lod-diff", "ignore", "lod-diff", "lod-ratio"),
+  intcovar = NULL, kinship = NULL, method = c("double-lod-diff", "ignore",
+  "lod-diff"), fitFunction = fitDefault, facet_name = "chr",
   verbose = TRUE)
-
-\method{subset}{mediation_scan}(object, chrs = NULL, ...)
 }
 \arguments{
 \item{target}{A numeric vector with gene/protein expression}
@@ -18,11 +16,17 @@ mediation_scan(target, mediator, driver, annotation, covar = NULL,
 
 \item{driver}{A matrix, haplotype probabilities at QTL we try to mediate}
 
-\item{annotation}{A data frame with mediators' annotation, must include columns "chr" and "pos"}
+\item{annotation}{A data frame with mediators' annotation, must include columns `chr`` and `pos``}
 
 \item{covar}{A matrix with additive covariates}
 
+\item{intcovar}{A matrix of covariate interacting with driver}
+
+\item{kinship}{kinship object}
+
 \item{method}{A method to handle missing cases}
+
+\item{fitFunction}{function to fit models}
 
 \item{verbose}{If TRUE display information about the progress}
 }
@@ -50,5 +54,5 @@ ggplot2::autoplot(subset(med_scan, "4")) +
 
 }
 \seealso{
-\code{\link{plot.mediation}}, \code{\link{kplot}}
+[ggplot_mediation()]
 }
