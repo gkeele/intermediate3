@@ -6,8 +6,7 @@
 \title{Triad scatter plot for mediator and target}
 \usage{
 mediation_triad(target, mediator, driver, covar_tar = NULL,
-  covar_med = NULL, kinship = NULL, fitFunction = fitQtl2, sdp = NULL,
-  allele = TRUE, label_fn = pattern_label, group_fn = pattern_sdp)
+  covar_med = NULL, kinship = NULL, fitFunction = fitQtl2, ...)
 
 ggplot_mediation_triad(x, tname = "target", mname = "mediator",
   dname = "driver", centerline = NULL, fitline = FALSE,
@@ -29,9 +28,7 @@ ggplot_mediation_triad(x, tname = "target", mname = "mediator",
 
 \item{fitFunction}{function to fit models with driver, target and mediator}
 
-\item{sdp}{SNP distribution pattern for plot colors}
-
-\item{allele}{Driver has alleles if \code{TRUE}, otherwise allele pairs.}
+\item{...}{additional arguments to internal routine}
 
 \item{x}{object of class \code{mediation_triad}}
 
@@ -48,6 +45,10 @@ ggplot_mediation_triad(x, tname = "target", mname = "mediator",
 \item{main}{main title (defautl \code{tname})}
 
 \item{colors}{named colors to use if \code{fitline} is \code{TRUE}}
+
+\item{sdp}{SNP distribution pattern for plot colors}
+
+\item{allele}{Driver has alleles if \code{TRUE}, otherwise allele pairs.}
 
 \item{\dots}{additional parameters for plotting}
 }

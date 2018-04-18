@@ -3,6 +3,8 @@ med_fits <- function(driver, target, mediator, fitFunction,
                      driver_med = NULL, intcovar = NULL,
                      common = FALSE, ...) {
   
+  # Probably want to move this to fitDefault as fitQtl2 does this.
+  # Need to look where common_data is found to adjust.
   if(!common) {
     commons <- common_data(target, mediator, driver,
                            cov_tar, cov_med, kinship, driver_med, intcovar)
