@@ -91,6 +91,7 @@ convert_matrix <- function(object,
     return(NULL)
   
   object <- as.matrix(object)
+  stopifnot(is.numeric(object))
   if(is.null(colnames(object)) & !is.null(col_names))
     colnames(object) <- col_names
   if(is.null(rownames(object)) & !is.null(row_names))

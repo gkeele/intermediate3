@@ -1,5 +1,5 @@
 cmst_default <- function(object, driver, target, 
-                         kinship, cov_tar, cov_med,
+                         kinship, covar_tar, covar_med,
                          driver_med, intcovar,
                          fitFunction, testFunction,
                          common = TRUE) {
@@ -12,11 +12,13 @@ cmst_default <- function(object, driver, target,
     driver_med <- driver_med[,, object[[2]]$driver]
   
   # Make sure covariates are numeric
-  cov_med <- covar_df_mx(cov_med)
-
+  covar_med <- covar_df_mx(covar_med)
+  covar_tar <- covar_df_mx(covar_tar)
+  intcovar <- covar_df_mx(intcovar)
+  
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
-                   kinship, cov_tar, cov_med, driver_med,
+                   kinship, covar_tar, covar_med, driver_med,
                    intcovar, common = common)
   
   combos <- combo_models()
@@ -80,7 +82,7 @@ combine_models <- function(combos, fits) {
 }
 
 cmst_pheno <- function(object, driver, target, 
-                       kinship, cov_tar, cov_med,
+                       kinship, covar_tar, covar_med,
                        driver_med, intcovar,
                        fitFunction, testFunction,
                        common = TRUE) {
@@ -89,14 +91,14 @@ cmst_pheno <- function(object, driver, target,
   # to assess TRUE/FALSE on covariate columns. This will likely change.
   
   # Get covariate names appropriate for mediator 
-  cov_names <- unlist(object[[2]][colnames(cov_med)])
+  cov_names <- unlist(object[[2]][colnames(covar_med)])
   if(length(cov_names))
-    cov_med <- cov_med[, cov_names, drop = FALSE]
+    covar_med <- covar_med[, cov_names, drop = FALSE]
   else
-    cov_med <- NULL
+    covar_med <- NULL
   
   cmst_default(object, driver, target, 
-               kinship, cov_tar, cov_med,
+               kinship, covar_tar, covar_med,
                driver_med, intcovar,
                fitFunction, testFunction,
                common)

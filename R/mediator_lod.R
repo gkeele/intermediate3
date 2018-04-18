@@ -42,27 +42,26 @@ mediator_lod <- function(mediator,
   covar_med <- covar_df_mx(covar_med)
   
   # Get common data.
-  commons <- common_data(, mediator, driver, intcovar, covar_med)
+  commons <- common_data(, mediator, driver,, covar_med, intcovar = intcovar)
   if(is.null(commons))
     return(NULL)
   
   mediator <- commons$mediator
   driver <- commons$driver
-  intcovar <- commons$intcovar
   covar_med <- commons$covar_med
   common <- commons$common
+  intcovar <- commons$intcovar
   rm(commons)
 
   # check input
   stopifnot(NROW(driver) == NROW(mediator))
   stopifnot(is.null(covar_med) | NROW(mediator) == NROW(covar_med))
   if(!is.null(covar_med)) {
-    stopifnot(all(is.numeric(covar_med)))
     stopifnot(!any(is.na(covar_med)))
   }
-  stopifnot(!any(is.na(driver)))
-  stopifnot(all(is.numeric(mediator)))
-  stopifnot(all(is.numeric(driver)))
+  if(!is.null(driver)) {
+    stopifnot(!any(is.na(driver)))
+  }
   stopifnot(c(facet_name, "pos") %in% tolower(names(annotation)))
 
   # Match up annotation with mediators

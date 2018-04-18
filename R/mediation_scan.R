@@ -48,13 +48,12 @@ mediation_scan <- function(target,
                            facet_name = "chr",
                            verbose=TRUE) {
   
-  # *** Something is wrong! ***
-
   # Make sure covariates are numeric
   covar <- covar_df_mx(covar)
+  intcovar <- covar_df_mx(intcovar)
   
   # Get common data.
-  commons <- common_data(target, mediator, driver, covar, intcovar)
+  commons <- common_data(target, mediator, driver, covar, intcovar = intcovar)
   if(is.null(commons))
     return(NULL)
   
@@ -62,16 +61,11 @@ mediation_scan <- function(target,
   mediator <- commons$mediator
   driver <- commons$driver
   covar <- commons$covar_tar
-  intcovar <- commons$covar_med
+  intcovar <- commons$intcovar
   common <- commons$common
   rm(commons)
 
   # check input
-  stopifnot(all(is.numeric(target)))
-  stopifnot(all(is.numeric(mediator)))
-  stopifnot(all(is.numeric(driver)))
-  stopifnot(all(is.numeric(covar)))
-  stopifnot(all(is.numeric(intcovar)))
   stopifnot(c(facet_name, "pos") %in% tolower(names(annotation)))
   method = match.arg(method)
 

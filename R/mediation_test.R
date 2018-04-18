@@ -87,7 +87,8 @@ mediation_test <- function(target, mediator, driver, annotation,
   
   # Make sure covariates are numeric
   covar_tar <- covar_df_mx(covar_tar)
-
+  intcovar <- covar_df_mx(intcovar)
+  
   scan_max <- fitFunction(driver, target, kinship, covar_tar)
   LR_tar <- scan_max$LR
   
