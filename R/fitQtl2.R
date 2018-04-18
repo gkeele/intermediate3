@@ -8,7 +8,8 @@ fitQtl2 <- function(driver,
   out <- qtl2::fit1(driver,
              target,
              kinship,
-             addcovar)
+             addcovar,
+             intcovar = intcovar)
   
   # Replace lod names with LR
   names(out) <- stringr::str_replace(names(out), "lod", "LR")

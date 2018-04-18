@@ -52,6 +52,9 @@ mediation_scan <- function(target,
   covar <- covar_df_mx(covar)
   intcovar <- covar_df_mx(intcovar)
   
+  # Fit model without mediation.
+  loglik0 <- fitFunction(driver, target, kinship, covar, intcovar)$LR
+  
   # Get common data.
   commons <- common_data(target, mediator, driver, covar, intcovar = intcovar)
   if(is.null(commons))
@@ -84,8 +87,6 @@ mediation_scan <- function(target,
       "lod-diff"        = function(loglik, loglik0) loglik[2] - loglik[1],
       "double-lod-diff" = function(loglik, loglik0) loglik0 - (loglik[2] - loglik[1]))
   
-  loglik0 <- fitFunction(driver, target, kinship, covar, intcovar)$LR
-
   mapfn <- function(x, target, covar, driver, loglik0) {
     loglik <- c(fitFunction(driver, target, kinship,
                            cbind(covar, x$mediator), intcovar)$LR,
