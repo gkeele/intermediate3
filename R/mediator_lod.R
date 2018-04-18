@@ -75,17 +75,15 @@ mediator_lod <- function(mediator,
            annotation = split(annotation, rownames(annotation))))
   
   # Fit likelihood on subset with no missing mediator data for a given mediator.
-  mapfn <- function(x, driver, covar_med, intcovar, kinship) {
-    no.na <- !is.na(x$mediator)
-    fitDefault(driver[no.na,],
-               x$mediator[no.na],
-               kinship = kinship[no.na, no.na],
-               addcovar = covar_med[no.na,],
-               intcovar = intcovar[no.na,])$LR
+  mapfn <- function(x, driver, covar_med, intcovar, kinship, med_rownames) {
+    mediator <- x$mediator
+    names(mediator) <- med_rownames
+    fitDefault(driver, mediator, kinship = kinship, addcovar = covar_med, intcovar = intcovar)$LR
   }
   
   output <- annotation
-  output$lod <- unlist(purrr::map(med_pur, mapfn, driver, covar_med, intcovar, kinship)) / log(10)
+  output$lod <- unlist(purrr::map(med_pur, mapfn, driver, covar_med, intcovar, kinship,
+                                  rownames(mediator))) / log(10)
   attr(output, "targetFit") <- min(output$lod)
   attr(output, "facet_name") <- facet_name
   class(output) <- c("mediation_scan", "data.frame")
