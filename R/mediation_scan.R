@@ -75,11 +75,6 @@ mediation_scan <- function(target,
   stopifnot(c(facet_name, "pos") %in% tolower(names(annotation)))
   method = match.arg(method)
 
-  # data preparation
-  mediator <- cbind(mediator) # to ensure 'mediator' is a matrix
-  N <- nrow(mediator) # number of individuals
-  if (is.null(covar)) covar <- cbind(rep(1, N)) # if no covariates, use just intercept
-  
   # Match up annotation with mediators
   stopifnot(all(!is.na(m <- match(colnames(mediator), annotation$id))))
   annotation <- annotation[m,]
@@ -95,17 +90,13 @@ mediation_scan <- function(target,
       "lod-diff"        = function(loglik, loglik0) loglik[2] - loglik[1],
       "double-lod-diff" = function(loglik, loglik0) loglik0 - (loglik[2] - loglik[1]))
   
-  no.na <- !is.na(target)
-  loglik0 <- fitFunction(driver[no.na,], target[no.na,], kinship[no.na, no.na],
-                        covar[no.na,], intcovar[no.na,])$LR
+  loglik0 <- fitFunction(driver, target, kinship, covar, intcovar)$LR
 
   mapfn <- function(x, target, covar, driver, loglik0) {
-    no.na <- !is.na(target) & !is.na(x$mediator)
-    loglik <- c(fitFunction(driver[no.na,], target[no.na,], kinship[no.na, no.na],
-                           cbind(covar[no.na,], x$mediator[no.na]),
-                           intcovar[no.na,])$LR,
-                fitFunction(driver[no.na,], target[no.na,], kinship[no.na, no.na],
-                           covar[no.na,], intcovar[no.na,])$LR)
+    loglik <- c(fitFunction(driver, target, kinship,
+                           cbind(covar, x$mediator), intcovar)$LR,
+                fitFunction(driver, target, kinship,
+                           covar, intcovar)$LR)
     lodfn(loglik, loglik0)
   }
   output <- annotation

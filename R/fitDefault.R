@@ -40,9 +40,17 @@ fitDefault <- function(driver,
   if(!is.null(kinship))
     return(fitQtl2(driver, target, kinship, addcovar, intcovar, weights, ...))
   
+  no.na <- !is.na(target) & apply(addcovar, 1, function(x) !any(is.na(x)))
+  driver <- driver[no.na,]
+  target <- cbind(target)[no.na,]
+  addcovar <- addcovar[no.na,]
+  intcovar <- intcovar[no.na,]
+  weights <- weights[no.na]
+
   # Original code fit T|D,C but want T|D,C - T|C
   full <- fitDefault_internal(driver, target, kinship, addcovar, intcovar, weights, ...) 
   red  <- fitDefault_internal(NULL,   target, kinship, addcovar, intcovar, weights, ...) 
+  
   full$LR <- full$LR - red$LR
   full$indLR <- full$indLR - red$indLR
   full$df <- full$df - red$df
