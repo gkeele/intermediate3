@@ -49,7 +49,7 @@ ggplot_driver_effect <- function(out1,
           out1,
           mediator = paste0(mediator, " (", signif(pvalue, 2), ")")),
         mediator %in% unique(mediator)[1:12]),
-      driver_level = driver_names[driver_level],
+      driver_level = factor(driver_names[driver_level], names(colors)),
       mediator = factor(mediator, unique(mediator)))
   ggplot2::ggplot(out1) +
     ggplot2::aes(fitType, effect, color = driver_level, group = driver_level) +

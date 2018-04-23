@@ -182,6 +182,7 @@ ggplot_mediation_triad <- function(x,
         dat$col <- names(colors)
       else
         names(colors) <- dat$col
+      dat$col <- factor(dat$col, names(colors))
     }
     p <- p +
       ggplot2::geom_abline(
