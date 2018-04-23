@@ -35,8 +35,13 @@ driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
 #' @export
 ggplot_driver_effect <- function(out1,
                               colors = qtl2::CCcolors) {
+  udriver <- sort(unique(out1$driver_level))
+  if(length(colors != length(udriver))) {
+    colors <- seq_along(udriver)
+    names(colors) <- udriver
+  }
   driver_names <- names(colors)
-  names(driver_names) <- sort(unique(out1$driver_level))
+  names(driver_names) <- udriver
   out1 <- 
     dplyr::mutate(
       dplyr::filter(
