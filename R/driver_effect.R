@@ -5,6 +5,8 @@
 #' @param object data frame with effects
 #' @param driver_levels levels of driver
 #' 
+#' @export
+#' 
 driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
   out1 <- out[, c("target","group","mediator","pvalue",
                   paste0(driver_levels, "_m"),
@@ -30,6 +32,7 @@ driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
   class(out1) <- c("driver_effect", class(out1))
   out1
 }
+#' @export
 ggplot_driver_effect <- function(out1,
                               colors = qtl2::CCcolors) {
   driver_names <- names(colors)
@@ -53,4 +56,5 @@ ggplot_driver_effect <- function(out1,
                                 values = colors)
   
 }
+#' @export
 autoplot.driver_effect <- function(...) ggplot_driver_effect(...)
