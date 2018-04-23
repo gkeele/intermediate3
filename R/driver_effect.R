@@ -34,7 +34,8 @@ driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
 }
 #' @export
 ggplot_driver_effect <- function(out1,
-                              colors = qtl2::CCcolors) {
+                              colors = qtl2::CCcolors,
+                              max_facet = 12) {
   udriver <- sort(unique(out1$driver_level))
   if(length(colors) != length(udriver)) {
     colors <- seq_along(udriver)
@@ -48,7 +49,7 @@ ggplot_driver_effect <- function(out1,
         dplyr::mutate(
           out1,
           mediator = paste0(mediator, " (", signif(pvalue, 2), ")")),
-        mediator %in% unique(mediator)[1:12]),
+        mediator %in% unique(mediator)[seq_len(max_facet)]),
       driver_level = factor(driver_names[driver_level], names(colors)),
       mediator = factor(mediator, unique(mediator)))
   ggplot2::ggplot(out1) +
