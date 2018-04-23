@@ -36,7 +36,7 @@ driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
 ggplot_driver_effect <- function(out1,
                               colors = qtl2::CCcolors,
                               max_facet = 12) {
-  udriver <- sort(unique(out1$driver_level))
+  udriver <- unique(out1$driver_level)
   if(length(colors) != length(udriver)) {
     colors <- seq_along(udriver)
     names(colors) <- udriver
