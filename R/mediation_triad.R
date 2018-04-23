@@ -105,7 +105,8 @@ triad_data <- function(target, mediator, driver,
   
   # Set up point labels and groups.
   if(is.null(label_fn))
-    label_fn <- function(driver, allele) as.character(round(2 * driver))
+    label_fn <- function(driver, allele)
+      as.character(apply(driver, 1, function(x) which.max(x)[1]))
   label <- label_fn(commons$driver, allele)
   if(is.null(group_fn))
     group_fn = function(label, a, b) label
