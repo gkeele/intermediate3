@@ -46,6 +46,30 @@ annotation <- Tmem68$annotation
 mediators <- Tmem68$mediator
 ```
 
+## Scan of mediators
+
+First fine mediators that have significant LOD. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
+
+```{r}
+med_lod <- mediator_lod(mediator = mediators,
+                        driver = driver,
+                        annotation = annotation,
+                        covar_med = covar)
+med_signif <- med_lod$id[med_lod$lod >= 5]
+# Add info column.
+med_lod$info <- paste("chr =", med_lod$chr)
+med_lod$col <- 1
+med_lod[med_signif, "col"] <- 2
+med_lod$col <- factor(med_lod$col)
+med_lod <- med_lod[order(med_lod$col, -med_lod$lod),]
+```
+
+```{r}
+autoplot(med_lod)
+```
+
+## Mediation scan of target adjusted by mediators
+
 ```{r}
 med_scan <- mediation_scan(target = target,
                       mediator = mediators,
@@ -53,6 +77,11 @@ med_scan <- mediation_scan(target = target,
                       annotation = annotation,
                       covar = covar,
                       method = "double-lod-diff")
+# Add color for mediators with significant LOD.
+med_scan$col <- 1
+med_scan[med_signif, "col"] <- 2
+med_scan$col <- factor(med_scan$col)
+med_scan <- med_scan[order(med_scan$col, -med_scan$lod),]
 ggplot_mediation_scan(med_scan)
 ```
 
@@ -65,18 +94,6 @@ autoplot(subset(med_scan, "4")) +
 ```
 
 ## Mediation test
-
-First fine mediators that have significant LOD. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
-
-```{r}
-med_lod <- mediator_lod(mediator = mediators,
-                        driver = driver,
-                        annotation = annotation,
-                        covar_med = covar)
-med_signif <- med_lod$id[med_lod$lod >= 5]
-# Add info column.
-med_lod$info <- paste("chr =", med_lod$chr)
-```
 
 Causal model selection tests.
 
@@ -93,7 +110,7 @@ med_test <- mediation_test(target = target,
 ```
 
 ```{r}
-autoplot(med_test)
+plotly::ggplotly(autoplot(med_test))
 ```
 
 ## Driver effects

@@ -44,9 +44,17 @@ ggplot_mediation_scan <- function(x,
 
   p <- ggplot2::ggplot(x) +
     ggplot2::aes(pos, lod, symbol = symbol) +
-    ggplot2::geom_point(col = col, alpha = 0.5) +
     ggplot2::facet_grid(formula(paste("~", facet_name)), scales = "free_x", space = "free")
 
+  if(!is.null(x$col)) {
+    p <- p +
+      ggplot2::aes(col = col) +
+      ggplot2::geom_point(alpha = 0.5)
+    
+  } else {
+    p <- p +
+      ggplot2::geom_point(col = col, alpha = 0.5)
+  }
   # gap between facets
   p <- p +
     ggplot2::theme(panel.spacing = grid::unit(gap / 10000, "npc")) +
