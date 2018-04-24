@@ -138,7 +138,8 @@ out <-
 ```{r}
 plotly::ggplotly(
   ggplot2::ggplot(out) +
-    ggplot2::aes(lod_tar - lod_adj, -log10(pvalue), col = group, symbol = mediator) +
+    ggplot2::aes(lod_tar - lod_adj, -log10(pvalue), col = triad,
+                 symbol = mediator, pvalue = pvalue) +
     ggplot2::geom_point())
 ```
 
