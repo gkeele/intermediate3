@@ -40,7 +40,9 @@ fitDefault <- function(driver,
   if(!is.null(kinship))
     return(fitQtl2(driver, target, kinship, addcovar, intcovar, weights, ...))
   
-  no.na <- !is.na(target) & apply(addcovar, 1, function(x) !any(is.na(x)))
+  no.na <- !is.na(target)
+  if(!is.null(addcovar))
+    no.na <- no.na & apply(addcovar, 1, function(x) !any(is.na(x)))
   driver <- driver[no.na,]
   target <- cbind(target)[no.na,]
   addcovar <- addcovar[no.na,]
@@ -107,6 +109,7 @@ fitDefault_internal <- function(driver,
 
   list(LR = as.vector(- (n/2) * (log(RSS))), #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
        indLR = dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
+       coef = qr.coef(qrX, target),
        df = dX,
        RSS = RSS)
 }

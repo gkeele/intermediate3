@@ -1,0 +1,171 @@
+---
+title: "Mediation with R/intermediate"
+author: "Brian S. Yandell"
+date: "4/23/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(intermediate)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+data(Tmem68)
+```
+
+## Mediation scan
+
+```{r}
+# target and Tmem68$mediator[,"Tmem68"] are identical.
+# so add some noise to make more interesting.
+target <- Tmem68$target
+target <- target + rnorm(length(target))
+```
+
+```{r}
+covar <- Tmem68$covar
+m <- match("Tmem68", Tmem68$annotation$symbol)
+annot_tar <- Tmem68$annotation[m,, drop = FALSE]
+```
+
+Reconstruct 8-allele genotype probabilities.
+
+```{r}
+driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+rownames(driver) <- rownames(Tmem68$qtl.geno)
+```
+
+```{r}
+annotation <- Tmem68$annotation
+mediators <- Tmem68$mediator
+```
+
+```{r}
+med_scan <- mediation_scan(target = target,
+                      mediator = mediators,
+                      driver = driver,
+                      annotation = annotation,
+                      covar = covar,
+                      method = "double-lod-diff")
+ggplot_mediation_scan(med_scan)
+```
+
+Or use `autoplot`, and maybe focus on one group and add a vertical line.
+
+```{r}
+autoplot(subset(med_scan, "4")) +
+  geom_vline(xintercept = annotation[m,"pos"], linetype = "dashed")
+
+```
+
+## Mediation test
+
+First fine mediators that have significant LOD. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
+
+```{r}
+med_lod <- mediator_lod(mediator = mediators,
+                        driver = driver,
+                        annotation = annotation,
+                        covar_med = covar)
+med_signif <- med_lod$id[med_lod$lod >= 5]
+# Add info column.
+med_lod$info <- paste("chr =", med_lod$chr)
+```
+
+Causal model selection tests.
+
+```{r}
+med_test <- mediation_test(target = target,
+                      mediator = mediators[, med_signif, drop = FALSE],
+                      driver = driver,
+                      annotation = med_lod,
+                      covar_tar = covar,
+                      covar_med = covar,
+                      method = "double-lod-diff")
+(sum_med <- summary(med_test) %>%
+    arrange(pvalue))
+```
+
+```{r}
+autoplot(med_test)
+```
+
+## Driver effects
+
+```{r}
+meds <- 
+  dplyr::rename(
+    dplyr::mutate(
+      dplyr::select(
+        sum_med,
+        symbol, chr, pos, mediation, pvalue, dplyr::everything()),
+      mediation = mediation / log(10),
+      chr = as.character(chr),
+      LRmed = LRmed / log(10)),
+    lod_adj = "mediation",
+    mediator = "symbol",
+    lod_med = "LRmed")
+```
+
+```{r}
+driver_levels <- LETTERS[1:8]
+```
+
+```{r}
+peaks <- fitDefault(driver, target,, covar)
+peaks <- data.frame(target = "target",
+                    pos_tar = annot_tar$pos,
+                    lod_tar = peaks$LR / log(10),
+                    group = "1",
+                    as.data.frame(t(peaks$coef[driver_levels])),
+                    stringsAsFactors = FALSE)
+m <- match(driver_levels, names(peaks))
+names(peaks)[m] <- paste0(driver_levels, "_p")
+```
+
+```{r}
+out <- 
+  data.frame(meds, peaks) %>%
+  dplyr::filter(pvalue <= 0.05)
+```
+
+```{r}
+plotly::ggplotly(
+  ggplot2::ggplot(out) +
+    ggplot2::aes(lod_tar - lod_adj, -log10(pvalue), col = group, symbol = mediator) +
+    ggplot2::geom_point())
+```
+
+```{r}
+tmp <- rep(seq_len(ceiling(nrow(out) / 6)), each = 6, length = nrow(out))
+outp <- split(out, tmp)
+driver_effects <- purrr::map(outp, intermediate::driver_effect)
+```
+
+```{r fig.width = 12, fig.heigth = 9}
+invisible(sapply(driver_effects, function(x) print(intermediate::ggplot_driver_effect(x))))
+```
+
+## Mediation triad
+
+```{r}
+m <- match("Tmem68", annotation$symbol)
+mediator <- mediators[, m, drop = FALSE]
+colnames(mediator) <- "Tmem68"
+```
+
+```{r}
+med_triad <- mediation_triad(target = target,
+                      mediator = mediator,
+                      driver = driver,
+                      covar_tar = covar,
+                      sdp = 2)
+autoplot(med_triad)
+```
+

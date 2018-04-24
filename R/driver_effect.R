@@ -7,6 +7,28 @@
 #' 
 #' @export
 #' 
+#' @examples
+#' data(Tmem68)
+#' # Find mediators with significant effect
+#' # Find and remove Tmem68 from mediators because it is target.
+#' m <- match("Tmem68", Tmem68$annotation$symbol)
+#' Tmem68$annotation[m,]
+#' med_lod <- mediator_lod(mediator = Tmem68$mediator[,-m],
+#'                         driver = Tmem68$qtl.geno,
+#'                         annotation = Tmem68$annotation[-m,],
+#'                         covar_med = NULL)
+#' med_signif <- med_lod$lod >= 5
+#' # Add info column.
+#' med_lod$info <- paste("chr =", med_lod$chr)
+#' 
+#' med_test <- mediation_test(target = Tmem68$target,
+#'                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
+#'                       driver = Tmem68$qtl.geno,
+#'                       annotation = med_lod,
+#'                       covar_tar = Tmem68$covar,
+#'                       method = "double-lod-diff")
+#' (sum_med <- summary(med_test))
+#' 
 driver_effect <- function(out, driver_levels = LETTERS[1:8]) {
   out1 <- out[, c("target","group","mediator","pvalue",
                   paste0(driver_levels, "_m"),
