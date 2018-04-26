@@ -60,24 +60,32 @@ and either $f(T\vert M,D)$ or $f(M\vert T,D)$
 
 ## Mediation scans and likelihood ratios
 
-Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the LR $f(T\vert D)/f(T)$ with the LR $f(T\vert M,D)/f(T\vert M)$. Under the causal model, the latter LR is 1, since $f(T\vert M,D) = f(T\vert M)$. If the mediator has no effect on the target, then the latter LR is equal to the former. Thus a plot of 
+Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the LR $f(T\vert D)/f(T)$ with the LR $f(T\vert M,D)/f(T\vert M)$. Under the causal model, the latter LR is 1, since $f(T\vert M,D) = f(T\vert M)$. If the mediator has no effect on the target, then the latter LR is equal to the former. Thus, as the argument goes, a plot of 
 
 $$\ell(\text{mediation}) = \log\left({f(T\vert D) \over f(T)}\right) - \log\left({f(T\vert M,D) \over f(T\vert M)}\right)$$
 
-across multiple mediators $M$ should be near zero except at causal mediators, where it will approach $\log(f(T\vert D)/f(T))$. However, this difference will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
+across multiple mediators $M$ should be near zero except at causal mediators, where it will approach $\log(f(T\vert D)/f(T))$. That is, for the causal model, $f(T\vert M,D)=f(T\vert M)$ and
 
-$${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)}$$
+$$\ell(\text{mediation}\vert\text{causal}) = \log\left({f(T\vert D) \over f(T)}\right)\,.$$
+
+However, this difference will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
+
+$${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)} = {f(T\vert D)\over f(T)}{f(M\vert D)\over f(M)}$$
 and hence
 
-$$\ell(\text{mediation}) = - \log\left({f(M\vert D) \over f(M)}\right)$$
+$$\ell(\text{mediation}\vert \text{reactive}) = - \log\left({f(M\vert D) \over f(M)}\right)\,,$$
 
 which is the opposite of the log LR for mediator given driver. Since we only consider mediators with significant effects, or large LR, this will be negative.
 
-## Causal model selection tests
+If target and mediator are independent given driver, a similar argument results in
 
-Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. That is, ...
+$$\ell(\text{mediation}\vert \text{independent}) = - \log\left({f(T\vert M) \over f(T)}\right)\,,$$
+
+which could be either positive or negative. If target and mediator are unconditionally independent, then $f(T\vert M) = f(T)$ and this will be zero. No simplification results for the correlated case, and the mediation could be positive or negative.
 
 ## Causal models with two drivers
+
+Multi-parent populations developed over multiple generations leads to the opportunity for fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlate traits. Further, than can be other causal settings where there are potentially separate drivers for target and mediator, leading to the need for somewhat more complicated causal models. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
 
 model | relationship | likelihood
 ----------- | ------------------- | -----------
@@ -86,7 +94,7 @@ reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C)f(T\vert
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
 correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D)$
 
-In this case, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated, and we will need to consider $C^*$ and $D^*$ for the causal and reactive models, which are constructed by adjusting one driver by the other.
+However, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated, and we will need to consider $C^*$ and $D^*$ for the causal and reactive models, which are constructed by adjusting one driver by the other. The following works whether drivers $C$ and $D$ are uncorrelated, totally correlated, or partially correlated.
 
 model | relationship | likelihood
 ----------- | ------------------- | -----------
@@ -104,3 +112,8 @@ and either $f(T\vert M,D)$
 or
 $f(M\vert T,C)$.
 Note that if $C$ and $D$ are uncorrelated, then $D^*$ and $C^*$ are null and the models look similar to those with one driver, except for the affinity of $D$ to $T$ and $C$ to $M$.
+
+## Causal model selection tests
+
+Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. That is, ...
+
