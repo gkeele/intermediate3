@@ -42,7 +42,8 @@ rownames(driver) <- rownames(Tmem68$qtl.geno)
 ```
 
 ```{r}
-annotation <- Tmem68$annotation
+annotation <- Tmem68$annotation %>%
+  mutate(chr = factor(chr, c(1:19,"X")))
 mediators <- Tmem68$mediator
 ```
 
@@ -58,9 +59,9 @@ med_lod <- mediator_lod(mediator = mediators,
 med_signif <- med_lod$id[med_lod$lod >= 5]
 # Add info column.
 med_lod$info <- paste("chr =", med_lod$chr)
-med_lod$col <- 1
-med_lod[med_signif, "col"] <- 2
-med_lod$col <- factor(med_lod$col)
+med_col <- rep(1, nrow(med_lod))
+med_col[med_lod$lod >= 5] <- 2
+med_lod$col <- factor(med_col)
 med_lod <- med_lod[order(med_lod$col, -med_lod$lod),]
 ```
 
@@ -78,9 +79,9 @@ med_scan <- mediation_scan(target = target,
                       covar = covar,
                       method = "double-lod-diff")
 # Add color for mediators with significant LOD.
-med_scan$col <- 1
-med_scan[med_signif, "col"] <- 2
-med_scan$col <- factor(med_scan$col)
+med_col <- rep(1, nrow(med_scan))
+med_col[med_scan$id %in% med_signif] <- 2
+med_scan$col <- factor(med_col)
 med_scan <- med_scan[order(med_scan$col, -med_scan$lod),]
 ggplot_mediation_scan(med_scan)
 ```
@@ -91,6 +92,18 @@ Or use `autoplot`, and maybe focus on one group and add a vertical line.
 autoplot(subset(med_scan, "4")) +
   geom_vline(xintercept = annotation[m,"pos"], linetype = "dashed")
 
+```
+
+Alternatively, only do scan on significant mediators
+
+```{r}
+med_scan <- mediation_scan(target = target,
+                      mediator = mediators[, med_signif],
+                      driver = driver,
+                      annotation = annotation,
+                      covar = covar,
+                      method = "double-lod-diff")
+ggplot_mediation_scan(med_scan)
 ```
 
 ## Mediation test

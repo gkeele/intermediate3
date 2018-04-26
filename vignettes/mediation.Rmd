@@ -1,0 +1,106 @@
+---
+title: "Mediaton Details"
+author: "Brian S. Yandell"
+date: "4/25/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Mediation examines the change in likelihood ratio, LR, (or LOD in genetic studies) for the relationship of a target and a driver by adjusting one at a time for a set of mediators. [For now, we ignore covariates and kinship.]
+
+The idea is to compare the strength of evidence for effect of the driver ($D$) on the target ($T$) with or without a mediator ($M$). That is, how do the models $D\rightarrow T$ and $D \rightarrow M \rightarrow T$ compare? This is often done for a set of mediators ($M_1, M_2, ...$), looking for the strongest mediation, or drop in LOD attributable to the mediator.
+
+### Causal models
+
+A key reference for our work is: 
+Li Y1, Tesson BM, Churchill GA, Jansen RC (2010) 
+Critical reasoning on causal inference in genome-wide linkage and association studies.
+_Trends Genet 26_: 493-498.
+[doi:10.1016/j.tig.2010.09.002](http://dx.doi.org/10.1016/j.tig.2010.09.002).
+This article has 10 models with driver $Q=D$, mediator $T1=M$ and target $T2=T$). There are three additional models (green) that imply additional interaction terms to modulate the causal relationship of $T$ with $M$.
+
+![Li et al. (2010)](../inst/doc/nihms-249591-f0001.jpg)
+
+The key models are in blue, corresponding to situations where the driver is known already to affect both the target and mediator, either directly or indirectly. To be exact, it is important to consider the joint distribution of $T$ and $M$ given $D$.
+Write $f()$ as the likelihood (or density) for a given model. Thus $f(T\vert D)$ is the likelihood for the target given the driver, and $f(T)$ is the unconditional likelihood for the target. The four models can be written as
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$
+reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$
+independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$
+correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D) = f(M\vert T,D)f(T\vert D)$
+
+The last model (undecided or correlated) has driver affecting both mediator and target, with the latter two correlated with each other. There are multiple indistinguishable models that fall into this latter context. This is detailed in the following paper:
+Chaibub Neto E, Broman AT, Keller MP, Attie AD, Zhang B, Zhu J, Yandell BS (2013)
+Modeling causality for pairs of phenotypes in system genetics.
+_Genetics 193_: 1003-1013.
+[doi:10.1534/genetics.112.147124](http://dx.doi.org/10.1534/genetics.112.147124).
+
+The above models are assessed relative to the joint likelihood without a driver, $f(M,T) = f(M\vert T)f(T) = f(M)f(T\vert M)$, through a likelihood ratio (or LOD for genetic models). For instance, for the causal model, the likelihood ratio is
+
+$$\ell (\text{causal}) = \log\left({f(M\vert D)f(T\vert M) \over f(M,T)}\right) = \log(f(M\vert D)) - \log(f(M)).$$
+
+In a similar fashion, the reactive LR is
+$\ell (\text{reactive}) = \log(f(T\vert D)) - \log(f(T))$,
+and the independent LR is
+
+$$\ell (\text{independent}) = \log(f(M\vert D)) + \log(f(T\vert D)) - \log(f(M,T)).$$
+
+Note that when comparing two models, the joint likelihood $f(M,T)$ cancels out.
+Comparing these four models involves fitting five models:
+$f(T\vert D)$,
+$f(M\vert D)$,
+$f(T\vert M)$,
+$f(M\vert T)$
+and either $f(T\vert M,D)$ or $f(M\vert T,D)$
+
+## Mediation scans and likelihood ratios
+
+Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the LR $f(T\vert D)/f(T)$ with the LR $f(T\vert M,D)/f(T\vert M)$. Under the causal model, the latter LR is 1, since $f(T\vert M,D) = f(T\vert M)$. If the mediator has no effect on the target, then the latter LR is equal to the former. Thus a plot of 
+
+$$\ell(\text{mediation}) = \log\left({f(T\vert D) \over f(T)}\right) - \log\left({f(T\vert M,D) \over f(T\vert M)}\right)$$
+
+across multiple mediators $M$ should be near zero except at causal mediators, where it will approach $\log(f(T\vert D)/f(T))$. However, this difference will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
+
+$${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)}$$
+and hence
+
+$$\ell(\text{mediation}) = - \log\left({f(M\vert D) \over f(M)}\right)$$
+
+which is the opposite of the log LR for mediator given driver. Since we only consider mediators with significant effects, or large LR, this will be negative.
+
+## Causal model selection tests
+
+Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. That is, ...
+
+## Causal models with two drivers
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D)$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C)f(T\vert D)$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
+correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D)$
+
+In this case, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated, and we will need to consider $C^*$ and $D^*$ for the causal and reactive models, which are constructed by adjusting one driver by the other.
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D^*)$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C^*)f(T\vert D)$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
+correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D) = f(M\vert T,C)f(T\vert D)$
+
+Comparing these four models involves fitting six models:
+$f(T\vert D)$,
+$f(M\vert C)$,
+$f(T\vert M,D^*)$,
+$f(M\vert T,C^*)$,
+and either $f(T\vert M,D)$
+or
+$f(M\vert T,C)$.
+Note that if $C$ and $D$ are uncorrelated, then $D^*$ and $C^*$ are null and the models look similar to those with one driver, except for the affinity of $D$ to $T$ and $C$ to $M$.
