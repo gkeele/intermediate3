@@ -55,8 +55,8 @@ Comparing these four models involves fitting five models:
 $f(T\vert D)$,
 $f(M\vert D)$,
 $f(T\vert M)$,
-$f(M\vert T)$
-and either $f(T\vert M,D)$ or $f(M\vert T,D)$
+$f(M\vert T)$,
+and either $f(T\vert M,D)$ or $f(M\vert T,D)$.
 
 ## Mediation scans and likelihood ratios
 
@@ -85,7 +85,7 @@ which could be either positive or negative. If target and mediator are unconditi
 
 ## Causal models with two drivers
 
-Multi-parent populations developed over multiple generations leads to the opportunity for fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlate traits. Further, than can be other causal settings where there are potentially separate drivers for target and mediator, leading to the need for somewhat more complicated causal models. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
+Multi-parent populations developed over multiple generations leads to the opportunity for fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlated traits. Further, than can be other causal settings where there are potentially separate drivers for target and mediator, leading to the need for somewhat more complicated causal models. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
 
 model | relationship | likelihood
 ----------- | ------------------- | -----------
@@ -115,5 +115,88 @@ Note that if $C$ and $D$ are uncorrelated, then $D^*$ and $C^*$ are null and the
 
 ## Causal model selection tests
 
-Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. That is, ...
+Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. While we could proceed in terms of the five likelihoods as indicated above, it is equivalent for testing purposes to consider the following five likelihood ratios:
 
+relationship | likelihood ratio
+------------ | ----------------
+1: $D\rightarrow T$ | $f(T\vert D)/f(T)$
+2: $D\rightarrow M$ | $f(M\vert D)/f(M)$
+3: $M\rightarrow T$ | $f(T\vert M)/f(T)$
+4: $T\rightarrow M$ | $f(M\vert T)/f(M)$
+5: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M)$
+
+For the $k$th relationship comparing full versus reduced model, we compute LR$_k$ = $\ell_k = \log f(\text{full}_k) - \log f(\text{reduced}_k)$ = log likelihood ratio. Here we are comparing to $f(T)f(M)$, whereas earlier, we compared to $f(M,T)$, but that is a simple ratio that cancels out.
+
+Similarlym df$_k$ = difference in degrees of freedom between full and reduced models, coef$_k$ = coefficient estimates under the full model, and indLR{_k} = vector of individual contributions to LR$_k$,
+
+$$\text{indLR}_{ki} = \ell_{ki} = \log f(\text{full}_{ki}) - \log f(\text{reduced}_{ki})\,.$$
+
+That is, $\text{LR}_k = \sum_i \text{indLR}_{ki}$, with the sum across all individuals. For instance, $f(\text{full}_{1i}) = f(T_i\vert D_i)$. The log likelihood ratios for the four models are constructed as:
+
+model | relationship | likelihood | log likelihood ratio
+----------- | ------------------- | ----------- | ---------------------
+causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$ | $\ell(\text{causal}) = \ell_2 + \ell_3$
+reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_1 + \ell_4$
+independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$ | $\ell(\text{independent}) = \ell_1 + \ell_2$
+correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_2 + \ell_5$
+
+In a similar fashion, df, coef and indLR are combined.
+Models are compared using an information criterion (BIC by default),
+$IC_m = \ell_m + \text{df}_m * \log(n)$, with $m$ identifying the model. That provides a point estimate, but to get a p-value, we compare the vector of individual contributions to $IC$,
+
+$$IC_{mi} = \ell_{mi} + \text{df}_{m} * \log(n) / n$$
+
+Chaibub Neto et al. (2013) considered sign test, normal, and normal joint tests versions, building on the original idea of Vuong. Here we add the Wilcoxon signed rank test. That is, for two models compare the $IC_{mi}$ vectors by replacing these values by their ranks, and finding the difference of the sum of ranks between the two models. This has the advantage of being nonparametric and almost as powerful as the normal test.
+
+The six possible pairs of the models are compared using the intersection-union approach, and the smallest p-value is reported, along with the model that best fit the data. This procedure has been shown to have good power for comparison of multiple entries; therefore we do not propose any adjustment.
+
+When there are two drivers, some adjustment needs to be made. The five relationships are:
+
+relationship | likelihood ratio
+------------ | ----------------
+$1^*$: $D\rightarrow T$ | $f(T\vert D)/f(T)$
+$2^*$: $C\rightarrow M$ | $f(M\vert C)/f(M)$
+$3^*$: $M\rightarrow T \leftarrow D^*$ | $f(T\vert M,D^*)/f(T)$
+$4^*$: $T\rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)/f(M)$
+$5^*$: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M,D^*)$
+
+and the four models with their likelihood ratios are:
+
+model | relationship | likelihood | log likelihood ratio
+----------- | ------------------- | ----------- | ---------------------
+causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D^*)$ | $\ell(\text{causal}) = \ell_{2^*} + \ell_{3^*}$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C^*)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_{1^*} + \ell_{4^*}$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$ | $\ell(\text{independent}) = \ell_{1^*} + \ell_{2^*}$
+correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_{2^*} + \ell_{5^*}$
+
+## Implementation
+
+The causal model selection tests (CMST) are implemented in the [R/qtlhot](https://cran.r-project.org/web/packages/qtlhot) available on [CRAN](https://cran.r-project.org). They have been updated and extended in this [R/intermediate](https://github.com/byandell/intermediate).
+
+Computation of the (CMST) is orchestrated by the [mediation_test](https://github.com/byandell/intermediate/blob/master/R/mediation_test.R) function, which can process one target and multiple mediators. It is assumed that the mediators have already been screened to have a significant relationship to the driver. After some preprocessing, for instance to remove data with missing values, `mediation_test` calls an internal function `cmst_default`, which uses a fit function to compute LR, df, coef and indLR for the five relationships. The default fit function, `fitDefault`, allows for covariates; another fit function, `fitQtl2`, is a wrapper for [qtl2::fit1](https://github.com/rqtl/qtl2/blob/master/R/fit1.R), which allows for correlation of individuals using a `kinship` matrix. These fits are combined to yield the four models, and then compared with a test function (`wilcIUCMST`, `binomIUCMST`, `normIUCMST`, or `normJointIUCMST`) to conduct the six tests.
+
+The `fitDefault` uses the QR decomposition. Assume we have response `y` (say the target) and predictors `X` (say driver and mediator combined), the steps are:
+
+```
+n <- length(y)
+qrX <- qr(cbind(X,1))
+df <- qrX$rank
+RSS <- sum(qr.resid(qrX, y) ^ 2)
+LR <- -(n/2) * (log(RSS)))
+indLR <- dnorm(y, qr.fitted(qrX, y), sqrt(RSS / n), log = TRUE)
+coef <- qr.coef(qrX, y)
+```
+
+In the case of two drivers we need to calculate $f(T\vert M,D^*)$ and $f(M\vert T,C^*)$ for relationships 3 and 4.
+
+We compute $D^*$ by taking a QR decomposition of $C$ and getting the residuals applied to each column of $D$
+
+```
+qrC <- qr(cbind(C,1))
+Dstar <- D
+for(i in seq_along(ncol(D))) Dstar[,i] <- qr.resid(qrC, D[,i])
+```
+
+Note that in the special case $C=D$, the residuals will be zero, and there will be no contribution, as desired. When $C\perp D$ (uncorrelated drivers), the residuals will be the original matrix $D$.
+
+More machinery is needed to accommodate covariates and kinship.
