@@ -105,12 +105,14 @@ fitDefault_internal <- function(driver,
   n <- length(target)
   qrX <- qr(cbind(X,1))
   dX <- qrX$rank
-  RSS <- sum(qr.resid(qrX, target) ^ 2)
+  resid <- qr.resid(qrX, target)
+  RSS <- sum(resid ^ 2)
 
   list(LR = as.vector(- (n/2) * (log(RSS))), #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
        indLR = dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
        coef = qr.coef(qrX, target),
        df = dX,
-       RSS = RSS)
+       RSS = RSS,
+       resid = resid)
 }
 

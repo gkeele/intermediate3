@@ -2,7 +2,10 @@
 title: "Mediaton Details"
 author: "Brian S. Yandell"
 date: "4/25/2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +23,7 @@ Li Y1, Tesson BM, Churchill GA, Jansen RC (2010)
 Critical reasoning on causal inference in genome-wide linkage and association studies.
 _Trends Genet 26_: 493-498.
 [doi:10.1016/j.tig.2010.09.002](http://dx.doi.org/10.1016/j.tig.2010.09.002).
-This article has 10 models with driver $Q=D$, mediator $T1=M$ and target $T2=T$). There are three additional models (green) that imply additional interaction terms to modulate the causal relationship of $T$ with $M$.
+This article has 10 models (see figure below) with driver $Q=D$, mediator $T1=M$ and target $T2=T$). There are three additional models (green) that imply additional interaction terms to modulate the causal relationship of $T$ with $M$.
 
 ![Li et al. (2010)](../inst/doc/nihms-249591-f0001.jpg)
 
@@ -34,33 +37,22 @@ reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$
 independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$
 correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D) = f(M\vert T,D)f(T\vert D)$
 
-The last model (undecided or correlated) has driver affecting both mediator and target, with the latter two correlated with each other. There are multiple indistinguishable models that fall into this latter context. This is detailed in the following paper:
-Chaibub Neto E, Broman AT, Keller MP, Attie AD, Zhang B, Zhu J, Yandell BS (2013)
-Modeling causality for pairs of phenotypes in system genetics.
-_Genetics 193_: 1003-1013.
-[doi:10.1534/genetics.112.147124](http://dx.doi.org/10.1534/genetics.112.147124).
-
-The above models are assessed relative to the joint likelihood without a driver, $f(M,T) = f(M\vert T)f(T) = f(M)f(T\vert M)$, through a likelihood ratio (or LOD for genetic models). For instance, for the causal model, the likelihood ratio is
-
-$$\ell (\text{causal}) = \log\left({f(M\vert D)f(T\vert M) \over f(M,T)}\right) = \log(f(M\vert D)) - \log(f(M)).$$
-
-In a similar fashion, the reactive LR is
-$\ell (\text{reactive}) = \log(f(T\vert D)) - \log(f(T))$,
-and the independent LR is
-
-$$\ell (\text{independent}) = \log(f(M\vert D)) + \log(f(T\vert D)) - \log(f(M,T)).$$
-
-Note that when comparing two models, the joint likelihood $f(M,T)$ cancels out.
-Comparing these four models involves fitting five models:
+Comparing these four models involves fitting five building blocks:
 $f(T\vert D)$,
 $f(M\vert D)$,
 $f(T\vert M)$,
 $f(M\vert T)$,
 and either $f(T\vert M,D)$ or $f(M\vert T,D)$.
 
+The last model (undecided or correlated) has driver affecting both mediator and target, with the latter two correlated with each other. There are multiple indistinguishable models that fall into this latter context. This is detailed in the following paper:
+Chaibub Neto E, Broman AT, Keller MP, Attie AD, Zhang B, Zhu J, Yandell BS (2013)
+Modeling causality for pairs of phenotypes in system genetics.
+_Genetics 193_: 1003-1013.
+[doi:10.1534/genetics.112.147124](http://dx.doi.org/10.1534/genetics.112.147124).
+
 ## Mediation scans and likelihood ratios
 
-Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the LR $f(T\vert D)/f(T)$ with the LR $f(T\vert M,D)/f(T\vert M)$. Under the causal model, the latter LR is 1, since $f(T\vert M,D) = f(T\vert M)$. If the mediator has no effect on the target, then the latter LR is equal to the former. Thus, as the argument goes, a plot of 
+Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the likelihood ratios (LRs) $f(T\vert D)/f(T)$ and $f(T\vert M,D)/f(T\vert M)$. Under the causal model, the LR adjusted for mediator is 1, since $f(T\vert M,D) = f(T\vert M)$. If the mediator has no effect on the target, then the mediator LR is equal to the unmediated LR. Thus, as the argument goes, a plot of the mediation score
 
 $$\ell(\text{mediation}) = \log\left({f(T\vert D) \over f(T)}\right) - \log\left({f(T\vert M,D) \over f(T\vert M)}\right)$$
 
@@ -68,7 +60,7 @@ across multiple mediators $M$ should be near zero except at causal mediators, wh
 
 $$\ell(\text{mediation}\vert\text{causal}) = \log\left({f(T\vert D) \over f(T)}\right)\,.$$
 
-However, this difference will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
+However, this mediation score will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
 
 $${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)} = {f(T\vert D)\over f(T)}{f(M\vert D)\over f(M)}$$
 and hence
@@ -85,7 +77,8 @@ which could be either positive or negative. If target and mediator are unconditi
 
 ## Causal models with two drivers
 
-Multi-parent populations developed over multiple generations leads to the opportunity for fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlated traits. Further, than can be other causal settings where there are potentially separate drivers for target and mediator, leading to the need for somewhat more complicated causal models. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
+There are situations where the mediator and target may plausibly have different drivers. That is, than can be causal settings where there are potentially separate drivers for target and mediator, leading to the need for somewhat more complicated causal models.
+Multi-parent populations developed over multiple generations lead to the opportunity for fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlated traits. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
 
 model | relationship | likelihood
 ----------- | ------------------- | -----------
@@ -103,7 +96,7 @@ reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C^*)f(T\ve
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
 correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D) = f(M\vert T,C)f(T\vert D)$
 
-Comparing these four models involves fitting six models:
+Comparing these four models also involves fitting five building blocks:
 $f(T\vert D)$,
 $f(M\vert C)$,
 $f(T\vert M,D^*)$,
@@ -138,7 +131,7 @@ model | relationship | likelihood | log likelihood ratio
 causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$ | $\ell(\text{causal}) = \ell_2 + \ell_3$
 reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_1 + \ell_4$
 independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$ | $\ell(\text{independent}) = \ell_1 + \ell_2$
-correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_2 + \ell_5$
+correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_2 + \ell_3 + \ell_5$
 
 In a similar fashion, df, coef and indLR are combined.
 Models are compared using an information criterion (BIC by default),
@@ -152,7 +145,7 @@ The six possible pairs of the models are compared using the intersection-union a
 
 When there are two drivers, some adjustment needs to be made. The five relationships are:
 
-relationship | likelihood ratio
+2-driver relationship | likelihood ratio
 ------------ | ----------------
 $1^*$: $D\rightarrow T$ | $f(T\vert D)/f(T)$
 $2^*$: $C\rightarrow M$ | $f(M\vert C)/f(M)$
@@ -164,10 +157,10 @@ and the four models with their likelihood ratios are:
 
 model | relationship | likelihood | log likelihood ratio
 ----------- | ------------------- | ----------- | ---------------------
-causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D^*)$ | $\ell(\text{causal}) = \ell_{2^*} + \ell_{3^*}$
-reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C^*)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_{1^*} + \ell_{4^*}$
+causal | $C \rightarrow M \rightarrow T \leftarrow D^*$ | $f(M\vert C)f(T\vert M,D^*)$ | $\ell(\text{causal}) = \ell_{2^*} + \ell_{3^*}$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_{1^*} + \ell_{4^*}$
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$ | $\ell(\text{independent}) = \ell_{1^*} + \ell_{2^*}$
-correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_{2^*} + \ell_{5^*}$
+correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_{2^*} + \ell_{3^*} + \ell_{5^*}$
 
 ## Implementation
 

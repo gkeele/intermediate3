@@ -22,5 +22,8 @@ fitQtl2 <- function(driver,
   # Add df for later use
   out$df <- ncol(driver) - 1
   
+  # Residuals
+  out$resid <- target - out$fitted
+  
   out
 }

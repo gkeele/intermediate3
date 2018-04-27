@@ -31,6 +31,9 @@ mediation_scan(target, mediator, driver, annotation, covar = NULL,
 \item{verbose}{If TRUE display information about the progress}
 }
 \description{
+Scan set of mediators for a target
+}
+\details{
 For a given QTL haplotype probabilities \code{driver} and target \code{target},
 the function sequentially tries to add each column \code{m} of \code{mediator} matrix as a covariate
 and calculates LOD statistic. The low LOD value indicates \code{driver} and
@@ -39,13 +42,14 @@ i.e. \code{m} is a mediator of causal relationship from \code{driver} to \code{t
 }
 \examples{
 data(Tmem68)
-# Find and remove Tmem68 from mediators because it is target.
-m <- match("Tmem68", Tmem68$annotation$symbol)
-Tmem68$annotation[m,]
-med_scan <- mediation_scan(target = Tmem68$target,
-                      mediator = Tmem68$mediator[,-m],
+m <- match("Tmem68", Tmem68$annotation$symbol) 
+# Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
+target <- Tmem68$target
+target <- target + rnorm(length(target), sd = 0.5)
+med_scan <- mediation_scan(target = target,
+                      mediator = Tmem68$mediator,
                       driver = Tmem68$qtl.geno,
-                      annotation = Tmem68$annotation[-m,],
+                      annotation = Tmem68$annotation,
                       covar = Tmem68$covar,
                       method = "double-lod-diff")
 ggplot2::autoplot(med_scan)

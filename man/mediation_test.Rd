@@ -54,19 +54,20 @@ Develop mediation models from driver, target and mediator
 }
 \examples{
 data(Tmem68)
+m <- match("Tmem68", Tmem68$annotation$symbol) 
+# Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
+target <- Tmem68$target
+target <- target + rnorm(length(target), sd = 0.5)
 # Find mediators with significant effect
-# Find and remove Tmem68 from mediators because it is target.
-m <- match("Tmem68", Tmem68$annotation$symbol)
-Tmem68$annotation[m,]
-med_lod <- mediator_lod(mediator = Tmem68$mediator[,-m],
+med_lod <- mediator_lod(mediator = Tmem68$mediator,
                         driver = Tmem68$qtl.geno,
-                        annotation = Tmem68$annotation[-m,],
+                        annotation = Tmem68$annotation,
                         covar_med = NULL)
-med_signif <- med_lod$lod >= 5
+med_signif <- med_lod$id[med_lod$lod >= 5]
 # Add info column.
 med_lod$info <- paste("chr =", med_lod$chr)
 
-med_test <- mediation_test(target = Tmem68$target,
+med_test <- mediation_test(target = target,
                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
                       driver = Tmem68$qtl.geno,
                       annotation = med_lod,

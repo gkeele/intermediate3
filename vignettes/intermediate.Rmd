@@ -25,7 +25,7 @@ data(Tmem68)
 # target and Tmem68$mediator[,"Tmem68"] are identical.
 # so add some noise to make more interesting.
 target <- Tmem68$target
-target <- target + rnorm(length(target))
+target <- target + rnorm(length(target), sd = 0.5)
 ```
 
 ```{r}
