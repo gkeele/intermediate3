@@ -24,13 +24,11 @@ fitQtl2 <- function(driver,
   
   # Residuals
   fitted <- rep(NA, length(target))
-  if(is.null(nms <- names(target))) {
-    if(nrow(driver) == length(target))
-      nms <- rownames(driver)
-    else
-      stop("cannot match target and fitted names")
+  names(fitted) <- if(is.matrix(target)) {
+    rownames(target)
+  } else
+    names(target)
   }
-  names(fitted) <- nms
   fitted[names(out$fitted)] <- out$fitted
   out$resid <- target - fitted
   
