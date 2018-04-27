@@ -39,9 +39,10 @@ med_fits <- function(driver, target, mediator, fitFunction,
   fits <- purrr::transpose(list(
     t.d_t    = fitFunction(driver, target, kinship, cov_tar, intcovar),
     m.d_m    = fitFunction(driver_med, mediator, kinship, cov_med, intcovar),
-    t.m_t    = fitFunction(cbind(1, mediator, perp_tar), target, kinship, cov_tar, intcovar),
-    m.t_m    = fitFunction(cbind(1, target, perp_med), mediator, kinship, cov_med, intcovar),
-    t.md_t.m = fitFunction(driver, target, kinship, cbind(cov_tar, mediator, perp_tar), intcovar)))
+    t.m_t    = fitFunction(bind_stuff(1, mediator, perp_tar), target, kinship, cov_tar, intcovar),
+    m.t_m    = fitFunction(bind_stuff(1, target, perp_med), mediator, kinship, cov_med, intcovar),
+    t.md_t.m = fitFunction(driver, target, kinship, 
+                           bind_stuff(cov_tar, mediator, perp_tar), intcovar)))
   fits$LR <- unlist(fits$LR)
   fits$indLR <- as.matrix(as.data.frame(fits$indLR))
   fits$df <- unlist(fits$df)
