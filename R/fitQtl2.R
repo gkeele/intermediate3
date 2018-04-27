@@ -23,7 +23,10 @@ fitQtl2 <- function(driver,
   out$df <- ncol(driver) - 1
   
   # Residuals
-  out$resid <- target - out$fitted
+  fitted <- rep(NA, length(target))
+  names(fitted) <- names(target)
+  fitted[names(out$fitted)] <- out$fitted
+  out$resid <- target - fitted
   
   out
 }
