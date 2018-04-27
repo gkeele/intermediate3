@@ -24,10 +24,14 @@ med_fits <- function(driver, target, mediator, fitFunction,
     # Find perpendicular matrices.
     perp_tar <- driver
     for(i in seq_len(ncol(driver)))
-      perp_tar[,i] <- fitFunction(driver, perp_tar[,i, drop = FALSE], kinship, cov_tar, intcovar)
+      perp_tar[,i] <- fitFunction(driver,
+                                  perp_tar[,i, drop = FALSE],
+                                  kinship, cov_tar, intcovar)$resid
     perp_med <- driver_med
     for(i in seq_len(ncol(driver_med)))
-      perp_tar[,i] <- fitFunction(driver_med, perp_med[,i, drop = FALSE], kinship, cov_med, intcovar)
+      perp_tar[,i] <- fitFunction(driver_med,
+                                  perp_med[,i, drop = FALSE],
+                                  kinship, cov_med, intcovar)$resid
   }
   
   # Fit mediation models.
