@@ -26,7 +26,7 @@ fitQtl2 <- function(driver,
   fitted <- rep(NA, length(target))
   names(fitted) <- if(is.matrix(target)) {
     rownames(target)
-  } else
+  } else {
     names(target)
   }
   fitted[names(out$fitted)] <- out$fitted
