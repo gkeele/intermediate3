@@ -48,3 +48,29 @@ med_fits <- function(driver, target, mediator, fitFunction,
   
   fits
 }
+bind_stuff <- function(...) {
+  # There has to be a better way to do this.
+  stuff <- list(...)
+  nr <- unlist(sapply(stuff, function(x) nrow(as.matrix(x))))
+  if(all(nr == 1 | nr == max(nr)))
+    return(cbind(...))
+  
+  # Take care of stuff with different number of rows
+  nms <- lapply(stuff, function(x) rownames(as.matrix(x)))
+  nms <- nms[sapply(nms, length) > 0]
+  nmsi <- intersect(nms[[1]],nms[[2]])
+  if(length(nms) > 2) for(i in 3:length(nms)) nmsi <- intersect(nmsi, nms[i])
+  
+  out <- NULL
+  for(i in seq_along(stuff)) {
+    if(nr[i] == 1) {
+      if(i == 1)
+        out <- stuff[[1]]
+      else
+        out <- cbind(out, stuff[[i]])
+    }
+    else
+      out <- cbind(out, as.matrix(stuff[[i]])[nmsi,, drop = FALSE])
+  }
+  out
+}
