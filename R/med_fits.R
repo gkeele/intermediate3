@@ -52,26 +52,36 @@ med_fits <- function(driver, target, mediator, fitFunction,
 bind_stuff <- function(...) {
   # There has to be a better way to do this.
   stuff <- list(...)
-  nr <- unlist(sapply(stuff, function(x) nrow(as.matrix(x))))
+  nr <- unlist(sapply(stuff, function(x) ifelse(is.null(x), 0, nrow(as.matrix(x)))))
   if(all(nr == 1 | nr == max(nr)))
     return(cbind(...))
   
   # Take care of stuff with different number of rows
-  nms <- lapply(stuff, function(x) rownames(as.matrix(x)))
+  nms <- lapply(stuff, function(x) {
+    if(is.null(x))
+      NULL
+    else
+      rownames(as.matrix(x))
+    })
   nms <- nms[sapply(nms, length) > 0]
-  nmsi <- intersect(nms[[1]],nms[[2]])
+  if(length(nms) > 1)
+    nmsi <- intersect(nms[[1]],nms[[2]])
+  else
+    nmsi <- nms[[1]]
   if(length(nms) > 2) for(i in 3:length(nms)) nmsi <- intersect(nmsi, nms[i])
   
   out <- NULL
   for(i in seq_along(stuff)) {
-    if(nr[i] == 1) {
-      if(i == 1)
-        out <- stuff[[1]]
+    if(!is.null(stuff[[i]])) {
+      if(nr[i] == 1) {
+        if(length(out) == 0)
+          out <- stuff[[1]]
+        else
+          out <- cbind(out, stuff[[i]])
+      }
       else
-        out <- cbind(out, stuff[[i]])
+        out <- cbind(out, as.matrix(stuff[[i]])[nmsi,, drop = FALSE])
     }
-    else
-      out <- cbind(out, as.matrix(stuff[[i]])[nmsi,, drop = FALSE])
   }
   out
 }
