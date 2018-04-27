@@ -29,7 +29,7 @@ med_fits <- function(driver, target, mediator, fitFunction,
                                   kinship, cov_tar, intcovar)$resid
     perp_med <- driver_med
     for(i in seq_len(ncol(driver_med)))
-      perp_tar[,i] <- fitFunction(driver_med,
+      perp_med[,i] <- fitFunction(driver_med,
                                   perp_med[,i, drop = FALSE],
                                   kinship, cov_med, intcovar)$resid
   }
