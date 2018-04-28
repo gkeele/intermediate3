@@ -15,6 +15,7 @@
 #' @param pos Position of driver.
 #' @param fitFunction function to fit models with driver, target and mediator
 #' @param data_type Type of mediator data.
+#' @param verbose verbose messages if `TRUE`
 #' @param ... additional parameters
 #'
 #' @importFrom purrr map transpose
@@ -62,6 +63,7 @@ mediation_test <- function(target, mediator, driver, annotation,
                           pos = NULL,
                           fitFunction = fitQtl2,
                           data_type = c("phenotype","expression"),
+                          verbose = FALSE,
                           ...) {
   
   ## Need to enable different covariates for different mediators.
@@ -147,7 +149,7 @@ mediation_test <- function(target, mediator, driver, annotation,
     cmstfn, driver, target, 
     kinship, covar_tar, covar_med,
     driver_med, intcovar,
-    fitFunction, testfn, common)
+    fitFunction, testfn, common, verbose)
 
   best <- dplyr::rename(
     dplyr::bind_rows(best, .id = "id"),

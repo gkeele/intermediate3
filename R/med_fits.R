@@ -1,7 +1,9 @@
 med_fits <- function(driver, target, mediator, fitFunction,
                      kinship=NULL, cov_tar=NULL, cov_med=NULL,
                      driver_med = NULL, intcovar = NULL,
-                     common = FALSE, ...) {
+                     common = FALSE,
+                     frobenius = 0.01,
+                     verbose = FALSE, ...) {
   
   # Probably want to move this to fitDefault as fitQtl2 does this.
   # Need to look where common_data is found to adjust.
@@ -22,16 +24,11 @@ med_fits <- function(driver, target, mediator, fitFunction,
     perp_tar <- perp_med <- NULL
   } else {
     # Find perpendicular matrices.
-    perp_tar <- driver
-    for(i in seq_len(ncol(driver)))
-      perp_tar[,i] <- fitFunction(driver,
-                                  perp_tar[,i, drop = FALSE],
-                                  kinship, cov_tar, intcovar)$resid
-    perp_med <- driver_med
-    for(i in seq_len(ncol(driver_med)))
-      perp_med[,i] <- fitFunction(driver_med,
-                                  perp_med[,i, drop = FALSE],
-                                  kinship, cov_med, intcovar)$resid
+    if(verbose) cat("target", file = stderr())
+    perp_tar <- perp_frob(driver, driver_med, frobenius, verbose)
+    if(verbose) cat("mediator", file = stderr())
+    perp_med <- perp_frob(driver_med, driver, frobenius, verbose)
+    if(verbose) cat("\ n", file = stderr())
   }
   
   # Fit mediation models.
@@ -48,6 +45,29 @@ med_fits <- function(driver, target, mediator, fitFunction,
   fits$df <- unlist(fits$df)
   
   fits
+}
+perp_frob <- function(driver, driver_med, cutoff = 0.01, verbose = FALSE) {
+  # Find part of driver perpendicular to other driver (driver_med)
+  m <- intersect(rownames(driver_med), rownames(driver))
+  qrX <- qr(driver_med[m,])
+  driver <- driver[m,]
+  for(i in seq_len(ncol(driver))) {
+    driver[,i] <- qr.resid(qrX, driver[,i])
+  }
+
+  # Check Frobenius norm. If too small, then nix this perpendicular piece.
+  m <- apply(driver, 1, function(x)!any(is.na(x)))
+  if(sum(m) < 3)
+    return(NULL)
+  driver <- driver[m,]
+  if(cutoff > 0) {
+    frob <- norm(driver, "F") / sqrt(length(driver))
+    if(verbose)
+      cat(frob, file = stderr())
+    if(frob < cutoff)
+      return(NULL)
+  }
+  driver
 }
 bind_stuff <- function(...) {
   # There has to be a better way to do this.
