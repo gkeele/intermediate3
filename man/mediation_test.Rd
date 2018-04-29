@@ -18,8 +18,7 @@ ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
 mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
   covar_med = NULL, kinship = NULL, driver_med = NULL, intcovar = NULL,
   test = c("wilcoxon", "binomial", "joint", "normal"), pos = NULL,
-  fitFunction = fitQtl2, data_type = c("phenotype", "expression"),
-  verbose = FALSE, ...)
+  fitFunction = fitQtl2, data_type = c("phenotype", "expression"), ...)
 }
 \arguments{
 \item{...}{additional parameters}
@@ -49,8 +48,6 @@ mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
 \item{fitFunction}{function to fit models with driver, target and mediator}
 
 \item{data_type}{Type of mediator data.}
-
-\item{verbose}{verbose messages if `TRUE`}
 }
 \description{
 Develop mediation models from driver, target and mediator

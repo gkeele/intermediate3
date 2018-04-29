@@ -103,7 +103,7 @@ fitDefault_internal <- function(driver,
   
   # Calculate log likelihood components
   n <- length(target)
-  qrX <- qr(cbind(X,1))
+  qrX <- qr(X)
   dX <- qrX$rank
   resid <- qr.resid(qrX, target)
   RSS <- sum(resid ^ 2)

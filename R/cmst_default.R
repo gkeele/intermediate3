@@ -2,7 +2,7 @@ cmst_default <- function(object, driver, target,
                          kinship, covar_tar, covar_med,
                          driver_med, intcovar,
                          fitFunction, testFunction,
-                         common = TRUE, verbose = FALSE) {
+                         common = TRUE, ...) {
   
   # Force x (= mediator column) to be matrix.
   mediator <- as.matrix(object[[1]])
@@ -19,7 +19,7 @@ cmst_default <- function(object, driver, target,
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
                    kinship, covar_tar, covar_med, driver_med,
-                   intcovar, common = common, verbose = verbose)
+                   intcovar, common = common, ...)
   
   combos <- combo_models()
   models <-
@@ -49,6 +49,10 @@ cmst_default <- function(object, driver, target,
   
   # Mediator LR
   out$LRmed <- compsLR["mediator"]
+  
+  # Frobenius norm
+  out$normT <- fits$normF["target"]
+  out$normM <- fits$normF["mediator"]
   
   # Coefficients
   coef_target <- as.data.frame(t(models$coef$t.md_t.m[seq_len(ncol(driver))]))
@@ -85,7 +89,7 @@ cmst_pheno <- function(object, driver, target,
                        kinship, covar_tar, covar_med,
                        driver_med, intcovar,
                        fitFunction, testFunction,
-                       common = TRUE, verbose = FALSE) {
+                       common = TRUE, ...) {
   
   # Currently, mediation_test uses elements of object[[2]] (columns of annot data frame)
   # to assess TRUE/FALSE on covariate columns. This will likely change.
@@ -101,5 +105,5 @@ cmst_pheno <- function(object, driver, target,
                kinship, covar_tar, covar_med,
                driver_med, intcovar,
                fitFunction, testFunction,
-               common, verbose)
+               common, ...)
 }  

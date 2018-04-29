@@ -4,7 +4,6 @@ author: "Brian S. Yandell"
 date: "4/25/2018"
 output:
   html_document: default
-  pdf_document: default
   word_document: default
 ---
 
@@ -37,13 +36,6 @@ reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$
 independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$
 correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D) = f(M\vert T,D)f(T\vert D)$
 
-Comparing these four models involves fitting five building blocks:
-$f(T\vert D)$,
-$f(M\vert D)$,
-$f(T\vert M)$,
-$f(M\vert T)$,
-and either $f(T\vert M,D)$ or $f(M\vert T,D)$.
-
 The last model (undecided or correlated) has driver affecting both mediator and target, with the latter two correlated with each other. There are multiple indistinguishable models that fall into this latter context. This is detailed in the following paper:
 Chaibub Neto E, Broman AT, Keller MP, Attie AD, Zhang B, Zhu J, Yandell BS (2013)
 Modeling causality for pairs of phenotypes in system genetics.
@@ -58,22 +50,71 @@ $$\ell(\text{mediation}) = \log\left({f(T\vert D) \over f(T)}\right) - \log\left
 
 across multiple mediators $M$ should be near zero except at causal mediators, where it will approach $\log(f(T\vert D)/f(T))$. That is, for the causal model, $f(T\vert M,D)=f(T\vert M)$ and
 
-$$\ell(\text{mediation}\vert\text{causal}) = \log\left({f(T\vert D) \over f(T)}\right)\,.$$
+$$\ell(\text{mediation}\,\vert\,\text{causal}) = \log\left({f(T\vert D) \over f(T)}\right)\,.$$
 
 However, this mediation score will be negative if the reactive model is correct. For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and
 
 $${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M\vert D)\over f(M)} = {f(T\vert D)\over f(T)}{f(M\vert D)\over f(M)}$$
 and hence
 
-$$\ell(\text{mediation}\vert \text{reactive}) = - \log\left({f(M\vert D) \over f(M)}\right)\,,$$
+$$\ell(\text{mediation}\,\vert\, \text{reactive}) = - \log\left({f(M\vert D) \over f(M)}\right)\,,$$
 
 which is the opposite of the log LR for mediator given driver. Since we only consider mediators with significant effects, or large LR, this will be negative.
 
 If target and mediator are independent given driver, a similar argument results in
 
-$$\ell(\text{mediation}\vert \text{independent}) = - \log\left({f(T\vert M) \over f(T)}\right)\,,$$
+$$\ell(\text{mediation}\,\vert\, \text{independent}) = - \log\left({f(T\vert M) \over f(T)}\right)\,,$$
 
 which could be either positive or negative. If target and mediator are unconditionally independent, then $f(T\vert M) = f(T)$ and this will be zero. No simplification results for the correlated case, and the mediation could be positive or negative.
+
+## Five relationships
+
+Comparing the four causal models and constructing the mediation scan involves fitting five building blocks:
+$f(T\vert D)$,
+$f(M\vert D)$,
+$f(T\vert M)$,
+$f(M\vert T)$,
+and either $f(T\vert M,D)$ or $f(M\vert T,D)$.
+Since we are comparing models, using ratios of likelihoods, it makes more sense to consider the related likelihood ratios:
+
+relationship | likelihood ratio | log likelihood ratio
+------------ | ---------------- | --------------------
+1: $D\rightarrow T$ | $f(T\vert D)/f(T)$ | $\ell_1 = \log f(T\vert D) - \log f(T)$
+2: $D\rightarrow M$ | $f(M\vert D)/f(M)$ | $\ell_2 = \log f(M\vert D) - \log f(M)$
+3: $M\rightarrow T$ | $f(T\vert M)/f(T)$ | $\ell_3 = \log f(T\vert M) - \log f(T)$
+4: $T\rightarrow M$ | $f(M\vert T)/f(M)$ | $\ell_4 = \log f(M\vert T) - \log f(M)$
+5: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M)$ | $\ell_5 = \log f(T\vert M,D) - \log f(T\vert M)$
+
+For the $k$th relationship comparing full versus reduced model, we compute LR$_k$ = $\ell_k = \log f(\text{full}_k) - \log f(\text{reduced}_k)$ = log likelihood ratio. Here we are comparing to $f(T)f(M)$, whereas earlier, we compared to $f(M,T)$, but that is a simple ratio that cancels out.
+
+## Causal model selection tests
+
+Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using Vuong's approach coupled with intersection-union tests.
+
+In addition to the likelihood ratios for the five relationships, we need df$_k$ = difference in degrees of freedom between full and reduced models, coef$_k$ = coefficient estimates under the full model, and indLR{_k} = vector of individual contributions to LR$_k$,
+
+$$\text{indLR}_{ki} = \ell_{ki} = \log f(\text{full}_{ki}) - \log f(\text{reduced}_{ki})\,.$$
+
+That is, $\text{LR}_k = \sum_i \text{indLR}_{ki}$, with the sum across all individuals. For instance, $f(\text{full}_{1i}) = f(T_i\vert D_i)$. The log likelihood ratios for the four causal models and mediation are constructed as:
+
+model | relationship | likelihood | log likelihood ratio
+----------- | ------------------- | ----------- | ---------------------
+causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$ | $\ell(\text{causal}) = \ell_2 + \ell_3$
+reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_1 + \ell_4$
+independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$ | $\ell(\text{independent}) = \ell_1 + \ell_2$
+correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_2 + \ell_3 + \ell_5$
+mediation | $D \rightarrow T$ vs $(M,D) \rightarrow T$ | $f(T\vert D)f(T\vert M)/f(T)f(T\vert M,D)$ | $\ell(\text{mediation}) = \ell_1 - \ell_5$
+
+
+In a similar fashion, df, coef and indLR are combined.
+Models are compared using an information criterion (BIC by default),
+$IC_m = \ell_m + \text{df}_m * \log(n)$, with $m$ identifying the model. That provides a point estimate, but to get a p-value, we compare the vector of individual contributions to $IC$,
+
+$$IC_{mi} = \ell_{mi} + \text{df}_{m} * \log(n) / n$$
+
+Chaibub Neto et al. (2013) considered sign test, normal, and normal joint tests versions, building on the original idea of Vuong. Here we add the Wilcoxon signed rank test. That is, for two models compare the $IC_{mi}$ vectors by replacing these values by their ranks, and finding the difference of the sum of ranks between the two models. This has the advantage of being nonparametric and almost as powerful as the normal test.
+
+The six possible pairs of the models are compared using the intersection-union approach, and the smallest p-value is reported, along with the model that best fit the data. This procedure has been shown to have good power for comparison of multiple entries; therefore we do not propose any adjustment.
 
 ## Causal models with two drivers
 
@@ -87,73 +128,41 @@ reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C)f(T\vert
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
 correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D)$
 
-However, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated, and we will need to consider $C^*$ and $D^*$ for the causal and reactive models, which are constructed by adjusting one driver by the other. The following works whether drivers $C$ and $D$ are uncorrelated, totally correlated, or partially correlated.
+However, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated. One way to model this is to introduce uncorrelated latent, or unobserved, drivers, say $X$, $Y$ and $Z$, with
+
+$$X\rightarrow C \leftarrow Y \rightarrow D \leftarrow Z\,.$$
+
+That is, the unobserved $Y$ captures the correlation between observed drivers $C$ and $D$. For the causal model, we can write it more properly as
+
+$$(X,Y) \rightarrow C \rightarrow M \rightarrow T \leftarrow Z$$
+
+While $Z$ is unobserved, we can determine the residual part of $D$ that is uncorrelated with $C$, and hence with $X$ and $Y$:
+
+$$D^* = [I-C(C^\text{T}C)^{-}C^\text{T}]D = Q_2Q_2^\text{T}D,\ \ \text{with}\ C=QR=\left[Q_1:Q_2\right]\left[{R \over 0}\right]$$
+
+with $(C^\text{T}C)^-$ the generalized inverse and $C=QR$ being the Hausholder (QR) decomposition of $C$. A similar decomposition yields $C^*$.
+If $C$ and $D$ are uncorrelated (unlinked in genetics), then $C^*=C$ and $D^*=D$. If $C=D$, then $C^*=0=D^*$.
+
+Incorporating $C^*$ and $D^*$ for the causal and reactive models yields the following models for two drivers. This works whether drivers $C$ and $D$ are uncorrelated, totally correlated, or partially correlated.
 
 model | relationship | likelihood
 ----------- | ------------------- | -----------
-causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D^*)$
-reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C^*)f(T\vert D)$
+causal | $C \rightarrow M \rightarrow T \leftarrow D^*$ | $f(M\vert C)f(T\vert M,D^*)$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)f(T\vert D)$
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
 correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D) = f(M\vert T,C)f(T\vert D)$
 
-Comparing these four models also involves fitting five building blocks:
-$f(T\vert D)$,
-$f(M\vert C)$,
-$f(T\vert M,D^*)$,
-$f(M\vert T,C^*)$,
-and either $f(T\vert M,D)$
-or
-$f(M\vert T,C)$.
-Note that if $C$ and $D$ are uncorrelated, then $D^*$ and $C^*$ are null and the models look similar to those with one driver, except for the affinity of $D$ to $T$ and $C$ to $M$.
+Inference with two drivers requires some adjustments to the five relationships:
 
-## Causal model selection tests
+2-driver relationship | likelihood ratio | log likelihood ratio
+------------ | ---------------- | ------------------------
+$1^*$: $D\rightarrow T$ | $f(T\vert D)/f(T)$ | $\ell_{1^*} = \log f(T\vert D) - \log f(T)$
+$2^*$: $C\rightarrow M$ | $f(M\vert C)/f(M)$ | $\ell_{2^*} = \log f(M\vert C) - \log f(M)$
+$3^*$: $M\rightarrow T \leftarrow D^*$ | $f(T\vert M,D^*)/f(T)$ | $\ell_{3^*} = \log f(T\vert M,D^*) - \log f(T)$
+$4^*$: $T\rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)/f(M)$ | $\ell_{4^*} = \log f(M\vert T,C^*) - \log f(M)$
+$5^*$: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M,D^*)$ | $\ell_{5^*} = \log f(T\vert M,D) - \log f(T\vert M,D^*)$
 
-Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using intersection-unition tests. While we could proceed in terms of the five likelihoods as indicated above, it is equivalent for testing purposes to consider the following five likelihood ratios:
-
-relationship | likelihood ratio
------------- | ----------------
-1: $D\rightarrow T$ | $f(T\vert D)/f(T)$
-2: $D\rightarrow M$ | $f(M\vert D)/f(M)$
-3: $M\rightarrow T$ | $f(T\vert M)/f(T)$
-4: $T\rightarrow M$ | $f(M\vert T)/f(M)$
-5: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M)$
-
-For the $k$th relationship comparing full versus reduced model, we compute LR$_k$ = $\ell_k = \log f(\text{full}_k) - \log f(\text{reduced}_k)$ = log likelihood ratio. Here we are comparing to $f(T)f(M)$, whereas earlier, we compared to $f(M,T)$, but that is a simple ratio that cancels out.
-
-Similarlym df$_k$ = difference in degrees of freedom between full and reduced models, coef$_k$ = coefficient estimates under the full model, and indLR{_k} = vector of individual contributions to LR$_k$,
-
-$$\text{indLR}_{ki} = \ell_{ki} = \log f(\text{full}_{ki}) - \log f(\text{reduced}_{ki})\,.$$
-
-That is, $\text{LR}_k = \sum_i \text{indLR}_{ki}$, with the sum across all individuals. For instance, $f(\text{full}_{1i}) = f(T_i\vert D_i)$. The log likelihood ratios for the four models are constructed as:
-
-model | relationship | likelihood | log likelihood ratio
------------ | ------------------- | ----------- | ---------------------
-causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$ | $\ell(\text{causal}) = \ell_2 + \ell_3$
-reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_1 + \ell_4$
-independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$ | $\ell(\text{independent}) = \ell_1 + \ell_2$
-correlated | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_2 + \ell_3 + \ell_5$
-
-In a similar fashion, df, coef and indLR are combined.
-Models are compared using an information criterion (BIC by default),
-$IC_m = \ell_m + \text{df}_m * \log(n)$, with $m$ identifying the model. That provides a point estimate, but to get a p-value, we compare the vector of individual contributions to $IC$,
-
-$$IC_{mi} = \ell_{mi} + \text{df}_{m} * \log(n) / n$$
-
-Chaibub Neto et al. (2013) considered sign test, normal, and normal joint tests versions, building on the original idea of Vuong. Here we add the Wilcoxon signed rank test. That is, for two models compare the $IC_{mi}$ vectors by replacing these values by their ranks, and finding the difference of the sum of ranks between the two models. This has the advantage of being nonparametric and almost as powerful as the normal test.
-
-The six possible pairs of the models are compared using the intersection-union approach, and the smallest p-value is reported, along with the model that best fit the data. This procedure has been shown to have good power for comparison of multiple entries; therefore we do not propose any adjustment.
-
-When there are two drivers, some adjustment needs to be made. The five relationships are:
-
-2-driver relationship | likelihood ratio
------------- | ----------------
-$1^*$: $D\rightarrow T$ | $f(T\vert D)/f(T)$
-$2^*$: $C\rightarrow M$ | $f(M\vert C)/f(M)$
-$3^*$: $M\rightarrow T \leftarrow D^*$ | $f(T\vert M,D^*)/f(T)$
-$4^*$: $T\rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)/f(M)$
-$5^*$: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M,D^*)$
-
-and the four models with their likelihood ratios are:
+and the four causal models and mediation with their likelihood ratios are:
 
 model | relationship | likelihood | log likelihood ratio
 ----------- | ------------------- | ----------- | ---------------------
@@ -161,6 +170,7 @@ causal | $C \rightarrow M \rightarrow T \leftarrow D^*$ | $f(M\vert C)f(T\vert M
 reactive | $D \rightarrow T \rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_{1^*} + \ell_{4^*}$
 independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$ | $\ell(\text{independent}) = \ell_{1^*} + \ell_{2^*}$
 correlated | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{correlated}) = \ell_{2^*} + \ell_{3^*} + \ell_{5^*}$
+mediation | $D \rightarrow T$ vs $(M,D) \rightarrow T$ | $f(T\vert D)f(T\vert M,D^*)/f(T)f(T\vert M,D)$ | $\ell(\text{mediation}) = \ell_{1^*} - \ell_{5^*}$
 
 ## Implementation
 
@@ -172,7 +182,7 @@ The `fitDefault` uses the QR decomposition. Assume we have response `y` (say the
 
 ```
 n <- length(y)
-qrX <- qr(cbind(X,1))
+qrX <- qr(X)
 df <- qrX$rank
 RSS <- sum(qr.resid(qrX, y) ^ 2)
 LR <- -(n/2) * (log(RSS)))
@@ -185,7 +195,7 @@ In the case of two drivers we need to calculate $f(T\vert M,D^*)$ and $f(M\vert 
 We compute $D^*$ by taking a QR decomposition of $C$ and getting the residuals applied to each column of $D$
 
 ```
-qrC <- qr(cbind(C,1))
+qrC <- qr(C)
 Dstar <- D
 for(i in seq_along(ncol(D))) Dstar[,i] <- qr.resid(qrC, D[,i])
 ```

@@ -21,6 +21,7 @@ med_fits <- function(driver, target, mediator, fitFunction,
   }
   if(is.null(driver_med)) {
     driver_med <- driver
+    normF <- c(target = NA, mediator = NA)
     perp_tar <- perp_med <- NULL
   } else {
     # Find perpendicular matrices.
@@ -29,6 +30,9 @@ med_fits <- function(driver, target, mediator, fitFunction,
     if(verbose) cat("mediator", file = stderr())
     perp_med <- perp_frob(driver_med, driver, frobenius, verbose)
     if(verbose) cat("\ n", file = stderr())
+    normF <- c(target = perp_tar$normF, mediator = perp_med$normF)
+    perp_tar <- perp_tar$driver
+    perp_med <- perp_med$driver
   }
   
   # Fit mediation models.
@@ -44,9 +48,11 @@ med_fits <- function(driver, target, mediator, fitFunction,
   fits$indLR <- as.matrix(as.data.frame(fits$indLR))
   fits$df <- unlist(fits$df)
   
+  fits$normF <- normF
+  
   fits
 }
-perp_frob <- function(driver, driver_med, cutoff = 0.01, verbose = FALSE) {
+perp_frob <- function(driver, driver_med, frobenius = 0.01, verbose = FALSE) {
   # Find part of driver perpendicular to other driver (driver_med)
   m <- intersect(rownames(driver_med), rownames(driver))
   qrX <- qr(driver_med[m,])
@@ -60,14 +66,15 @@ perp_frob <- function(driver, driver_med, cutoff = 0.01, verbose = FALSE) {
   if(sum(m) < 3)
     return(NULL)
   driver <- driver[m,]
-  if(cutoff > 0) {
-    frob <- norm(driver, "F") / sqrt(length(driver))
+  normF <- NA
+  if(frobenius > 0) {
+    normF <- norm(driver, "F") / sqrt(length(driver))
     if(verbose)
-      cat(frob, file = stderr())
-    if(frob < cutoff)
+      cat(normF, file = stderr())
+    if(normF < frobenius)
       return(NULL)
   }
-  driver
+  list(driver = driver, normF = normF)
 }
 bind_stuff <- function(...) {
   # There has to be a better way to do this.
