@@ -66,14 +66,14 @@ mediation_triad <- function(target, mediator, driver,
   dat <- triad_data(target, mediator, driver, 
                     covar_tar, covar_med, kinship, ...)
   
-  for(i in names(fit$coef)[1:2]) {
+  for(i in c("t.d_t","t.md_t.m")) {
     tmp <- fit$coef[[i]][seq_len(ncol(driver))]
     dat[[i]] <- c(as.matrix(dat[names(tmp)]) %*% tmp)
   }
   
   # Need to account for covariates and sex.
   out <- list(data = dat,
-              coef = fit$coef[[1]], coef_med = fit$coef[[2]],
+              coef = fit$coef[["t.d_t"]], coef_med = fit$coef[["t.md_t.m"]],
               drivers = colnames(driver), med_name = colnames(mediator))
   
   class(out) <- c("mediation_triad", class(out))
@@ -107,7 +107,7 @@ triad_data <- function(target, mediator, driver,
   # Set up point labels and groups.
   if(is.null(label_fn))
     label_fn <- function(driver, allele)
-      as.character(apply(driver, 1, function(x) which.max(x)[1]))
+      colnames(driver)[apply(driver, 1, function(x) which.max(x)[1])]
   label <- label_fn(commons$driver, allele)
   if(is.null(group_fn))
     group_fn = function(label, a, b) label
@@ -147,7 +147,7 @@ ggplot_mediation_triad <- function(x,
   if("label" %in% names(x$data)) {
     p <- p + 
       ggplot2::aes(label = label) +
-      ggplot2::geom_text(size=3)
+      ggplot2::geom_text(size = 2)
   } else {
     p <- p +
       ggplot2::geom_point(alpha = 0.2)
