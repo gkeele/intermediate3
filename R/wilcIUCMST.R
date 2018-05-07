@@ -52,16 +52,6 @@ wilcIUCMST <- function(models, flavor = c("B","A")) {
         v = nz * (nz + 1) * (2 * nz + 1) / 6),
       W = Z),
     pv = pnorm(W, 0, sqrt(v), lower.tail = FALSE))
-
-  # Compare reference model with all others and get max pvalue.
-  dplyr::mutate(
-    dplyr::ungroup(
-      dplyr::summarize(
-        dplyr::group_by(
-          dplyr::mutate(LR2,
-                        ref = factor(ref, unique(ref))),
-          ref),
-        alt = alt[which.max(pv)][1],
-        pv = max(pv))),
-    ref = as.character(ref))
+  
+  comp_pv(LR2)
 }

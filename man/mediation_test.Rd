@@ -18,7 +18,7 @@ ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
 mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
   covar_med = NULL, kinship = NULL, driver_med = NULL, intcovar = NULL,
   test = c("wilcoxon", "binomial", "joint", "normal"), pos = NULL,
-  fitFunction = fitQtl2, data_type = c("phenotype", "expression"), ...)
+  fitFunction = fitQtl2, ...)
 }
 \arguments{
 \item{...}{additional parameters}
@@ -54,24 +54,30 @@ Develop mediation models from driver, target and mediator
 }
 \examples{
 data(Tmem68)
-m <- match("Tmem68", Tmem68$annotation$symbol) 
+ 
 # Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
 target <- Tmem68$target
 target <- target + rnorm(length(target), sd = 0.5)
+
+# Reconstruct 8-allele genotype probabilities.
+driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+rownames(driver) <- rownames(Tmem68$qtl.geno)
+
 # Find mediators with significant effect
 med_lod <- mediator_lod(mediator = Tmem68$mediator,
-                        driver = Tmem68$qtl.geno,
+                        driver = driver,
                         annotation = Tmem68$annotation,
-                        covar_med = NULL)
+                        covar_med = Tmem68$covar)
 med_signif <- med_lod$id[med_lod$lod >= 5]
 # Add info column.
 med_lod$info <- paste("chr =", med_lod$chr)
 
 med_test <- mediation_test(target = target,
                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
-                      driver = Tmem68$qtl.geno,
+                      driver = driver,
                       annotation = med_lod,
                       covar_tar = Tmem68$covar,
+                      covar_med = Tmem68$covar,
                       method = "double-lod-diff")
 summary(med_test)
 ggplot2::autoplot(med_test)

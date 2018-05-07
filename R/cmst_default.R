@@ -2,7 +2,8 @@ cmst_default <- function(object, driver, target,
                          kinship, covar_tar, covar_med,
                          driver_med, intcovar,
                          fitFunction, testFunction,
-                         common = TRUE, ...) {
+                         common = TRUE, 
+                         flavor = "B", ...) {
   
   # Force x (= mediator column) to be matrix.
   mediator <- as.matrix(object[[1]])
@@ -10,6 +11,13 @@ cmst_default <- function(object, driver, target,
   colnames(mediator) <- "mediator"
   if(!is.null(driver_med))
     driver_med <- driver_med[,, object[[2]]$driver]
+  if(is.null(driver)) {
+    if(!is.null(driver_med))
+      driver <- driver_med
+    else {
+      stop("must supply driver or driver_med")
+    }
+  }
   
   # Make sure covariates are numeric
   covar_med <- covar_df_mx(covar_med)
@@ -30,36 +38,45 @@ cmst_default <- function(object, driver, target,
   models$LR <- unlist(models$LR)
   models$indLR <- as.data.frame(models$indLR)
   models$df <- unlist(models$df)
-  models$coef <- fits$coef
   
-  compsLR <- apply(fits$LR * combos[,5:7], 2, sum)
+  n_ind <- length(models$indLR[[1]])
+  
+  # causal model tests
+  test <- 
+    dplyr::select(
+      dplyr::mutate(
+        dplyr::rename(
+          testFunction(models, flavor = flavor),
+          model = "ref",
+          pvalue = pv),
+        alt = factor(alt, model),
+        model = factor(model, model),
+        LR = models$LR,
+        df = models$df,
+        IC = LR - df * penalty(n_ind, flavor) / 2),
+      model, LR, df, IC, pvalue, alt)
 
-  # CMST on key models. Pick first as best.
-  out <- head(dplyr::rename(
-    dplyr::filter(
-      testFunction(models),
-      pv == min(pv)),
-    pvalue = pv), n = 1L)
+  # target and mediator fits
+  fit <- apply(fits$LR * combos[,5:7], 2, sum)
+  coefs <- fits$coef[c(1,2,5)]
+  names(coefs) <- names(fit)
+  coef_names <- unique(unlist(lapply(coefs, names)))
+  coefs <- lapply(coefs, function(x, coef_names) {
+    out <- rep(NA, length(coef_names))
+    names(out) <- coef_names
+    out[names(x)] <- x
+    out
+  }, coef_names)
+  coefs <- t(as.data.frame(coefs, stringsAsFactors = FALSE))
+  coefs <- 
+    dplyr::select(
+      dplyr::mutate(
+        as.data.frame(coefs, stringsAsFactors = FALSE),
+        response = rownames(coefs),
+        LR = fit),
+      response, LR, dplyr::everything())
   
-  out$ref <- factor(out$ref, c("causal","reactive","independent","correlated"))
-  out$alt <- factor(out$alt, c("causal","reactive","independent","correlated"))
-  
-  # Mediation LR
-  out$mediation <- compsLR["mediation"] # t.md_t.m
-  
-  # Mediator LR
-  out$LRmed <- compsLR["mediator"]
-  
-  # Frobenius norm
-  out$normT <- fits$normF["target"]
-  out$normM <- fits$normF["mediator"]
-  
-  # Coefficients
-  coef_target <- as.data.frame(t(models$coef$t.md_t.m[seq_len(ncol(driver))]))
-  coef_mediator <- as.data.frame(t(models$coef$m.d_m[seq_len(ncol(driver))]))
-  names(coef_mediator) <- paste0(names(coef_mediator), "_m")
-  
-  dplyr::bind_cols(out, coef_target, coef_mediator)
+  list(test = test, fit = coefs, normF = fits$normF)
 }
 combo_models <- function() {
   combos <- 
@@ -67,12 +84,12 @@ combo_models <- function() {
       0, 5, 7,
       dimnames = list(
         c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m"),
-        c("causal", "reactive", "independent", "correlated",
+        c("causal", "reactive", "independent", "undecided",
           "target", "mediator", "mediation")))
   combos[  c(2,3), 1] <- 1 # causal: m.d_t.m
   combos[  c(1,4), 2] <- 1 # reactive: t.d_m.t
   combos[  c(1,2), 3] <- 1 # independent: t.d_m.d
-  combos[c(2,3,5), 4] <- 1 # correlated: t.md_m.d
+  combos[c(2,3,5), 4] <- 1 # undecided: t.md_m.d
   combos[       1, 5] <- 1 # target contrast: t.d_t
   combos[       2, 6] <- 1 # mediator contrast: m.d_m
   combos[       5, 7] <- 1 # mediation contrast: t.md_t.m
@@ -84,26 +101,3 @@ combine_models <- function(combos, fits) {
        df = sum(fits$df * combos),
        coef = fits$coef)
 }
-
-cmst_pheno <- function(object, driver, target, 
-                       kinship, covar_tar, covar_med,
-                       driver_med, intcovar,
-                       fitFunction, testFunction,
-                       common = TRUE, ...) {
-  
-  # Currently, mediation_test uses elements of object[[2]] (columns of annot data frame)
-  # to assess TRUE/FALSE on covariate columns. This will likely change.
-  
-  # Get covariate names appropriate for mediator 
-  cov_names <- unlist(object[[2]][colnames(covar_med)])
-  if(length(cov_names))
-    covar_med <- covar_med[, cov_names, drop = FALSE]
-  else
-    covar_med <- NULL
-  
-  cmst_default(object, driver, target, 
-               kinship, covar_tar, covar_med,
-               driver_med, intcovar,
-               fitFunction, testFunction,
-               common, ...)
-}  

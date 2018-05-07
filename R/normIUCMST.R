@@ -15,12 +15,15 @@ normIUCMST <- function(models,
   # Add p-value
   Zscores$pv <- pnorm(Zscores$Z, lower.tail = FALSE)
 
+  comp_pv(Zscores)
+}
+comp_pv <- function(object) {
   # Compare reference model with all others and get max pvalue.
   dplyr::mutate(
     dplyr::ungroup(
       dplyr::summarize(
         dplyr::group_by(
-          dplyr::mutate(Zscores, 
+          dplyr::mutate(object,
                         ref = factor(ref, unique(ref))),
           ref),
         alt = alt[which.max(pv)][1],

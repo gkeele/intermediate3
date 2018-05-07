@@ -16,7 +16,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                                lod = TRUE,
                                ...) {
   type <- match.arg(type)
-  if(is.null(local_only))
+  if(is.null(local_only) | !("local" %in% names(x$best)))
     local_only <- FALSE
   if(is.null(significant))
     significant <- TRUE
@@ -57,14 +57,15 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
   x <- dplyr::arrange(x, dplyr::desc(triad))
   
   # For expression, use qtl_pos if not missing.
-  if(params$data_type == "expression" & !type %in% c("alleles","mediator")) {
+  if(!type %in% c("alleles","mediator")) {
     if(local_only)
       x <- dplyr::filter(x, local)
     else {
-      x <- dplyr::mutate(x, pos = ifelse(local, pos, qtl_pos))
+      if("qtl_pos" %in% names(x))
+        x <- dplyr::mutate(x, pos = ifelse(local, pos, qtl_pos))
     }
     
-    if(!is.null(x$local) & !is.null(x$qtl_ct)) {
+    if(all(c("local","qtl_ct") %in% names(x))) {
       # Set up plot symbol.
       shapes <- c(17,16,2,1)
       names(shapes) <- c("distal", "local", "distal_info", "local_info")

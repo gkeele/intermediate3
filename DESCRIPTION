@@ -1,8 +1,8 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.4-5
-Date: 2018-04-28
+Version: 0.4-6
+Date: 2018-05-07
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
 Maintainer: Brian Yandell <brian.yandell@wisc.edu>
 Description: Search for a mediator M that would explain D->T relationship.

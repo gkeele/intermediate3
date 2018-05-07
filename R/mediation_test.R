@@ -31,24 +31,30 @@
 #' 
 #' @examples
 #' data(Tmem68)
-#' m <- match("Tmem68", Tmem68$annotation$symbol) 
+#'  
 #' # Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
 #' target <- Tmem68$target
 #' target <- target + rnorm(length(target), sd = 0.5)
+#' 
+#' # Reconstruct 8-allele genotype probabilities.
+#' driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+#' rownames(driver) <- rownames(Tmem68$qtl.geno)
+#' 
 #' # Find mediators with significant effect
 #' med_lod <- mediator_lod(mediator = Tmem68$mediator,
-#'                         driver = Tmem68$qtl.geno,
+#'                         driver = driver,
 #'                         annotation = Tmem68$annotation,
-#'                         covar_med = NULL)
+#'                         covar_med = Tmem68$covar)
 #' med_signif <- med_lod$id[med_lod$lod >= 5]
 #' # Add info column.
 #' med_lod$info <- paste("chr =", med_lod$chr)
 #' 
 #' med_test <- mediation_test(target = target,
 #'                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
-#'                       driver = Tmem68$qtl.geno,
+#'                       driver = driver,
 #'                       annotation = med_lod,
 #'                       covar_tar = Tmem68$covar,
+#'                       covar_med = Tmem68$covar,
 #'                       method = "double-lod-diff")
 #' summary(med_test)
 #' ggplot2::autoplot(med_test)
@@ -61,21 +67,12 @@ mediation_test <- function(target, mediator, driver, annotation,
                           test = c("wilcoxon","binomial","joint","normal"),
                           pos = NULL,
                           fitFunction = fitQtl2,
-                          data_type = c("phenotype","expression"),
                           ...) {
   
   ## Need to enable different covariates for different mediators.
 
   if(is.null(mediator))
     return(NULL)
-  
-  data_type = match.arg(data_type)
-  # Need following in annotation for each data_type
-  #   id = identifier of mediator
-  #   biotype = type of biological measurement
-  cmstfn <- switch(data_type,
-                   expression = cmst_default,
-                   phenotype = cmst_pheno)
   
   test <- match.arg(test)
   testfn <- switch(test,
@@ -90,7 +87,11 @@ mediation_test <- function(target, mediator, driver, annotation,
   covar_tar <- covar_df_mx(covar_tar)
   intcovar <- covar_df_mx(intcovar)
   
-  scan_max <- fitFunction(driver, target, kinship, covar_tar)
+  if(!is.null(driver)) {
+    scan_max <- fitFunction(driver, target, kinship, covar_tar)
+  } else {
+    scan_max <- NULL
+  }
   LR_tar <- scan_max$LR
   
   use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
@@ -135,7 +136,7 @@ mediation_test <- function(target, mediator, driver, annotation,
 
   # Workhorse: CMST on each mediator.
   mediator <- as.data.frame(mediator)
-  best <- purrr::map(
+  result <- purrr::map(
     purrr::transpose(list(
       mediator = mediator,
       annotation = 
@@ -144,30 +145,51 @@ mediation_test <- function(target, mediator, driver, annotation,
           dplyr::mutate(
             annotation,
             id = factor(id, id))))),
-    cmstfn, driver, target, 
+    cmst_default, driver, target, 
     kinship, covar_tar, covar_med,
     driver_med, intcovar,
     fitFunction, testfn, common, ...)
-
-  best <- dplyr::rename(
-    dplyr::bind_rows(best, .id = "id"),
-    triad = ref)
   
-  # Kludge until I figure out why last level.
-#  relabel <- c("causal", "reactive", "independent", "correlated")
-#  names(relabel) <- c("m.d_t.m", "t.d_m.t", "t.d_m.d", "t.md_m.d")
-#  best$triad <- factor(relabel[best$triad], relabel)
-#  best$alt <- factor(relabel[best$alt], relabel)
+  result <-
+    purrr::map(
+      purrr::transpose(result),
+      dplyr::bind_rows,
+      .id = "id")
   
-  result <- list(
-    best = dplyr::arrange(
-      dplyr::left_join(best, annotation, by = "id"),
-      pvalue),
-    params = list(pos = pos_tar,
-                  LR = LR_tar,
-                  target = colnames(target),
-                  data_type = data_type),
-    targetFit = scan_max)
+  # Frobenius norm if using two drivers
+  if(all(is.na(result$normF[,-1]))) {
+    result$normF <- NULL
+  } else {
+    result$normF[[1]] <- c("target","mediator")
+    names(result$normF)[1] <- "response"
+  }
+  
+  result$driver <- 
+    list(
+      target = colnames(driver),
+      mediator = if(is.null(driver_med)) colnames(driver) else colnames(driver_med))
+  
+  result$best <-
+    dplyr::arrange(
+      dplyr::rename(
+        dplyr::mutate(
+          dplyr::left_join(
+            dplyr::ungroup(
+              dplyr::filter(
+                dplyr::group_by(
+                  result$test,
+                  id),
+                pvalue == min(pvalue))),
+            annotation, by = "id"),
+          mediation = dplyr::filter(result$fit, response == "mediation")$LR,
+          LRmed = dplyr::filter(result$fit, response == "mediator")$LR),
+        triad = model),
+      pvalue)
+  result$params <-
+    list(pos = pos_tar,
+         LR = LR_tar,
+         target = colnames(target))
+  result$targetFit <- scan_max
     
   class(result) <- c("mediation_test", class(result))
   result

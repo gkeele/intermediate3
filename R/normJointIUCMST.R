@@ -13,6 +13,8 @@ normJointIUCMST <- function(models,
   # Expand to data frame with ref, alt, Z.
   Zscores <- left_right(Zscores)
 
+  # Compare pvalues. this is different from comp_pv().
+  # Need to verify at some time that it works properly!
   dplyr::mutate(
     dplyr::ungroup(
       dplyr::summarize(
