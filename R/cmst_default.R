@@ -3,12 +3,10 @@ cmst_default <- function(object, driver, target,
                          driver_med, intcovar,
                          fitFunction, testFunction,
                          common = TRUE, 
-                         flavor = "B", ...) {
+                         flavor = "B",
+                         ...) {
   
-  # Force x (= mediator column) to be matrix.
-  mediator <- as.matrix(object[[1]])
-  rownames(mediator) <- rownames(driver)
-  colnames(mediator) <- "mediator"
+  # Make sure we have driver or driver_med.
   if(!is.null(driver_med))
     driver_med <- driver_med[,, object[[2]]$driver]
   if(is.null(driver)) {
@@ -18,6 +16,11 @@ cmst_default <- function(object, driver, target,
       stop("must supply driver or driver_med")
     }
   }
+
+  # Force x (= mediator column) to be matrix.
+  mediator <- as.matrix(object[[1]])
+  colnames(mediator) <- "mediator"
+  rownames(mediator) <- rownames(driver)
   
   # Make sure covariates are numeric
   covar_med <- covar_df_mx(covar_med)

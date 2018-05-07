@@ -118,8 +118,16 @@ mediation_test <- function(target, mediator, driver, annotation,
   # 1: different mediators may have different covariates
   # 2: covar_med is data frame, so need to be careful.
   # Fix up covar_med to match the rest
-  m <- match(rownames(driver), rownames(covar_med), nomatch = 0)
-  covar_med <- covar_med[m,, drop = FALSE]
+  if(!is.null(covar_med)) {
+    m <- match(rownames(mediator), rownames(covar_med), nomatch = 0)
+    covar_med <- covar_med[m,, drop = FALSE]
+  }
+  
+  # If we have driver_med, reduce to same subset as others
+  if(!is.null(driver_med)) {
+    m <- match(rownames(mediator), rownames(driver_med), nomatch = 0)
+    driver_med <- driver_med[m,,, drop = FALSE]
+  }
   
   # Reorganize annotation and mediator data.
   # Need to make sure elements of mediator have same ids.
