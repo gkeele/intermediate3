@@ -79,7 +79,7 @@ cmst_default <- function(object, driver, target,
         LR = fit),
       response, LR, dplyr::everything())
   
-  list(test = test, fit = coefs, normF = fits$normF)
+  list(test = test, fit = coefs, fitsLR = fits$LR, normF = fits$normF)
 }
 combo_models <- function() {
   combos <- 

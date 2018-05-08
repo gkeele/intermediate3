@@ -161,16 +161,16 @@ mediation_test <- function(target, mediator, driver, annotation,
   result <-
     purrr::map(
       purrr::transpose(result),
-      dplyr::bind_rows,
-      .id = "id")
+      function(x) {
+        if(is.data.frame(x[[1]])) {
+          dplyr::bind_rows(x, .id = "id")
+        } else {
+          as.data.frame(t(as.data.frame(x)))
+        }
+      })
   
-  # Frobenius norm if using two drivers
-  if(all(is.na(result$normF[,-1]))) {
+  if(all(is.na(result$normF)))
     result$normF <- NULL
-  } else {
-    result$normF[[1]] <- c("target","mediator")
-    names(result$normF)[1] <- "response"
-  }
   
   result$driver <- 
     list(
