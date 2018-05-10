@@ -214,4 +214,8 @@ for(i in seq_along(ncol(D))) Dstar[,i] <- qr.resid(qrC, D[,i])
 
 Note that in the special case $C=D$, the residuals will be zero, and there will be no contribution, as desired. When $C\perp D$ (uncorrelated drivers), the residuals will be the original matrix $D$.
 
-More machinery is needed to accommodate covariates and kinship.
+Analysis of multiple mediators is handled using the [purrr](https://jennybc.github.io/purrr-tutorial/) package functions `map()` and `transpose()`. There are a few arcane tricks burried in the code, such as using a `driver` column in the `annotation` data frame to identify which `driver` $C_k$ is appropriate for a given `mediator` $k$. If no driver $C_k$ is provided, then we set $C_k=D$ for the single `target`-based driver approach. Conversely, if no $D$ is provided, then for each `mediator` $k$ we set $D_k=C_k$, corresponding to the single `mediator`-based driver approach.
+
+More machinery is in place to accommodate covariates and kinship. 
+Covariates are fairly straightforward, and are incorporated in [fitDefault](https://github.com/byandell/intermediate/blob/master/R/fitDefault.R).
+Kinship has been already handled well by Karl Broman in [qtl2::fit1](https://github.com/rqtl/qtl2/blob/master/R/fit1.R), which we wrap with [fitQtl2](https://github.com/byandell/intermediate/blob/master/R/fitQtl2.R).
