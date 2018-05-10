@@ -124,7 +124,7 @@ The six possible pairs among the four models are compared, and the smallest p-va
 That is, for model 1, let $p_1 = \max(p_{12},p_{13},p_{14})$, where $p_{jk}$ is the $p$-value for comparing models $j$ and $k$. The model with the minimum over these composite $p$-values is the closest model, with corresponding $p$-value. 
 This procedure has been shown to have good power for comparison of multiple entries; therefore we do not propose any adjustment.
 
-## Causal models with two drivers
+## Causal models with different drivers
 
 There are situations where the mediator and target may plausibly have different drivers. That is, potentially separate drivers affect target and mediator, leading to the need for somewhat more complicated causal models.
 For instance, in multi-parent populations developed over multiple generations enable fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlated traits. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
@@ -180,7 +180,9 @@ independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T
 undecided | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{undecided}) = \ell_{2^*} + \ell_{3^*} + \ell_{5^*}$
 mediation | $D \rightarrow T$ vs $(M,D) \rightarrow T$ | $f(T\vert D)f(T\vert M,D^*)/f(T)f(T\vert M,D)$ | $\ell(\text{mediation}) = \ell_{1^*} - \ell_{5^*}$
 
-The challenge is that we don't know whether one or two drivers is appropriate in practice. Further, the above adjustment for correlated drivers introduces noise, and may be worse than treating drivers as uncorrelated. Without a clear reason to choose one or two drivers, we propose using another Vuong-style test to compare these three approaches.
+The challenge is that we don't know whether one or two drivers is appropriate in practice. Further, the above adjustment for correlated drivers introduces noise, and may be worse than treating drivers as uncorrelated. Without a clear reason to choose one or two drivers, we might use another Vuong-style test to compare these three approaches, remembering that all models we consider may be wrong.
+
+It turns out that in practice, this two-driver approach, while having some merit, may lead to ambiguous results. Another, more promising approach is to use a `driver` that is best for the `mediator`. This will usually favor the `causal` model over the other three models. A variant on this, which takes slightly more computing, is to find the driver that is best for the `undecided` model, which corresponds to the unrestricted joint likelihood of the `target` and the `mediator`. When the `mediator` has a much stronger `driver` (corresponding to larger likelihood) than the `target`, this `driver` will be close in some sense to the `driver` for the `mediator` alone. That is, pick the `driver` $C$ that is best for the joint likelihood $f(M,T\vert C)$ and then conduct the causal model selection test using this `driver`.
 
 ## Implementation
 
