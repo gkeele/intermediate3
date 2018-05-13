@@ -56,7 +56,12 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
     warning(paste0("too few data (", length(ind2keep), ") for analysis"))
     return(NULL)
   }
-  driver <- driver[ind2keep,, drop = FALSE]
+  driver <- switch(
+    length(dim(driver)),
+    as.matrix(driver)[ind2keep,, drop = FALSE],
+    driver[ind2keep,, drop = FALSE],
+    driver[ind2keep,,, drop = FALSE]
+  )
   target <- target[ind2keep,, drop = FALSE]
   mediator <- mediator[ind2keep,, drop = FALSE]
   if(!is.null(covar_tar))
@@ -64,7 +69,7 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
   if(!is.null(covar_med))
     covar_med <- covar_med[ind2keep,, drop = FALSE]
   if(!is.null(driver_med))
-    driver_med <- driver_med[ind2keep,, drop = FALSE]
+    driver_med <- driver_med[ind2keep,,, drop = FALSE]
   if(!is.null(intcovar))
     intcovar <- intcovar[ind2keep,, drop = FALSE]
   
@@ -90,7 +95,8 @@ convert_matrix <- function(object,
   if(is.null(object))
     return(NULL)
   
-  object <- as.matrix(object)
+  if(!is.array(object))
+    object <- as.matrix(object)
   stopifnot(is.numeric(object))
   if(is.null(colnames(object)) & !is.null(col_names))
     colnames(object) <- col_names

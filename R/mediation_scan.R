@@ -57,7 +57,11 @@ mediation_scan <- function(target,
   intcovar <- covar_df_mx(intcovar)
   
   # Fit model without mediation.
-  loglik0 <- fitFunction(driver, target, kinship, covar, intcovar)$LR
+  if(length(dim(driver)) == 2)
+    driver_tar <- driver
+  else
+    driver_tar <- driver[,,1]
+  loglik0 <- fitFunction(driver_tar, target, kinship, covar, intcovar)$LR
   
   # Get common data.
   commons <- common_data(target, mediator, driver, covar, intcovar = intcovar)
@@ -79,6 +83,7 @@ mediation_scan <- function(target,
   # Match up annotation with mediators
   stopifnot(all(!is.na(m <- match(colnames(mediator), annotation$id))))
   annotation <- annotation[m,]
+  rownames(annotation) <- colnames(mediator)
   
   med_pur <- 
     purrr::transpose(
@@ -92,6 +97,12 @@ mediation_scan <- function(target,
       "double-lod-diff" = function(loglik, loglik0) loglik0 - (loglik[2] - loglik[1]))
   
   mapfn <- function(x, target, covar, driver, loglik0) {
+    if(length(dim(driver)) > 2) {
+      if(is.null(dcol <- x$annotation$driver))
+        driver <- driver[,,1]
+      else
+        driver <- driver[,, dcol]
+    }
     loglik <- c(fitFunction(driver, target, kinship,
                            cbind(covar, x$mediator), intcovar)$LR,
                 fitFunction(driver, target, kinship,

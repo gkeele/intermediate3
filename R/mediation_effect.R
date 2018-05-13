@@ -26,7 +26,8 @@ mediation_effect <- function(object,
             dplyr::select(
               object$fit,
               id, response, dplyr::one_of(driver_levels)),
-            response = ifelse(response == "mediation", "adjusted", response)),
+            response = ifelse(response == "mediation", "adjusted", response),
+            response = factor(response, c("mediator","target","adjusted"))),
           by = "id"),
         mediator = "id"),
       level, effect, -mediator, -dplyr::matches(id_name), -triad, -pvalue, -response)
