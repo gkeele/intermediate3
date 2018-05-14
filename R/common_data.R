@@ -22,8 +22,16 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
                              paste0("intcov", seq_len(ncol(intcovar))), 
                              rownames(target))
   
+  if(is.list(kinship)) {
+    if(is.matrix(kinship[[1]]))
+      kinship <- kinship[[1]]
+  }
+  K <- kinship  
+  if(!is.matrix(K))
+    K <- NULL
+  
   # Keep individuals with full records.
-  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, kinship, driver_med, intcovar,
+  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, K, driver_med, intcovar,
                              complete.cases = TRUE)
   
   # Drop mediator columns with too few non-missing data.
@@ -74,9 +82,13 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
     intcovar <- intcovar[ind2keep,, drop = FALSE]
   
   if(!is.null(kinship)) {
-    kinship <- kinship[ind2keep, ind2keep]
+    if(is.matrix(kinship))
+      kinship <- kinship[ind2keep, ind2keep]
     # Decompose kinship if all in common.
-    if(common)
+    is_kinship <- attr(kinship, "eigen_decomp")
+    if(is.null(is_kinship))
+      is_kinship <- FALSE
+    if(common && !is_kinship)
       kinship <- qtl2::decomp_kinship(kinship)
   }
   list(driver = driver,

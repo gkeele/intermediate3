@@ -73,12 +73,14 @@ No simplification results for the undecided case, and the mediation could be pos
 
 ## Five relationships
 
-Comparing the four causal models and constructing the mediation scan involves fitting five building blocks:
+Comparing the four causal models and constructing the mediation scan involves fitting six building blocks:
 $f(T\vert D)$,
 $f(M\vert D)$,
 $f(T\vert M)$,
 $f(M\vert T)$,
-and either $f(T\vert M,D)$ or $f(M\vert T,D)$.
+$f(T\vert M,D)$,
+and
+$f(M\vert T,D)$.
 Since we are comparing models, using ratios of likelihoods, it makes more sense to consider the related likelihood ratios:
 
 relationship | likelihood ratio | log likelihood ratio
@@ -88,6 +90,9 @@ relationship | likelihood ratio | log likelihood ratio
 3: $M\rightarrow T$ | $f(T\vert M)/f(T)$ | $\ell_3 = \log f(T\vert M) - \log f(T)$
 4: $T\rightarrow M$ | $f(M\vert T)/f(M)$ | $\ell_4 = \log f(M\vert T) - \log f(M)$
 5: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M)$ | $\ell_5 = \log f(T\vert M,D) - \log f(T\vert M)$
+6: $D\rightarrow M\leftarrow T$ | $f(M\vert T,D)/f(M\vert T)$ | $\ell_6 = \log f(M\vert T,D) - \log f(M\vert T)$
+
+If there is no kinship (see last section), then $\ell_3 = \ell_4$ and $\ell_5 = \ell_6$ by the chain rule. That is, the first two are the likelihood ratio for the correlation of $M$ and $T$, while the latter two are the likelihood ratio for the conditional correlation of $M$ and $T$ given $D$. Below, we keep $\ell_3$ and $\ell_4$ but drop $\ell_6$.
 
 For the $k$th relationship comparing full versus reduced model, we compute LR$_k$ = $\ell_k = \log f(\text{full}_k) - \log f(\text{reduced}_k)$ = log likelihood ratio.
 The log likelihood ratios for the four causal models and mediation are constructed as:
@@ -202,6 +207,9 @@ indLR <- dnorm(y, qr.fitted(qrX, y), sqrt(RSS / n), log = TRUE)
 coef <- qr.coef(qrX, y)
 ```
 
+This approach by default does _not_ include an intercept. When fitting for $f(T\vert M)$, for instance, it is important to include an intercept (`X = cbind(1,M)`).
+If the driver $D$ has the property that all rows sum to 1, as is true for genotype probability matrices, then no column of 1s is needed.
+
 In the case of two drivers we need to calculate $f(T\vert M,D^*)$ and $f(M\vert T,C^*)$ for relationships 3 and 4.
 
 We compute $D^*$ by taking a QR decomposition of $C$ and getting the residuals applied to each column of $D$
@@ -216,6 +224,31 @@ Note that in the special case $C=D$, the residuals will be zero, and there will 
 
 Analysis of multiple mediators is handled using the [purrr](https://jennybc.github.io/purrr-tutorial/) package functions `map()` and `transpose()`. There are a few arcane tricks burried in the code, such as using a `driver` column in the `annotation` data frame to identify which `driver` $C_k$ is appropriate for a given `mediator` $k$. If no driver $C_k$ is provided, then we set $C_k=D$ for the single `target`-based driver approach. Conversely, if no $D$ is provided, then for each `mediator` $k$ we set $D_k=C_k$, corresponding to the single `mediator`-based driver approach.
 
+# Covariates and Kinship
+
 More machinery is in place to accommodate covariates and kinship. 
 Covariates are fairly straightforward, and are incorporated in [fitDefault](https://github.com/byandell/intermediate/blob/master/R/fitDefault.R).
+The math carries through for covariates exactly as before.
+
+The challenge comes with kinship.
 Kinship has been already handled well by Karl Broman in [qtl2::fit1](https://github.com/rqtl/qtl2/blob/master/R/fit1.R), which we wrap with [fitQtl2](https://github.com/byandell/intermediate/blob/master/R/fitQtl2.R).
+See the [Kinship Decomposition](https://github.com/byandell/intermediate/blob/master/vignettes/decomp.Rmd) vignette for details about how kinship affects things. Basically,
+instead of having independent, equal variance errors, the covariance now has the form
+
+$$V = \sigma^2 (\gamma K + I)\,,$$
+
+with $K$ the kinship matrix and $\gamma = \sigma_g^2/\sigma^2$ the heritability. In this case,
+in general $f(M\vert T,K)/f(M\vert K) \neq f(T\vert M,K)/f(T\vert K)$ as these no longer correspond to simple likelihood ratios for the correlation of $M$ and $T$. There are now two variance components, and their ratio may be different for $M$ and $T$:
+
+$$V_T = \sigma_T^2 (\gamma_T K + I)\ \ V_M = \sigma_M^2 (\gamma_M K + I)\,.$$
+
+This is not easily overcome by making sure $M$ and $T$ have unit variance, because their correlation cannot be pulled out in a linear way. For instance, if we set $y = T$ and $X = [1,M]$,
+the likelihood $f(T\vert M)$ without kinship is (assuming normality) $y\sim N(X\beta, \sigma^2 I)$ with $\beta = (\beta_0, \beta_1)$ and the test of correlation is the same as the test whether $\beta_1$ is 0 or not.
+
+The kinship decomposition corresponds to premultiplying by the inverse transpose of an upper triangular matrix $G_1$, which depends on $\gamma_T$:
+
+$$y^*\sim N(X^*\beta^*, \sigma_*^2 I)\,,\ \text{ with }y^* = G_1^\text{-T}y=G_1^\text{-T}T\,, X^*=G_1^\text{-T}X=[G_1^\text{-T}1,G_1^\text{-T}M]\,.$$
+
+Now the first column in $X^*$ is no longer 1. While we could argue that the second column looks like a rotated form of $M$, the reverse setup for $f(M\vert T)$ would have a different upper triangular matrix $G_2$, which depends on $\gamma_M$. 
+
+In practice, we expect the random effects corresponding to kinship for target and mediator to be very similar, but they are not constrained to be identical. Thus, there will be numerical differences that will alter results somewhat. Further, since the building block LR relationships all depend on unknown $\gamma$ values, they are not strictly independent and cannot be simply added as we have done above. One pragmatic way to handle this, as it is only really a concern for the `undecided` model, is to use the form with the highest likelihood.
