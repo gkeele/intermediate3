@@ -43,7 +43,9 @@ med_fits <- function(driver, target, mediator, fitFunction,
     t.m_t    = fitFunction(bind_stuff(1, mediator, perp_tar), target, kinship, covar_tar, intcovar),
     m.t_m    = fitFunction(bind_stuff(1, target, perp_med), mediator, kinship, covar_med, intcovar),
     t.md_t.m = fitFunction(driver, target, kinship, 
-                           bind_stuff(covar_tar, mediator, perp_tar), intcovar)))
+                           bind_stuff(covar_tar, mediator, perp_tar), intcovar),
+    t.md_t   = fitFunction(bind_stuff(driver, mediator, perp_tar), target, kinship, 
+                           covar_tar, intcovar)))
   fits$LR <- unlist(fits$LR)
   fits$indLR <- as.matrix(as.data.frame(fits$indLR))
   fits$df <- unlist(fits$df)

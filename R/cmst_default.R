@@ -4,6 +4,7 @@ cmst_default <- function(object, driver, target,
                          fitFunction, testFunction,
                          common = TRUE, 
                          flavor = "B",
+                         fitRelate = TRUE,
                          ...) {
   
   # Make sure we have driver or driver_med.
@@ -32,7 +33,7 @@ cmst_default <- function(object, driver, target,
                    kinship, covar_tar, covar_med, driver_med,
                    intcovar, common = common, ...)
   
-  combos <- combo_models()
+  combos <- combo_models(fitRelate)
   models <-
     purrr::transpose(
       purrr::map(combos[,1:4],
@@ -81,18 +82,21 @@ cmst_default <- function(object, driver, target,
   
   list(test = test, fit = coefs, fitsLR = fits$LR, normF = fits$normF)
 }
-combo_models <- function() {
+combo_models <- function(fitRelate) {
   combos <- 
     matrix(
-      0, 5, 7,
+      0, 6, 7,
       dimnames = list(
-        c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m"),
+        c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m","t.md_t"),
         c("causal", "reactive", "independent", "undecided",
           "target", "mediator", "mediation")))
   combos[  c(2,3), 1] <- 1 # causal: m.d_t.m
   combos[  c(1,4), 2] <- 1 # reactive: t.d_m.t
   combos[  c(1,2), 3] <- 1 # independent: t.d_m.d
-  combos[c(2,3,5), 4] <- 1 # undecided: t.md_m.d
+  if(fitRelate)
+    combos[  c(2,6), 4] <- 1 # undecided: t.md_m.d
+  else
+    combos[c(2,3,5), 4] <- 1 # undecided: t.md_m.d
   combos[       1, 5] <- 1 # target contrast: t.d_t
   combos[       2, 6] <- 1 # mediator contrast: m.d_m
   combos[       5, 7] <- 1 # mediation contrast: t.md_t.m
