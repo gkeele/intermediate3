@@ -165,11 +165,15 @@ mediation_test <- function(target, mediator, driver, annotation,
         if(is.data.frame(x[[1]])) {
           dplyr::bind_rows(x, .id = "id")
         } else {
-          as.data.frame(t(as.data.frame(x)))
+          isnt <- !sapply(x, is.null)
+          if(any(isnt))
+            as.data.frame(t(as.data.frame(x[isnt])))
+          else
+            NULL
         }
       })
   
-  if(all(is.na(result$normF)))
+  if(!is.null(result$normF) && all(is.na(result$normF)))
     result$normF <- NULL
   
   result$driver <- 
