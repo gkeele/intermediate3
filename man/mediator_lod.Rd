@@ -5,14 +5,15 @@
 \title{Mediator LOD}
 \usage{
 mediator_lod(mediator, driver, annotation, covar_med = NULL,
-  intcovar = NULL, kinship = NULL, facet_name = "chr", verbose = TRUE)
+  intcovar = NULL, kinship = NULL, facet_name = "chr",
+  index_name = "pos", verbose = TRUE)
 }
 \arguments{
 \item{mediator}{A matrix, each column is one gene/protein's expression}
 
 \item{driver}{A matrix, haplotype probabilities at QTL we try to mediate}
 
-\item{annotation}{A data frame with mediators' annotation, must include columns "chr" and "pos"}
+\item{annotation}{A data frame with mediators' annotation with columns for `facet_name` and `index_name`}
 
 \item{covar_med}{A matrix with additive covariates}
 
@@ -21,6 +22,8 @@ mediator_lod(mediator, driver, annotation, covar_med = NULL,
 \item{kinship}{kinship object}
 
 \item{facet_name}{name of facet column (default `chr`)}
+
+\item{index_name}{name of index column (default `pos`)}
 
 \item{verbose}{If TRUE display information about the progress}
 }

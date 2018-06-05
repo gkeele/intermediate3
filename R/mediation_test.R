@@ -5,16 +5,17 @@
 #' @param target vector or 1-column matrix with target values
 #' @param mediator matrix of mediators
 #' @param driver vector or matrix with driver values
-#' @param annotation optional annotation data frame for mediators
+#' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
 #' @param kinship optional kinship matrix among individuals
 #' @param driver_med optional driver matrix for mediators
-#' @param intcovar optional interactive covariates (assumed same for `mediator`` and `target``)
+#' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
 #' @param test Type of CMST test.
-#' @param pos Position of driver.
 #' @param fitFunction function to fit models with driver, target and mediator
 #' @param data_type Type of mediator data.
+#' @param facet_name name of facet column (default `chr`)
+#' @param index_name name of index column (default `pos`)
 #' @param ... additional parameters
 #'
 #' @importFrom purrr map transpose
@@ -65,8 +66,9 @@ mediation_test <- function(target, mediator, driver, annotation,
                           covar_tar=NULL, covar_med=NULL, kinship=NULL,
                           driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
-                          pos = NULL,
                           fitFunction = fitQtl2,
+                          facet_name = "chr",
+                          index_name = "pos",
                           ...) {
   
   ## Need to enable different covariates for different mediators.
@@ -81,8 +83,6 @@ mediation_test <- function(target, mediator, driver, annotation,
                    joint    = normJointIUCMST,
                    normal   = normIUCMST)
 
-  pos_tar <- pos
-  
   # Make sure covariates are numeric
   covar_tar <- covar_df_mx(covar_tar)
   intcovar <- covar_df_mx(intcovar)
@@ -92,9 +92,9 @@ mediation_test <- function(target, mediator, driver, annotation,
   } else {
     scan_max <- NULL
   }
-  LR_tar <- scan_max$LR
+  target_LR <- scan_max$LR
   
-  use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
+  use_1_driver <- is.null(annotation$driver_name) | is.null(driver_med)
   if(use_1_driver & !is.null(driver_med))
     driver_med <- NULL
   
@@ -198,11 +198,12 @@ mediation_test <- function(target, mediator, driver, annotation,
         triad = model),
       pvalue)
   result$params <-
-    list(pos = pos_tar,
-         LR = LR_tar,
-         target = colnames(target))
+    list(target_LR = target_LR,
+         target_name = colnames(target),
+         facet_name = facet_name,
+         index_name = index_name)
   result$targetFit <- scan_max
-    
+  
   class(result) <- c("mediation_test", class(result))
   result
 }
@@ -217,19 +218,30 @@ subset.mediation_test <- function(object, not_type, ...) {
 }
 #' @export
 summary.mediation_test <- function(object, ..., lod = FALSE) {
+  # Change out facet and index names for now.
+  facet_name <- object$params$facet_name
+  index_name <- object$params$index_name
+  best <-
+    dplyr::rename(
+      object$best,
+      facet = facet_name,
+      index = index_name)
+  
   out <- dplyr::select(
     dplyr::mutate(
       dplyr::arrange(
-        object$best,
+        best,
         pvalue),
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
-      pos = round(pos, 2),
       mediation = signif(mediation, 3),
       LRmed = signif(LRmed, 3)),
-    id, symbol, chr, pos, mediation, triad, pvalue, LRmed,
+    id, symbol, facet, index, mediation, triad, pvalue, LRmed,
     dplyr::everything())
   
+  # Change facet and index names back in now.
+  names(out)[3:4] <- c(facet_name, index_name)
+
   if(lod) {
     out <- 
       dplyr::rename(

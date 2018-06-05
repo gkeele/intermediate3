@@ -9,11 +9,12 @@
 #'
 #' @param mediator A matrix, each column is one gene/protein's expression
 #' @param driver A matrix, haplotype probabilities at QTL we try to mediate
-#' @param annotation A data frame with mediators' annotation, must include columns "chr" and "pos"
+#' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
 #' @param covar_med A matrix with additive covariates
 #' @param intcovar A matrix of covariate interacting with driver
 #' @param kinship kinship object
 #' @param facet_name name of facet column (default `chr`)
+#' @param index_name name of index column (default `pos`)
 #' @param verbose If TRUE display information about the progress
 #' 
 #' @seealso \code{\link{plot.mediation}}, \code{\link{kplot}}
@@ -36,6 +37,7 @@ mediator_lod <- function(mediator,
                          intcovar = NULL,
                          kinship = NULL,
                          facet_name = "chr",
+                         index_name = "pos",
                          verbose=TRUE) {
 
   # Make sure covariates are numeric
@@ -62,7 +64,7 @@ mediator_lod <- function(mediator,
   if(!is.null(driver)) {
     stopifnot(!any(is.na(driver)))
   }
-  stopifnot(c(facet_name, "pos") %in% tolower(names(annotation)))
+  stopifnot(c(facet_name, index_name) %in% tolower(names(annotation)))
 
   # Match up annotation with mediators
   stopifnot(all(!is.na(m <- match(colnames(mediator), annotation$id))))
@@ -86,6 +88,7 @@ mediator_lod <- function(mediator,
                                   rownames(mediator))) / log(10)
   attr(output, "targetFit") <- min(output$lod)
   attr(output, "facet_name") <- facet_name
+  attr(output, "index_name") <- index_name
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
 }

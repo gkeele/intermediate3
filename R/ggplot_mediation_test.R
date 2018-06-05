@@ -14,6 +14,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                                local_only = FALSE, 
                                significant = TRUE,
                                lod = TRUE,
+                               target_index = NULL,
                                ...) {
   type <- match.arg(type)
   if(is.null(local_only) | !("local" %in% names(x$best)))
@@ -22,8 +23,8 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     significant <- TRUE
   
   params <- x$params
-  pos_tar <- params$pos
-  unmediated <- params$LR
+  unmediated <- params$target_LR
+  index_name <- params$index_name
   
   targetFit <- x$targetFit
   x <- x$best
@@ -56,6 +57,8 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
   }
   x <- dplyr::arrange(x, dplyr::desc(triad))
   
+  x <- dplyr::rename(x, pos = index_name)
+  
   # For expression, use qtl_pos if not missing.
   if(!type %in% c("alleles","mediator")) {
     if(local_only)
@@ -86,9 +89,9 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("-log10 of p-value")
-             if(!is.null(pos_tar))
+             if(!is.null(target_index))
                p <- p +
-                 ggplot2::geom_vline(xintercept = pos_tar, col = "darkgrey")
+                 ggplot2::geom_vline(xintercept = target_index, col = "darkgrey")
            },
            pvalue_lod = {
              p <- ggplot2::ggplot(x) +
@@ -108,9 +111,9 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("Mediation LOD")
 #               ggplot2::scale_color_manual(values = cols)
-             if(!is.null(pos_tar))
+             if(!is.null(target_index))
                p <- p +
-                 ggplot2::geom_vline(xintercept = pos_tar, col = "darkgrey")
+                 ggplot2::geom_vline(xintercept = target_index, col = "darkgrey")
            })
     if("biotype" %in% names(x)) {
       p <- p + ggplot2::aes(col = biotype)

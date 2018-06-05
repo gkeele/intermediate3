@@ -1,15 +1,14 @@
-#' @title Plot of conditioned LOD scores against genomic positions
+#' Plot of conditioned LOD scores against index
 #'
-#' @description Plot LOD statistics calculated by [mediation_scan()] against genomic positions
+#' Plot LOD statistics calculated by [mediation_scan()] against index
 #' using ggplot2.
 #'
 #' @param x mediation object
 #' @param col color of points (default "firebrick4")
 #' @param cex character expansion (default 2)
-#' @param ylab Y axis label (default "Conditioned LOD")
+#' @param xlab,ylab X and Y axis label (default `index_name` and "Conditioned LOD")
 #' @param col_target color for target LOD line
 #' @param gap gap between facets (default `25`)
-#' @param facet_name name of facet column (default `chr`)
 #' 
 #' @examples
 #' data(Tmem68)
@@ -31,21 +30,28 @@
 #' @importFrom ggplot2 aes autoplot element_blank element_rect facet_grid geom_hline geom_point ggplot theme
 #' @importFrom grid unit
 #' @importFrom dplyr arrange_at
+#' @rdname mediation_scan
 
 ggplot_mediation_scan <- function(x, 
                            col="firebrick4",
                            cex = 1,
+                           xlab = index_name,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
-                           gap = 25,
-                           facet_name = attr(x, "facet_name")) {
+                           gap = 25) {
+  
+  facet_name <- attr(x, "facet_name")
+  index_name <- attr(x, "index_name")
   if(!is.factor(x[[facet_name]]))
     x[[facet_name]] <- factor(x[[facet_name]], unique(x[[facet_name]]))
-  x <- dplyr::arrange_at(x, c(facet_name, "pos"))
+  x <- dplyr::rename(x, index = index_name)
+  x <- dplyr::arrange_at(x, c(facet_name, "index"))
 
   p <- ggplot2::ggplot(x) +
-    ggplot2::aes(pos, lod, symbol = symbol) +
-    ggplot2::facet_grid(formula(paste("~", facet_name)), scales = "free_x", space = "free")
+    ggplot2::aes(index, lod, symbol = symbol) +
+    ggplot2::facet_grid(formula(paste("~", facet_name)),
+                        scales = "free_x", space = "free") +
+    ggplot2::xlab(xlab)
 
   if(!is.null(x$col)) {
     p <- p +
@@ -77,13 +83,13 @@ ggplot_mediation_scan <- function(x,
   p
 }
 #' @export
-#' @rdname ggplot_mediation_scan
+#' @rdname mediation_scan
 #'
 autoplot.mediation_scan <- function(x, ...) {
   ggplot_mediation_scan(x, ...)
 }
 #' @export
-#' @rdname ggplot_mediation_scan
+#' @rdname mediation_scan
 #'
 plot.mediation_scan <- function(x, ...) {
   ggplot_mediation_scan(x, ...)

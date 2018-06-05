@@ -13,12 +13,13 @@
 
 ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
   "alleles", "mediator"), main = params$target, maxPvalue = 0.1,
-  local_only = FALSE, significant = TRUE, lod = TRUE, ...)
+  local_only = FALSE, significant = TRUE, lod = TRUE,
+  target_index = NULL, ...)
 
 mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
   covar_med = NULL, kinship = NULL, driver_med = NULL, intcovar = NULL,
-  test = c("wilcoxon", "binomial", "joint", "normal"), pos = NULL,
-  fitFunction = fitQtl2, ...)
+  test = c("wilcoxon", "binomial", "joint", "normal"),
+  fitFunction = fitQtl2, facet_name = "chr", index_name = "pos", ...)
 }
 \arguments{
 \item{...}{additional parameters}
@@ -29,7 +30,7 @@ mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
 
 \item{driver}{vector or matrix with driver values}
 
-\item{annotation}{optional annotation data frame for mediators}
+\item{annotation}{A data frame with mediators' annotation with columns for `facet_name` and `index_name`}
 
 \item{covar_tar}{optional covariates for target}
 
@@ -39,13 +40,15 @@ mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
 
 \item{driver_med}{optional driver matrix for mediators}
 
-\item{intcovar}{optional interactive covariates (assumed same for `mediator`` and `target``)}
+\item{intcovar}{optional interactive covariates (assumed same for `mediator` and `target`)}
 
 \item{test}{Type of CMST test.}
 
-\item{pos}{Position of driver.}
-
 \item{fitFunction}{function to fit models with driver, target and mediator}
+
+\item{facet_name}{name of facet column (default `chr`)}
+
+\item{index_name}{name of index column (default `pos`)}
 
 \item{data_type}{Type of mediator data.}
 }
