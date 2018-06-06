@@ -57,7 +57,7 @@
 #'
 mediation_index <- function(target, mediator, driver = NULL,
                             annotation = NULL, covar_tar = NULL, covar_med = NULL, kinship = NULL,
-                            driver_med = NULL, driver_index = NULL,
+                            driver_med = NULL, driver_index = colnames(mediator),
                             index_name = "pos", ...) {
   # Mediation test over interval
   
@@ -71,7 +71,7 @@ mediation_index <- function(target, mediator, driver = NULL,
     else
       names(driver_med)
   }
-  
+
   # Propagate annotation over 
   annotation <- annotation[rep(1, nmed),, drop = FALSE]
   annotation$id <- colnames(mediator)
@@ -116,12 +116,17 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), ...) {
       index = index_name)
   
   p <- ggplot2::ggplot(best)
-  p <- p +
-    switch(
-      type,
-        pvalue = ggplot2::aes(index, -log10(pvalue)),
-        IC     = ggplot2::aes(index, IC) +
-          ggplot2::ylab("BIC on log10 scale"))
+  switch(
+    type,
+    pvalue = {
+      p <- p +
+        ggplot2::aes(index, -log10(pvalue))
+      },
+    IC     = {
+      p <- p +
+        ggplot2::aes(index, IC) +
+        ggplot2::ylab("BIC on log10 scale")
+      })
   if("pattern" %in% names(best))
     p <- p + ggplot2::aes(col = pattern)
   p +

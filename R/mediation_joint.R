@@ -68,6 +68,15 @@ mediation_joint <- function(target, mediator, driver, annotation,
   if(is.null(mediator))
     return(NULL)
   
+  # If only one mediator, replicate it to match annotation.
+  mediator <- as.matrix(mediator)
+  if(ncol(mediator) == 1) {
+    mediator <- mediator[, rep(1, nrow(annotation)), drop = FALSE]
+    colnames(mediator) <- annotation$id
+  } else {
+    stopifnot(ncol(mediator) == nrow(annotation))
+  }
+  
   result <- mediation_test_internal(target, mediator, driver, annotation,
                                     covar_tar, covar_med, kinship,
                                     driver_med, intcovar,

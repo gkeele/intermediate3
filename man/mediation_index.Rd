@@ -9,7 +9,7 @@
 \usage{
 mediation_index(target, mediator, driver = NULL, annotation = NULL,
   covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
-  driver_index = NULL, index_name = "pos", ...)
+  driver_index = colnames(mediator), index_name = "pos", ...)
 
 \method{plot}{mediation_index}(x, ...)
 
