@@ -13,7 +13,7 @@ mediation_index(target, mediator, driver = NULL, annotation = NULL,
 
 \method{plot}{mediation_index}(x, ...)
 
-autoplot.mediation_index(x, ...)
+\method{autoplot}{mediation_index}(x, ...)
 
 ggplot_mediation_index(x, type = c("pvalue", "IC"), ...)
 }

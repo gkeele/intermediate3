@@ -9,7 +9,7 @@
 \usage{
 \method{plot}{mediation_test}(x, ...)
 
-autoplot.mediation_test(x, ...)
+\method{autoplot}{mediation_test}(x, ...)
 
 ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
   "alleles", "mediator"), main = params$target, maxPvalue = 0.1,

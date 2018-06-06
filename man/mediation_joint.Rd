@@ -13,7 +13,7 @@ mediation_joint(target, mediator, driver, annotation, covar_tar = NULL,
 
 \method{plot}{mediation_joint}(x, ...)
 
-autoplot.mediation_joint(x, ...)
+\method{autoplot}{mediation_joint}(x, ...)
 
 ggplot_mediation_joint(x, lod = TRUE, xlab = index_name, ylab = ylab_name,
   ...)

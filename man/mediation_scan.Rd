@@ -10,7 +10,7 @@
 ggplot_mediation_scan(x, col = "firebrick4", cex = 1, xlab = index_name,
   ylab = "Conditioned LOD", col_target = "blue", gap = 25)
 
-autoplot.mediation_scan(x, ...)
+\method{autoplot}{mediation_scan}(x, ...)
 
 \method{plot}{mediation_scan}(x, ...)
 
@@ -71,21 +71,6 @@ and calculates LOD statistic. The low LOD value indicates `driver` and
 i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 }
 \examples{
-data(Tmem68)
-m <- match("Tmem68", Tmem68$annotation$symbol) 
-# Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
-target <- Tmem68$target
-target <- target + rnorm(length(target), sd = 0.5)
-med_scan <- mediation_scan(target = target,
-                      mediator = Tmem68$mediator,
-                      driver = Tmem68$qtl.geno,
-                      annotation = Tmem68$annotation,
-                      covar = Tmem68$covar,
-                      method = "double-lod-diff")
-ggplot2::autoplot(med_scan)
-ggplot2::autoplot(subset(med_scan, "4")) +
-  ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
-
 data(Tmem68)
 m <- match("Tmem68", Tmem68$annotation$symbol) 
 # Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]

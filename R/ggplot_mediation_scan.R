@@ -10,22 +10,6 @@
 #' @param col_target color for target LOD line
 #' @param gap gap between facets (default `25`)
 #' 
-#' @examples
-#' data(Tmem68)
-#' m <- match("Tmem68", Tmem68$annotation$symbol) 
-#' # Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
-#' target <- Tmem68$target
-#' target <- target + rnorm(length(target), sd = 0.5)
-#' med_scan <- mediation_scan(target = target,
-#'                       mediator = Tmem68$mediator,
-#'                       driver = Tmem68$qtl.geno,
-#'                       annotation = Tmem68$annotation,
-#'                       covar = Tmem68$covar,
-#'                       method = "double-lod-diff")
-#' ggplot2::autoplot(med_scan)
-#' ggplot2::autoplot(subset(med_scan, "4")) +
-#'   ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
-#' 
 #' @export
 #' @importFrom ggplot2 aes autoplot element_blank element_rect facet_grid geom_hline geom_point ggplot theme
 #' @importFrom grid unit
