@@ -33,7 +33,7 @@
 #' @examples
 #' data(Tmem68)
 #'  
-#' # Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
+#' # Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
 #' target <- Tmem68$target
 #' target <- target + rnorm(length(target), sd = 0.5)
 #' 
@@ -55,8 +55,7 @@
 #'                       driver = driver,
 #'                       annotation = med_lod,
 #'                       covar_tar = Tmem68$covar,
-#'                       covar_med = Tmem68$covar,
-#'                       method = "double-lod-diff")
+#'                       covar_med = Tmem68$covar)
 #' summary(med_test)
 #' ggplot2::autoplot(med_test)
 #'
@@ -94,7 +93,7 @@ mediation_test <- function(target, mediator, driver, annotation,
   }
   target_LR <- scan_max$LR
   
-  use_1_driver <- is.null(annotation$driver_name) | is.null(driver_med)
+  use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
   if(use_1_driver & !is.null(driver_med))
     driver_med <- NULL
   
@@ -125,8 +124,17 @@ mediation_test <- function(target, mediator, driver, annotation,
   
   # If we have driver_med, reduce to same subset as others
   if(!is.null(driver_med)) {
-    m <- match(rownames(mediator), rownames(driver_med), nomatch = 0)
-    driver_med <- driver_med[m,,, drop = FALSE]
+    if(is.array(driver_med)) {
+      m <- match(rownames(mediator), rownames(driver_med), nomatch = 0)
+      driver_med <- driver_med[m,,, drop = FALSE]
+    } else {
+      if(is.list(driver_med)) {
+        m <- match(rownames(mediator), rownames(driver_med[[1]]), nomatch = 0)
+        driver_med <- lapply(driver_med, function(x) x[m,, drop = FALSE])
+      } else {
+        stop("driver_med is neither an array nor a list")
+      }
+    }
   }
   
   # Reorganize annotation and mediator data.
@@ -179,7 +187,13 @@ mediation_test <- function(target, mediator, driver, annotation,
   result$driver <- 
     list(
       target = colnames(driver),
-      mediator = if(is.null(driver_med)) colnames(driver) else colnames(driver_med))
+      mediator = {
+        if(is.null(driver_med)) colnames(driver)
+        else {
+          if(is.array(driver_med)) colnames(driver_med)
+          else names(driver_med)
+        }
+      })
   
   result$best <-
     dplyr::arrange(
@@ -197,6 +211,7 @@ mediation_test <- function(target, mediator, driver, annotation,
           LRmed = dplyr::filter(result$fit, response == "mediator")$LR),
         triad = model),
       pvalue)
+  
   result$params <-
     list(target_LR = target_LR,
          target_name = colnames(target),

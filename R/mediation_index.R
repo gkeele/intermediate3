@@ -3,7 +3,7 @@
 #' Test mediation across set of indexed drivers
 #'
 #' @param target vector or 1-column matrix with target values
-#' @param mediator matrix of mediators
+#' @param mediator vector or 1-column matrix with mediator values
 #' @param driver vector or matrix with driver values
 #' @param annotation optional annotation data frame for mediators
 #' @param covar_tar optional covariates for target
@@ -24,6 +24,35 @@
 #' @importFrom grid grid.newpage pushViewport viewport grid.layout
 #' @importFrom RColorBrewer brewer.pal
 #' 
+#' @examples
+#' data(Tmem68)
+#'  
+#' # Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
+#' target <- Tmem68$target
+#' target <- target + rnorm(length(target), sd = 0.5)
+#' 
+#' # Mediator is Tmem68.
+#' m <- grep("Tmem68", Tmem68$annotation$symbol)
+#' mediator <- Tmem68$mediator[,m]
+#' 
+#' # Reconstruct 8-allele genotype probabilities.
+#' driver_allele <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+#' rownames(driver_allele) <- rownames(Tmem68$qtl.geno)
+#' 
+#' # Reduce to SNP
+#' driver_SNP <- cbind(B6 = driver_allele[,2], rest = 1 - driver_allele[,2])
+#' driver_med <- list(allele = driver_allele, SNP = driver_SNP)
+#' 
+#' med_index <- mediation_index(target = target,
+#'                       mediator = mediator,
+#'                       driver = NULL,
+#'                       annotation = med_lod,
+#'                       covar_tar = Tmem68$covar,
+#'                       covar_med = Tmem68$covar,
+#'                       driver_med = driver_med, driver_index = names(driver_med), index_name = "probs")
+#' summary(med_index)
+#' ggplot2::autoplot(med_index)
+#' 
 #' @export
 #'
 mediation_index <- function(target, mediator, driver = NULL,
@@ -32,11 +61,16 @@ mediation_index <- function(target, mediator, driver = NULL,
                             index_name = "pos", ...) {
   # Mediation test over interval
   
-  nmed <- dim(driver_med)[3]
+  nmed <- ifelse(is.array(driver_med), dim(driver_med)[3], length(driver_med))
   
   # Propagate mediator over third dimension of driver_med.
-  mediator <- mediator[, rep(1, nmed), drop = FALSE]
-  colnames(mediator) <- dimnames(driver_med)[[3]]
+  mediator <- as.matrix(mediator)[, rep(1, nmed), drop = FALSE]
+  colnames(mediator) <- {
+    if(is.array(driver_med))
+      dimnames(driver_med)[[3]]
+    else
+      names(driver_med)
+  }
   
   # Propagate annotation over 
   annotation <- annotation[rep(1, nmed),, drop = FALSE]
@@ -48,10 +82,10 @@ mediation_index <- function(target, mediator, driver = NULL,
   #   run mediation test and find the best models (using BIC among the four models)
   out <- intermediate::mediation_test(
     target = target,
-    mediator = mediators,
+    mediator = mediator,
     annotation = annotation,
-    covar_tar = covar,
-    covar_med = covar,
+    covar_tar = covar_tar,
+    covar_med = covar_med,
     kinship = kinship,
     driver = driver,
     driver_med = driver_med,
@@ -59,4 +93,40 @@ mediation_index <- function(target, mediator, driver = NULL,
   
   class(out) <- c("mediation_index", class(out))
   out
+}
+#' @export
+#' @rdname mediation_index
+plot.mediation_index <- function(x, ...)
+  ggplot_mediation_index(x, ...)
+#' @export
+#' @rdname mediation_index
+autoplot.mediation_index <- function(x, ...)
+  ggplot_mediation_index(x, ...)
+#' @export
+#' @rdname mediation_index
+ggplot_mediation_index <- function(x, type = c("pvalue","IC"), ...) {
+  type <- match.arg(type)
+  index_name <- x$params$index_name
+  
+  ## Somehow index_name is not propagating through mediation_test.
+  ## It seems cmst_default uses chr and pos. Fix earlier?
+  best <-
+    dplyr::rename(
+      x$best,
+      index = index_name)
+  
+  p <- ggplot2::ggplot(best)
+  p <- p +
+    switch(
+      type,
+        pvalue = ggplot2::aes(index, -log10(pvalue)),
+        IC     = ggplot2::aes(index, IC) +
+          ggplot2::ylab("BIC on log10 scale"))
+  if("pattern" %in% names(best))
+    p <- p + ggplot2::aes(col = pattern)
+  p +
+    ggplot2::aes(group = triad) +
+    ggplot2::geom_point() +
+    ggplot2::facet_wrap(~ triad) +
+    ggplot2::xlab(index_name)
 }

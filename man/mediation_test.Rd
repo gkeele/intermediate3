@@ -58,7 +58,7 @@ Develop mediation models from driver, target and mediator
 \examples{
 data(Tmem68)
  
-# Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
+# Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
 target <- Tmem68$target
 target <- target + rnorm(length(target), sd = 0.5)
 
@@ -80,8 +80,7 @@ med_test <- mediation_test(target = target,
                       driver = driver,
                       annotation = med_lod,
                       covar_tar = Tmem68$covar,
-                      covar_med = Tmem68$covar,
-                      method = "double-lod-diff")
+                      covar_med = Tmem68$covar)
 summary(med_test)
 ggplot2::autoplot(med_test)
 

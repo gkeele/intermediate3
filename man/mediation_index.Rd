@@ -2,16 +2,25 @@
 % Please edit documentation in R/mediation_index.R
 \name{mediation_index}
 \alias{mediation_index}
+\alias{plot.mediation_index}
+\alias{autoplot.mediation_index}
+\alias{ggplot_mediation_index}
 \title{Test mediation across set of indexed drivers}
 \usage{
 mediation_index(target, mediator, driver = NULL, annotation = NULL,
   covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
   driver_index = NULL, index_name = "pos", ...)
+
+\method{plot}{mediation_index}(x, ...)
+
+\method{autoplot}{mediation_index}(x, ...)
+
+ggplot_mediation_index(x, type = c("pvalue", "IC"), ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}
 
-\item{mediator}{matrix of mediators}
+\item{mediator}{vector or 1-column matrix with mediator values}
 
 \item{driver}{vector or matrix with driver values}
 
@@ -31,4 +40,34 @@ mediation_index(target, mediator, driver = NULL, annotation = NULL,
 }
 \description{
 Test mediation across set of indexed drivers
+}
+\examples{
+data(Tmem68)
+ 
+# Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
+target <- Tmem68$target
+target <- target + rnorm(length(target), sd = 0.5)
+
+# Mediator is Tmem68.
+m <- grep("Tmem68", Tmem68$annotation$symbol)
+mediator <- Tmem68$mediator[,m]
+
+# Reconstruct 8-allele genotype probabilities.
+driver_allele <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
+rownames(driver_allele) <- rownames(Tmem68$qtl.geno)
+
+# Reduce to SNP
+driver_SNP <- cbind(B6 = driver_allele[,2], rest = 1 - driver_allele[,2])
+driver_med <- list(allele = driver_allele, SNP = driver_SNP)
+
+med_index <- mediation_index(target = target,
+                      mediator = mediator,
+                      driver = NULL,
+                      annotation = med_lod,
+                      covar_tar = Tmem68$covar,
+                      covar_med = Tmem68$covar,
+                      driver_med = driver_med, driver_index = names(driver_med), index_name = "probs")
+summary(med_index)
+ggplot2::autoplot(med_index)
+
 }
