@@ -46,7 +46,7 @@ data(Tmem68)
  
 # Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
 target <- Tmem68$target
-target <- target + rnorm(length(target), sd = 0.5)
+target <- target + rnorm(length(target), sd = 0.25)
 
 # Mediator is Tmem68.
 m <- grep("Tmem68", Tmem68$annotation$symbol)

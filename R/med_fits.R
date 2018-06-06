@@ -3,6 +3,7 @@ med_fits <- function(driver, target, mediator, fitFunction,
                      driver_med = NULL, intcovar = NULL,
                      common = FALSE,
                      frobenius = 0.01,
+                     fit_list = c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m","t.md_t"),
                      verbose = FALSE, ...) {
   
   # Probably want to move this to fitDefault as fitQtl2 does this.
@@ -36,16 +37,27 @@ med_fits <- function(driver, target, mediator, fitFunction,
   }
   
   # Fit mediation models.
+  fits <- list()
+  for(i in fit_list) {
+    fits[[i]] <- 
+      switch(
+        i,
+        t.d_t    = fitFunction(driver, target, kinship,
+                               covar_tar, intcovar),
+        m.d_m    = fitFunction(driver_med, mediator, kinship,
+                               covar_med, intcovar),
+        t.m_t    = fitFunction(bind_stuff(1, mediator, perp_tar), target, kinship,
+                               covar_tar, intcovar),
+        m.t_m    = fitFunction(bind_stuff(1, target, perp_med), mediator, kinship,
+                               covar_med, intcovar),
+        t.md_t.m = fitFunction(driver, target, kinship, 
+                               bind_stuff(covar_tar, mediator, perp_tar), intcovar),
+        t.md_t   = fitFunction(bind_stuff(driver, mediator, perp_tar), target, kinship, 
+                               covar_tar, intcovar))
+  }
+
   # Transpose list of model fits
-  fits <- purrr::transpose(list(
-    t.d_t    = fitFunction(driver, target, kinship, covar_tar, intcovar),
-    m.d_m    = fitFunction(driver_med, mediator, kinship, covar_med, intcovar),
-    t.m_t    = fitFunction(bind_stuff(1, mediator, perp_tar), target, kinship, covar_tar, intcovar),
-    m.t_m    = fitFunction(bind_stuff(1, target, perp_med), mediator, kinship, covar_med, intcovar),
-    t.md_t.m = fitFunction(driver, target, kinship, 
-                           bind_stuff(covar_tar, mediator, perp_tar), intcovar),
-    t.md_t   = fitFunction(bind_stuff(driver, mediator, perp_tar), target, kinship, 
-                           covar_tar, intcovar)))
+  fits <- purrr::transpose(fits)
   fits$LR <- unlist(fits$LR)
   fits$indLR <- as.matrix(as.data.frame(fits$indLR))
   fits$df <- unlist(fits$df)

@@ -13,7 +13,6 @@
 #' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
 #' @param test Type of CMST test.
 #' @param fitFunction function to fit models with driver, target and mediator
-#' @param data_type Type of mediator data.
 #' @param facet_name name of facet column (default `chr`)
 #' @param index_name name of index column (default `pos`)
 #' @param ... additional parameters
@@ -29,13 +28,19 @@
 #' @importFrom grid grid.newpage pushViewport viewport grid.layout
 #' @importFrom RColorBrewer brewer.pal
 #' 
+#' @return List with elements:
+#' - best best fit table
+#' - test causal test results in table
+#' - driver list of driver names for target and mediator(s)
+#' - normF Frobenius norm if using both target and mediator drivers
+#' - params list of parameter settings for use by summary and plot methods
 #' 
 #' @examples
 #' data(Tmem68)
 #'  
 #' # Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
 #' target <- Tmem68$target
-#' target <- target + rnorm(length(target), sd = 0.5)
+#' target <- target + rnorm(length(target), sd = 0.25)
 #' 
 #' # Reconstruct 8-allele genotype probabilities.
 #' driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
@@ -75,97 +80,29 @@ mediation_test <- function(target, mediator, driver, annotation,
   if(is.null(mediator))
     return(NULL)
   
-  test <- match.arg(test)
-  testfn <- switch(test,
-                   wilcoxon = wilcIUCMST,
-                   binomial = binomIUCMST,
-                   joint    = normJointIUCMST,
-                   normal   = normIUCMST)
-
-  # Make sure covariates are numeric
-  covar_tar <- covar_df_mx(covar_tar)
-  intcovar <- covar_df_mx(intcovar)
-  
   if(!is.null(driver)) {
-    scan_max <- fitFunction(driver, target, kinship, covar_tar)
+    scan_max <- fitFunction(driver, target, kinship, covar_df_mx(covar_tar))
   } else {
     scan_max <- NULL
   }
   target_LR <- scan_max$LR
   
-  use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
-  if(use_1_driver & !is.null(driver_med))
-    driver_med <- NULL
+  test <- match.arg(test)
+  testFunction <- switch(test,
+                   wilcoxon = wilcIUCMST,
+                   binomial = binomIUCMST,
+                   joint    = normJointIUCMST,
+                   normal   = normIUCMST)
   
-  # Get common data.
-  commons <- common_data(target, mediator, driver,
-                         covar_tar, NULL, kinship, intcovar = intcovar,
-                         common = use_1_driver)
-  if(is.null(commons))
+  result <- mediation_test_internal(target, mediator, driver, annotation,
+                                    covar_tar, covar_med, kinship,
+                                    driver_med, intcovar,
+                                    fitFunction, testFunction,
+                                    cmst_default,
+                                    ...)
+  if(is.null(result))
     return(NULL)
-  
-  target <- commons$target
-  mediator <- commons$mediator
-  driver <- commons$driver
-  kinship <- commons$kinship
-  covar_tar <- commons$covar_tar
-  intcovar <- commons$intcovar
-  common <- commons$common
-  rm(commons)
-
-  # Two reasons not to put covar_med in common_data call:
-  # 1: different mediators may have different covariates
-  # 2: covar_med is data frame, so need to be careful.
-  # Fix up covar_med to match the rest
-  if(!is.null(covar_med)) {
-    m <- match(rownames(mediator), rownames(covar_med), nomatch = 0)
-    covar_med <- covar_med[m,, drop = FALSE]
-  }
-  
-  # If we have driver_med, reduce to same subset as others
-  if(!is.null(driver_med)) {
-    if(is.array(driver_med)) {
-      m <- match(rownames(mediator), rownames(driver_med), nomatch = 0)
-      driver_med <- driver_med[m,,, drop = FALSE]
-    } else {
-      if(is.list(driver_med)) {
-        m <- match(rownames(mediator), rownames(driver_med[[1]]), nomatch = 0)
-        driver_med <- lapply(driver_med, function(x) x[m,, drop = FALSE])
-      } else {
-        stop("driver_med is neither an array nor a list")
-      }
-    }
-  }
-  
-  # Reorganize annotation and mediator data.
-  # Need to make sure elements of mediator have same ids.
-  annotation <- dplyr::filter(
-    annotation,
-    id %in% colnames(mediator))
-  # Make sure annotation is in same order as mediator.
-  m <- match(colnames(mediator), annotation$id)
-  if(any(is.na(m))) {
-    cat("mediator and annotation do not match\n", file = stderr())
-    return(NULL)
-  }
-  annotation <- annotation[m,]
-
-  # Workhorse: CMST on each mediator.
-  mediator <- as.data.frame(mediator)
-  result <- purrr::map(
-    purrr::transpose(list(
-      mediator = mediator,
-      annotation = 
-        purrr::transpose(
-          # Make sure order is maintained to match mediator.
-          dplyr::mutate(
-            annotation,
-            id = factor(id, id))))),
-    cmst_default, driver, target, 
-    kinship, covar_tar, covar_med,
-    driver_med, intcovar,
-    fitFunction, testfn, common, ...)
-  
+    
   result <-
     purrr::map(
       purrr::transpose(result),
@@ -216,12 +153,99 @@ mediation_test <- function(target, mediator, driver, annotation,
     list(target_LR = target_LR,
          target_name = colnames(target),
          facet_name = facet_name,
-         index_name = index_name)
+         index_name = index_name,
+         test = test)
   result$targetFit <- scan_max
   
   class(result) <- c("mediation_test", class(result))
   result
 }
+mediation_test_internal <- function(target, mediator, driver, annotation,
+                                    covar_tar, covar_med, kinship,
+                                    driver_med, intcovar,
+                                    fitFunction,
+                                    testFunction,
+                                    cmstfn = cmst_default,
+                                    ...) {
+                                    
+  # Make sure covariates are numeric
+  covar_tar <- covar_df_mx(covar_tar)
+  intcovar <- covar_df_mx(intcovar)
+  
+  use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
+  if(use_1_driver & !is.null(driver_med))
+    driver_med <- NULL
+  
+  # Get common data.
+  commons <- common_data(target, mediator, driver,
+                         covar_tar, NULL, kinship, intcovar = intcovar,
+                         common = use_1_driver)
+  if(is.null(commons))
+    return(NULL)
+  
+  target <- commons$target
+  mediator <- commons$mediator
+  driver <- commons$driver
+  kinship <- commons$kinship
+  covar_tar <- commons$covar_tar
+  intcovar <- commons$intcovar
+  common <- commons$common
+  rm(commons)
+  
+  # Two reasons not to put covar_med in common_data call:
+  # 1: different mediators may have different covariates
+  # 2: covar_med is data frame, so need to be careful.
+  # Fix up covar_med to match the rest
+  if(!is.null(covar_med)) {
+    m <- match(rownames(mediator), rownames(covar_med), nomatch = 0)
+    covar_med <- covar_med[m,, drop = FALSE]
+  }
+  
+  # If we have driver_med, reduce to same subset as others
+  if(!is.null(driver_med)) {
+    if(is.array(driver_med)) {
+      m <- match(rownames(mediator), rownames(driver_med), nomatch = 0)
+      driver_med <- driver_med[m,,, drop = FALSE]
+    } else {
+      if(is.list(driver_med)) {
+        m <- match(rownames(mediator), rownames(driver_med[[1]]), nomatch = 0)
+        driver_med <- lapply(driver_med, function(x) x[m,, drop = FALSE])
+      } else {
+        stop("driver_med is neither an array nor a list")
+      }
+    }
+  }
+  
+  # Reorganize annotation and mediator data.
+  # Need to make sure elements of mediator have same ids.
+  annotation <- dplyr::filter(
+    annotation,
+    id %in% colnames(mediator))
+  # Make sure annotation is in same order as mediator.
+  m <- match(colnames(mediator), annotation$id)
+  if(any(is.na(m))) {
+    cat("mediator and annotation do not match\n", file = stderr())
+    return(NULL)
+  }
+  annotation <- annotation[m,]
+  
+  # Workhorse: CMST on each mediator.
+  mediator <- as.data.frame(mediator)
+  purrr::map(
+    purrr::transpose(list(
+      mediator = mediator,
+      annotation = 
+        purrr::transpose(
+          # Make sure order is maintained to match mediator.
+          dplyr::mutate(
+            annotation,
+            id = factor(id, id))))),
+    cmstfn, driver, target, 
+    kinship, covar_tar, covar_med,
+    driver_med, intcovar,
+    fitFunction, testFunction, common, ...)
+}
+
 #' @export
 subset.mediation_test <- function(object, not_type, ...) {
   attrc <- class(object)
