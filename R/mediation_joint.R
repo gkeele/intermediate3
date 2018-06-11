@@ -149,6 +149,10 @@ autoplot.mediation_joint <- function(x, ...)
 ggplot_mediation_joint <- function(x, lod = TRUE,
                                    xlab = index_name, ylab = ylab_name, ...) {
   index_name <- attr(x, "index_name")
+  if(index_name != "index" & "index" %in% names(x)) {
+    # Make sure we don't clash with column named index.
+    x$index <- NULL
+  }
   x <- dplyr::rename(x, index = index_name)
   if(lod) {
     x <- dplyr::mutate(x, LR = LR / log(10))

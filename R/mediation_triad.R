@@ -210,10 +210,3 @@ autoplot.mediation_triad <- function(x, ...) {
   ggplot_mediation_triad(x, ...)
 }
 
-# from qtl2pattern
-sdp_to_logical <- function(sdp, haplos = LETTERS[1:8]) {
-  sapply(sdp, function(x, haplos) {
-    as.logical(intToBits(x)[seq_along(haplos)])
-  }, haplos)
-}
-

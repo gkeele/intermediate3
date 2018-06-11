@@ -110,6 +110,10 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), ...) {
   
   ## Somehow index_name is not propagating through mediation_test.
   ## It seems cmst_default uses chr and pos. Fix earlier?
+  if(index_name != "index" & "index" %in% names(x$best)) {
+    # Make sure we don't clash with column named index.
+    x$best$index <- NULL
+  }
   best <-
     dplyr::rename(
       x$best,

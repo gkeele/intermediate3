@@ -26,9 +26,16 @@ ggplot_mediation_scan <- function(x,
   
   facet_name <- attr(x, "facet_name")
   index_name <- attr(x, "index_name")
+  if(index_name != "index" & "index" %in% names(x)) {
+    # Make sure we don't clash with column named index.
+    x$index <- NULL
+  }
+
   if(!is.factor(x[[facet_name]]))
     x[[facet_name]] <- factor(x[[facet_name]], unique(x[[facet_name]]))
+  
   x <- dplyr::rename(x, index = index_name)
+  
   x <- dplyr::arrange_at(x, c(facet_name, "index"))
 
   p <- ggplot2::ggplot(x) +

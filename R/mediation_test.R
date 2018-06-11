@@ -260,6 +260,15 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
   # Change out facet and index names for now.
   facet_name <- object$params$facet_name
   index_name <- object$params$index_name
+  if(index_name != "index" & "index" %in% names(object$best)) {
+    # Make sure we don't clash with column named index.
+    object$best$index <- NULL
+  }
+  if(facdt_name != "facet" & "facet" %in% names(object$best)) {
+    # Make sure we don't clash with column named facet.
+    object$best$facet <- NULL
+  }
+  
   best <-
     dplyr::rename(
       object$best,

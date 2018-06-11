@@ -45,9 +45,20 @@ pattern_allele_pair <- function(x, geno_names) {
   # Paste together top 2, but first sort to  be in allele order
   paste(rep(geno_names[sort(o[seq_len(i)])], length = 2), collapse = "")
 }
+
+# from qtl2pattern
 sdp_to_logical <- function(sdp, haplos) {
   assertthat::assert_that(!missing(haplos))
   sapply(sdp, function(x, haplos) {
     as.logical(intToBits(x)[seq_along(haplos)])
+  }, haplos)
+}
+sdp_to_pattern <- function(sdp, haplos) {
+  assertthat::assert_that(!missing(haplos))
+  sapply(sdp, function(x, haplos) {
+    ref <- as.logical(intToBits(x)[seq_along(haplos)])
+    paste(paste(haplos[!ref], collapse = ""),
+          paste(haplos[ref], collapse = ""),
+          sep = ":")
   }, haplos)
 }

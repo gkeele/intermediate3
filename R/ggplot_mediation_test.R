@@ -57,6 +57,10 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
   }
   x <- dplyr::arrange(x, dplyr::desc(triad))
   
+  if(index_name != "index" & "index" %in% names(x)) {
+    # Make sure we don't clash with column named index.
+    x$index <- NULL
+  }
   x <- dplyr::rename(x, pos = index_name)
   
   # For expression, use qtl_pos if not missing.
