@@ -264,7 +264,7 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
     # Make sure we don't clash with column named index.
     object$best$index <- NULL
   }
-  if(facdt_name != "facet" & "facet" %in% names(object$best)) {
+  if(facet_name != "facet" & "facet" %in% names(object$best)) {
     # Make sure we don't clash with column named facet.
     object$best$facet <- NULL
   }
