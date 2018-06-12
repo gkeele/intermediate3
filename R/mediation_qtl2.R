@@ -75,11 +75,8 @@ mediation_qtl2 <- function(target, mediator,
       snpinfo)[[1]]
 
   # Create annotation from snpinfo with driver names.
-  annotation <- 
-    dplyr::rename(
-      assoc_tar$snpinfo[m,],
-      id = "snp_id")
-  annotation$driver <- dimnames(driver_med)[[3]]
+  annot_driver <- dplyr::rename(snpinfo, id = "snp_id")
+  annot_driver$driver <- dimnames(driver_med)[[3]]
 
   # Reduce to common IDs
   m <- qtl2::get_common_ids(
@@ -102,7 +99,7 @@ mediation_qtl2 <- function(target, mediator,
         target,
         mediator,
         NULL,
-        annotation,
+        annot_driver,
         covar_tar,
         covar_med,
         kinship,
@@ -122,16 +119,36 @@ mediation_qtl2 <- function(target, mediator,
       driver_med[,, med_joint$id, drop = FALSE],
       driver_index = med_joint$pos)
   
-  # Add SNP distribution pattern.
+  # Add SNP distribution pattern (sdp).
+  m <- match(med_joint$id, med_index$best$id)
+  med_index$best$sdp <- med_joint$sdp[m]
   med_index$best <-
     dplyr::mutate(
       med_index$best,
       pattern = sdp_to_pattern(sdp, prob_alleles))
-  
-  med_index$top_snps <- ts
+
+  ## Add in all SNPS to best
+  # Get all SNPs in interval with same sdp.
+  topsnps <- 
+    dplyr::filter(
+      qtl2::index_snps(
+        map,
+        query_variant(chr_id, start, end)),
+    pos >= min(med_index$best$pos),
+    pos <= max(med_index$best$pos),
+    sdp %in% unique(med_index$best$sdp))
+  # Match up index for joining.
+  m <- match(med_index$best$id, topsnps$snp_id)
+  med_index$best$index <- topsnps$index[m]
+  # Join to get all SNPs.
+  med_index$best <- 
+    dplyr::right_join(
+      dplyr::select(med_index$best, -chr, -pos, -sdp),
+      topsnps,
+      by = "index")
+
   med_index$joint <- mj
-  med_index$snpinfo <- assoc_tar$snpinfo
-  
+
   med_index
 }
 
