@@ -104,7 +104,7 @@ autoplot.mediation_index <- function(x, ...)
   ggplot_mediation_index(x, ...)
 #' @export
 #' @rdname mediation_index
-ggplot_mediation_index <- function(x, type = c("pvalue","IC"), ...) {
+ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...) {
   type <- match.arg(type)
   index_name <- x$params$index_name
   
@@ -133,9 +133,20 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), ...) {
       })
   if("pattern" %in% names(best))
     p <- p + ggplot2::aes(col = pattern)
-  p +
+  p <- p +
     ggplot2::aes(group = triad) +
-    ggplot2::geom_point() +
+    ggplot2::geom_point(alpha = alpha) +
     ggplot2::facet_wrap(~ triad) +
     ggplot2::xlab(index_name)
+  if(!is.null(x$map)) {
+    tmp <- 
+      dplyr::filter(
+        data.frame(map = x$map),
+        map >= min(best$index),
+        map <= max(best$index))
+    p <- p +
+      geom_rug(aes(map), data = tmp, inherit.aes = FALSE)
+    
+  }
+  p
 }

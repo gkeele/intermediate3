@@ -69,6 +69,7 @@ mediation_qtl2 <- function(target, mediator,
                c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
   snpinfo <- assoc_tar$snpinfo[m,, drop = FALSE]
   snpinfo$index <- seq_len(nrow(snpinfo))
+
   driver_med <-
     qtl2::genoprob_to_snpprob(
       genoprobs,
@@ -122,32 +123,36 @@ mediation_qtl2 <- function(target, mediator,
   # Add SNP distribution pattern (sdp).
   m <- match(med_joint$id, med_index$best$id)
   med_index$best$sdp <- med_joint$sdp[m]
-  med_index$best <-
-    dplyr::mutate(
-      med_index$best,
-      pattern = sdp_to_pattern(sdp, prob_alleles))
 
   ## Add in all SNPS to best
   # Get all SNPs in interval with same sdp.
   topsnps <- 
-    dplyr::filter(
-      qtl2::index_snps(
-        map,
-        query_variant(chr_id, start, end)),
-    pos >= min(med_index$best$pos),
-    pos <= max(med_index$best$pos),
-    sdp %in% unique(med_index$best$sdp))
+    qtl2::index_snps(
+      map,
+      dplyr::filter(
+        query_variant(chr_id, start, end),
+        pos >= min(med_index$best$pos),
+        pos <= max(med_index$best$pos),
+        sdp %in% unique(med_index$best$sdp)))
+
   # Match up index for joining.
   m <- match(med_index$best$id, topsnps$snp_id)
   med_index$best$index <- topsnps$index[m]
+
   # Join to get all SNPs.
   med_index$best <- 
-    dplyr::right_join(
-      dplyr::select(med_index$best, -chr, -pos, -sdp),
-      topsnps,
-      by = "index")
-
+    dplyr::mutate(
+      dplyr::right_join(
+        dplyr::select(
+          med_index$best,
+          -chr, -pos, -sdp, -id),
+        topsnps,
+        by = "index"),
+      pattern = sdp_to_pattern(sdp, prob_alleles),
+      id = snp_id)
+  
   med_index$joint <- mj
+  med_index$map <- map[[chr_id]]
 
   med_index
 }

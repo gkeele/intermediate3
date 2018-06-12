@@ -15,7 +15,7 @@ mediation_index(target, mediator, driver = NULL, annotation = NULL,
 
 \method{autoplot}{mediation_index}(x, ...)
 
-ggplot_mediation_index(x, type = c("pvalue", "IC"), ...)
+ggplot_mediation_index(x, type = c("pvalue", "IC"), alpha = 0.5, ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}
