@@ -134,7 +134,12 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...)
   if("pattern" %in% names(best))
     p <- p + ggplot2::aes(col = pattern)
   p <- p +
-    ggplot2::aes(group = triad) +
+    ggplot2::aes(group = triad, id = id)
+  if(!is.null(x$params$target_index)) {
+    p <- p +
+      ggplot2::geom_vline(xintercept = x$params$target_index, col = "gray")
+  }
+  p <- p +
     ggplot2::geom_point(alpha = alpha) +
     ggplot2::facet_wrap(~ triad) +
     ggplot2::xlab(index_name)
@@ -145,7 +150,7 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...)
         map >= min(best$index),
         map <= max(best$index))
     p <- p +
-      geom_rug(aes(map), data = tmp, inherit.aes = FALSE)
+      geom_rug(aes(map), data = tmp, inherit.aes = FALSE, col = "gray")
     
   }
   p
