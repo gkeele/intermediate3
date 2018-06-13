@@ -13,6 +13,7 @@
 #' @param drop_lod drop in `LOD` (= `LR/log(10)`) to define index set
 #' @param query_variant function to query variant database
 #' @param cores number of cores to use
+#' @param target_scan optional object from [qtl2::scan1snps()] for target (created if missing)
 #'
 #' @importFrom qtl2 genoprob_to_snpprob get_common_ids scan1snps top_snps
 #' @importFrom dplyr arrange desc distinct filter mutate rename
@@ -25,7 +26,7 @@ mediation_qtl2 <- function(target, mediator,
                            annotation, covar_tar, covar_med, kinship,
                            genoprobs, map,
                            drop_lod = 1.5, query_variant,
-                           cores = 1) {
+                           cores = 1, target_scan) {
 
   chr_id <- names(genoprobs)
   if(length(chr_id) > 1) {
@@ -37,37 +38,34 @@ mediation_qtl2 <- function(target, mediator,
   end <- max(map[[chr_id]])
   
   # Find peak for target to get SNP distribution pattern (sdp)
-  assoc_tar <-
-    qtl2::scan1snps(
-      genoprobs = genoprobs[,chr_id],
-      map = map, 
-      pheno = target,
-      kinship = kinship,
-      addcovar = addcovar,
-      chr = chr_id, start = start, end = end,
-      query_func = query_variant,
-      cores = cores,
-      keep_all_snps = FALSE)
+  if(missing(target_scan)) {
+    target_scan <-
+      qtl2::scan1snps(
+        genoprobs = genoprobs[,chr_id],
+        map = map, 
+        pheno = target,
+        kinship = kinship,
+        addcovar = addcovar,
+        chr = chr_id, start = start, end = end,
+        query_func = query_variant,
+        cores = cores,
+        keep_all_snps = FALSE)
+  }
   ts <- 
     dplyr::arrange(
       qtl2::top_snps(
-        assoc_tar$lod,
-        assoc_tar$snpinfo),
+        target_scan$lod,
+        target_scan$snpinfo),
       dplyr::desc(lod))
-  ts_sdp <-
-    (dplyr::distinct(
-      dplyr::filter(
-        ts, 
-        lod == max(lod)),
-      sdp))$sdp
+  ts_sdp <- ts$sdp[1]
 
   prob_alleles <- attr(genoprobs, "alleles")
   
   # Get SNP probabilities for SNPs with same sdp as target peak.
   # Be careful to check for reflection of pattern.
-  m <- which(assoc_tar$snpinfo$sdp %in%
+  m <- which(target_scan$snpinfo$sdp %in%
                c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
-  snpinfo <- assoc_tar$snpinfo[m,, drop = FALSE]
+  snpinfo <- target_scan$snpinfo[m,, drop = FALSE]
   snpinfo$index <- seq_len(nrow(snpinfo))
 
   driver_med <-
@@ -153,6 +151,9 @@ mediation_qtl2 <- function(target, mediator,
   
   med_index$joint <- mj
   med_index$map <- map[[chr_id]]
+  
+  med_index$params$target_LR <- ts$lod[1] * log(10)
+  med_index$params$target_index <- ts$pos[1]
 
   med_index
 }

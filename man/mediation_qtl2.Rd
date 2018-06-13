@@ -5,7 +5,7 @@
 \title{Test mediation across set of indexed drivers for `qtl2` data}
 \usage{
 mediation_qtl2(target, mediator, annotation, covar_tar, covar_med, kinship,
-  genoprobs, map, drop_lod = 1.5, query_variant, cores = 1)
+  genoprobs, map, drop_lod = 1.5, query_variant, cores = 1, target_scan)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}
@@ -27,6 +27,8 @@ mediation_qtl2(target, mediator, annotation, covar_tar, covar_med, kinship,
 \item{query_variant}{function to query variant database}
 
 \item{cores}{number of cores to use}
+
+\item{target_scan}{optional object from [qtl2::scan1snps()] for target (created if missing)}
 
 \item{genoprob}{genoprob object of class [qtl2::calc_genoprob()]}
 }

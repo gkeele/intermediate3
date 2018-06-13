@@ -19,7 +19,7 @@
 #' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
 #' @importFrom tidyr gather
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
-#' geom_hline geom_point geom_vline ggplot 
+#' geom_hline geom_point geom_vline ggplot guides guide_legend
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
 #' @importFrom grid grid.newpage pushViewport viewport grid.layout
 #' @importFrom RColorBrewer brewer.pal
