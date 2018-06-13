@@ -144,7 +144,9 @@ mediation_qtl2 <- function(target, mediator,
         dplyr::select(
           med_index$best,
           -chr, -pos, -sdp, -id),
-        topsnps,
+        dplyr::filter(
+          topsnps,
+          index %in% med_index$best$index),
         by = "index"),
       pattern = sdp_to_pattern(sdp, prob_alleles),
       id = snp_id)

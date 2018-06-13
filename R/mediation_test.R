@@ -127,7 +127,7 @@ mediation_test <- function(target, mediator, driver, annotation,
       mediator = {
         if(is.null(driver_med)) colnames(driver)
         else {
-          if(is.array(driver_med)) colnames(driver_med)
+          if(is.array(driver_med)) dimnames(driver_med)[[3]]
           else names(driver_med)
         }
       })
@@ -138,15 +138,21 @@ mediation_test <- function(target, mediator, driver, annotation,
         dplyr::mutate(
           dplyr::left_join(
             dplyr::ungroup(
-              dplyr::filter(
+              dplyr::summarize(
                 dplyr::group_by(
                   result$test,
                   id),
-                pvalue == min(pvalue))),
-            annotation, by = "id"),
+                model = model[which.min(pvalue)[1]],
+                LR = LR[which.min(pvalue)[1]],
+                IC = IC[which.min(pvalue)[1]],
+                alt = alt[which.min(pvalue)[1]],
+                df = df[which.min(pvalue)[1]],
+                pvalue = pvalue[which.min(pvalue)[1]])),
+            annotation,
+            by = "id"),
           mediation = dplyr::filter(result$fit, response == "mediation")$LR,
           LRmed = dplyr::filter(result$fit, response == "mediator")$LR),
-        triad = model),
+        triad = "model"),
       pvalue)
   
   result$params <-
