@@ -64,9 +64,7 @@ Develop mediation models from driver, target and mediator
 \examples{
 data(Tmem68)
  
-# Add noise to target, which is exactly Tmem68$mediator[,"Tmem68"]
 target <- Tmem68$target
-target <- target + rnorm(length(target), sd = 0.25)
 
 # Reconstruct 8-allele genotype probabilities.
 driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)

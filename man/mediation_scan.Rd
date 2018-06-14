@@ -72,10 +72,8 @@ i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 }
 \examples{
 data(Tmem68)
-m <- match("Tmem68", Tmem68$annotation$symbol) 
-# Add noise to target, which is exactly Tmem68Rmediator[,"Tmem68"]
 target <- Tmem68$target
-target <- target + rnorm(length(target), sd = 0.25)
+
 med_scan <- mediation_scan(target = target,
                       mediator = Tmem68$mediator,
                       driver = Tmem68$qtl.geno,

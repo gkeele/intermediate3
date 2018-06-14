@@ -21,7 +21,7 @@
 #' @examples
 #' data(Tmem68)
 #' target <- cbind(Tmem68 = Tmem68$target)
-#' # Pick strongest mediator.
+#' # Pick strongest mediator that is not target.
 #' m <- match("Nnt", Tmem68$annotation$symbol)
 #' mediator <- Tmem68$mediator[, m, drop = FALSE]
 #' colnames(mediator) <- "Nnt"

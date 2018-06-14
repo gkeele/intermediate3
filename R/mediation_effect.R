@@ -63,6 +63,35 @@ ggplot_mediation_effect <- function(object,
         mediator %in% unique(mediator)[seq_len(max_facet)]),
       level = factor(driver_names[level], names(colors)),
       mediator = factor(mediator, unique(mediator)))
+  
+  tmpfn <- function(object) {
+    if(!nrow(object))
+      return(NULL)
+    sum_object <- 
+      purrr::map(
+        split(object, object$response),
+        function(x) c(mean = mean(x$effect), sd = sd(x$effect)))
+    sum_object$adjusted <- sum_object$target
+    object <- split(object, object$response)
+    for(i in names(object)) {
+      object[[i]] <-
+        dplyr::mutate(
+          object[[i]],
+          effect = (effect - sum_object[[i]]["mean"]) / sum_object[[i]]["sd"])
+    }
+    dplyr::bind_rows(object)
+  }
+  object <- 
+    dplyr::bind_rows(
+      purrr::map(
+        split(object, object$mediator),
+        function(x) {
+          dplyr::bind_rows(
+            purrr::map(
+              split(object, object$triad),
+              tmpfn))
+        }))
+  
   ggplot2::ggplot(object) +
     ggplot2::aes(response, effect, color = level, group = level) +
     ggplot2::geom_line() +
