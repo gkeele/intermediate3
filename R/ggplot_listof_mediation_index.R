@@ -13,7 +13,11 @@ ggplot_listof_mediation_index <- function(x,
                                           minpvalue = 0.05, ...) {
   # Remake listof as mediation_index object.
   out <- bind_mediation_index(x)
-
+  out$best <-
+    dplyr::filter(
+      out$best,
+      pvalue <= minpvalue)
+  
   plot_type <- match.arg(plot_type)
 
   switch(

@@ -1,5 +1,5 @@
 #' @export
-bind_mediation_index <- function(object, minpvalue = 0.05, ...) {
+bind_mediation_index <- function(object, ...) {
   # Remake one element as mediation_index object.
   out <- object[[1]]
   
@@ -10,11 +10,6 @@ bind_mediation_index <- function(object, minpvalue = 0.05, ...) {
         object[[i]],
         .id = "mediator_id")
   }
-  out$best <-
-    dplyr::filter(
-      out$best,
-      !is.na(pvalue),
-      pvalue <= minpvalue)
 
   isnt <- !sapply(object$normF, is.null)
   out$normF <- {

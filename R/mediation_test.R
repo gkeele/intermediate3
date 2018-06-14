@@ -137,17 +137,10 @@ mediation_test <- function(target, mediator, driver, annotation,
       dplyr::rename(
         dplyr::mutate(
           dplyr::left_join(
-            dplyr::ungroup(
-              dplyr::summarize(
-                dplyr::group_by(
-                  result$test,
-                  id),
-                model = model[which.min(pvalue)[1]],
-                LR = LR[which.min(pvalue)[1]],
-                IC = IC[which.min(pvalue)[1]],
-                alt = alt[which.min(pvalue)[1]],
-                df = df[which.min(pvalue)[1]],
-                pvalue = pvalue[which.min(pvalue)[1]])),
+            dplyr::bind_rows(
+              purrr::map(
+                split(result$test, result$test$id),
+                function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
             annotation,
             by = "id"),
           mediation = dplyr::filter(result$fit, response == "mediation")$LR,
