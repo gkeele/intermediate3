@@ -25,7 +25,8 @@
 mediation_qtl2 <- function(target, mediator,
                            annotation, covar_tar, covar_med, kinship,
                            genoprobs, map,
-                           drop_lod = 1.5, query_variant,
+                           drop_lod = 1.5, min_lod = 3,
+                           query_variant,
                            cores = 1, target_scan) {
 
   chr_id <- names(genoprobs)
@@ -60,7 +61,8 @@ mediation_qtl2 <- function(target, mediator,
       qtl2::top_snps(
         target_scan$lod,
         target_scan$snpinfo),
-      lod >= max(lod) - drop_lod)
+      lod >= max(lod) - drop_lod,
+      lod >= min_lod)
   ts_sdp <- unique(ts$sdp)
   ts_sdp <- unique(c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
   
@@ -76,7 +78,7 @@ mediation_qtl2 <- function(target, mediator,
 
   # Create annotation from snpinfo with driver names.
   annot_driver <- dplyr::rename(snpinfo, id = "snp_id")
-  annot_driver$driver <- dimnames(driver_med)[[3]]
+  annot_driver$driver_names <- dimnames(driver_med)[[3]]
 
   # Reduce to common IDs
   m <- qtl2::get_common_ids(

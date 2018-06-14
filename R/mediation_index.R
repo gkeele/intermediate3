@@ -75,7 +75,7 @@ mediation_index <- function(target, mediator, driver = NULL,
   # Propagate annotation over 
   annotation <- annotation[rep(1, nmed),, drop = FALSE]
   annotation$id <- colnames(mediator)
-  annotation$driver <- colnames(mediator)
+  annotation$driver_names <- colnames(mediator)
   stopifnot(length(driver_index) == nmed)
   annotation[[index_name]] <- driver_index
   

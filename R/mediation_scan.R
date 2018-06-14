@@ -99,7 +99,7 @@ mediation_scan <- function(target,
   
   mapfn <- function(x, target, covar, driver, loglik0) {
     if(length(dim(driver)) > 2) {
-      if(is.null(dcol <- x$annotation$driver))
+      if(is.null(dcol <- x$annotation$driver_names))
         driver <- driver[,,1]
       else
         driver <- driver[,, dcol]

@@ -121,11 +121,23 @@ mediation_test <- function(target, mediator, driver, annotation,
   if(!is.null(result$normF) && all(is.na(result$normF)))
     result$normF <- NULL
   
-  result$driver <- {
+  result$driver_names <- {
     if(is.null(driver_med)) NULL
     else {
       if(is.array(driver_med)) dimnames(driver_med)[[3]]
       else names(driver_med)
+    }
+  }
+  
+  result$driver_levels <- {
+    if(!is.null(driver))
+      colnames(driver)
+    else {
+      if(is.null(driver_med)) NULL
+      else {
+        if(is.array(driver_med)) colnames(driver_med)
+        else colnames(driver_med[[1]])
+      }
     }
   }
   
@@ -168,7 +180,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   covar_tar <- covar_df_mx(covar_tar)
   intcovar <- covar_df_mx(intcovar)
   
-  use_1_driver <- is.null(annotation$driver) | is.null(driver_med)
+  use_1_driver <- is.null(annotation$driver_names) | is.null(driver_med)
   if(use_1_driver & !is.null(driver_med))
     driver_med <- NULL
   

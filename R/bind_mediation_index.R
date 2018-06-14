@@ -12,11 +12,15 @@ bind_mediation_index <- function(object, ...) {
         .id = "mediator_id")
   }
   # Bind elements that are vectors; set to NULL if empty.
-  for(i in c("normF","driver")) {
+  for(i in c("normF","driver_names","driver_levels")) {
     isnt <- !sapply(object[[i]], is.null)
     out[[i]] <- {
-      if(any(isnt))
-        as.data.frame(t(as.data.frame(object[[i]][isnt])))
+      if(any(isnt)) {
+        if(i == "normF")
+          as.data.frame(t(as.data.frame(object[[i]][isnt])))
+        else
+          object[[i]][isnt]
+      }
       else
         NULL
     }

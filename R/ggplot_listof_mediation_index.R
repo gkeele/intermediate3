@@ -30,13 +30,15 @@ ggplot_listof_mediation_index <- function(x,
     independent =,
     undecided = {
       out$best <-
-        dplyr::rename(
-          dplyr::select(
-            dplyr::filter(
-              out$best,
-              triad == plot_type),
-            -pattern),
-          pattern = "symbol")
+        dplyr::mutate(
+          dplyr::rename(
+            dplyr::select(
+              dplyr::filter(
+                out$best,
+                triad == plot_type),
+              -pattern),
+            pattern = "symbol"),
+          pattern = reorder(pattern, -pvalue))
       if(!nrow(out$best))
         return(NULL)
       ggplot_mediation_index(out) +

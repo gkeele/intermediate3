@@ -5,7 +5,8 @@
 \title{Test mediation across set of indexed drivers for `qtl2` data}
 \usage{
 mediation_qtl2(target, mediator, annotation, covar_tar, covar_med, kinship,
-  genoprobs, map, drop_lod = 1.5, query_variant, cores = 1, target_scan)
+  genoprobs, map, drop_lod = 1.5, min_lod = 3, query_variant, cores = 1,
+  target_scan)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}

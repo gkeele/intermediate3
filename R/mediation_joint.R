@@ -106,9 +106,9 @@ fit_joint <- function(object, driver, target,
   # Make sure we have driver or driver_med.
   if(!is.null(driver_med)) {
     if(is.array(driver_med))
-      driver_med <- driver_med[,, object[[2]]$driver]
+      driver_med <- driver_med[,, object[[2]]$driver_names]
     else # must be list
-      driver_med <- driver_med[[object[[2]]$driver]]
+      driver_med <- driver_med[[object[[2]]$driver_names]]
   }
   if(is.null(driver)) {
     if(!is.null(driver_med))
