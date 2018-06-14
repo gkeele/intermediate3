@@ -121,16 +121,13 @@ mediation_test <- function(target, mediator, driver, annotation,
   if(!is.null(result$normF) && all(is.na(result$normF)))
     result$normF <- NULL
   
-  result$driver <- 
-    list(
-      target = colnames(driver),
-      mediator = {
-        if(is.null(driver_med)) colnames(driver)
-        else {
-          if(is.array(driver_med)) dimnames(driver_med)[[3]]
-          else names(driver_med)
-        }
-      })
+  result$driver <- {
+    if(is.null(driver_med)) NULL
+    else {
+      if(is.array(driver_med)) dimnames(driver_med)[[3]]
+      else names(driver_med)
+    }
+  }
   
   result$best <-
     dplyr::arrange(

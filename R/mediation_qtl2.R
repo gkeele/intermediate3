@@ -51,20 +51,21 @@ mediation_qtl2 <- function(target, mediator,
         cores = cores,
         keep_all_snps = FALSE)
   }
+
+  # Get alleles in genoprobs  
+  prob_alleles <- attr(genoprobs, "alleles")
+  # Get top SNPs (and their reflection)
   ts <- 
-    dplyr::arrange(
+    dplyr::filter(
       qtl2::top_snps(
         target_scan$lod,
         target_scan$snpinfo),
-      dplyr::desc(lod))
-  ts_sdp <- ts$sdp[1]
-
-  prob_alleles <- attr(genoprobs, "alleles")
+      lod >= max(lod) - drop_lod)
+  ts_sdp <- unique(ts$sdp)
+  ts_sdp <- unique(c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
   
   # Get SNP probabilities for SNPs with same sdp as target peak.
-  # Be careful to check for reflection of pattern.
-  m <- which(target_scan$snpinfo$sdp %in%
-               c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
+  m <- which(target_scan$snpinfo$sdp %in% ts_sdp)
   snpinfo <- target_scan$snpinfo[m,, drop = FALSE]
   snpinfo$index <- seq_len(nrow(snpinfo))
 
@@ -121,6 +122,7 @@ mediation_qtl2 <- function(target, mediator,
   # Add SNP distribution pattern (sdp).
   m <- match(med_joint$id, med_index$best$id)
   med_index$best$sdp <- med_joint$sdp[m]
+  ts_sdp <- unique(med_index$best$sdp)
 
   ## Add in all SNPS to best
   # Get all SNPs in interval with same sdp.
@@ -131,7 +133,7 @@ mediation_qtl2 <- function(target, mediator,
         query_variant(chr_id, start, end),
         pos >= min(med_index$best$pos),
         pos <= max(med_index$best$pos),
-        sdp %in% unique(med_index$best$sdp)))
+        sdp %in% ts_sdp))
 
   # Match up index for joining.
   m <- match(med_index$best$id, topsnps$snp_id)
