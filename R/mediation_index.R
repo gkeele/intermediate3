@@ -19,7 +19,7 @@
 #' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
 #' @importFrom tidyr gather
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
-#' geom_hline geom_point geom_vline ggplot guides guide_legend
+#' geom_hline geom_point geom_rug geom_vline ggplot guides guide_legend
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
 #' @importFrom grid grid.newpage pushViewport viewport grid.layout
 #' @importFrom RColorBrewer brewer.pal
@@ -102,8 +102,8 @@ autoplot.mediation_index <- function(x, ...)
   ggplot_mediation_index(x, ...)
 #' @export
 #' @rdname mediation_index
-ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...) {
-  type <- match.arg(type)
+ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5, ...) {
+  response <- match.arg(response)
   index_name <- x$params$index_name
   
   ## Somehow index_name is not propagating through mediation_test.
@@ -119,7 +119,7 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...)
   
   p <- ggplot2::ggplot(best)
   switch(
-    type,
+    response,
     pvalue = {
       p <- p +
         ggplot2::aes(index, -log10(pvalue))
@@ -133,9 +133,10 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...)
     p <- p + ggplot2::aes(col = pattern)
   p <- p +
     ggplot2::aes(group = triad, id = id)
-  if(!is.null(x$params$target_index)) {
-    p <- p +
-      ggplot2::geom_vline(xintercept = x$params$target_index, col = "gray")
+  if(!is.null(target_index <- x$params$target_index)) {
+    if(target_index >= min(best$index) & target_index <= max(best$index))
+      p <- p +
+        ggplot2::geom_vline(xintercept = target_index, col = "gray")
   }
   p <- p +
     ggplot2::geom_point(alpha = alpha) +
@@ -148,7 +149,7 @@ ggplot_mediation_index <- function(x, type = c("pvalue","IC"), alpha = 0.5, ...)
         map >= min(best$index),
         map <= max(best$index))
     p <- p +
-      geom_rug(aes(map), data = tmp, inherit.aes = FALSE, col = "gray")
+      ggplot2::geom_rug(aes(map), data = tmp, inherit.aes = FALSE, col = "gray")
     
   }
   p
