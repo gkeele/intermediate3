@@ -10,9 +10,10 @@ autoplot.listof_mediation_qtl2 <- function(x, ...)
 #' @rdname mediation_qtl2
 ggplot_listof_mediation_qtl2 <- function(x, 
                                          plot_type = c("all","causal","reactive","independent","undecided"),
-                                         minpvalue = 0.05, ...) {
+                                         minpvalue = 0.05,
+                                         id_name = "mediator_id", ...) {
   # Remake listof as mediation_qtl2 object.
-  out <- bind_mediation_qtl2(x)
+  out <- bind_mediation_index(x, id_name)
   out$best <-
     dplyr::filter(
       out$best,
@@ -31,17 +32,12 @@ ggplot_listof_mediation_qtl2 <- function(x,
     undecided = {
       out$best <-
         dplyr::mutate(
-          dplyr::rename(
-            dplyr::select(
-              dplyr::filter(
-                out$best,
-                triad == plot_type),
-              -pattern),
-            pattern = "symbol"),
-          pattern = reorder(pattern, -pvalue))
+          dplyr::filter(
+            out$best,
+            triad == plot_type),
+          symbol = reorder(symbol, -pvalue))
       if(!nrow(out$best))
         return(NULL)
-      ggplot_mediation_qtl2(out) +
-        ggplot2::guides(color = ggplot2::guide_legend("Mediator"))
+      ggplot_mediation_qtl2(out, pattern_name = "symbol")
     })
 }

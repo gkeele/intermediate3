@@ -14,6 +14,7 @@
 #' @param query_variant function to query variant database
 #' @param cores number of cores to use
 #' @param target_scan optional object from [qtl2::scan1snps()] for target (created if missing)
+#' @param ... additional parameters for [mediation_index()]
 #'
 #' @importFrom qtl2 genoprob_to_snpprob get_common_ids scan1snps top_snps
 #' @importFrom dplyr arrange desc distinct filter mutate rename
@@ -27,7 +28,7 @@ mediation_qtl2 <- function(target, mediator,
                            genoprobs, map,
                            drop_lod = 1.5, min_lod = 3,
                            query_variant,
-                           cores = 1, target_scan) {
+                           cores = 1, target_scan, ...) {
 
   chr_id <- names(genoprobs)
   if(length(chr_id) > 1) {
@@ -119,7 +120,7 @@ mediation_qtl2 <- function(target, mediator,
       covar_tar,
       kinship,
       driver_med[,, med_joint$id, drop = FALSE],
-      driver_index = med_joint$pos)
+      driver_index = med_joint$pos, ...)
   
   # Add SNP distribution pattern (sdp).
   m <- match(med_joint$id, med_index$best$id)
@@ -189,11 +190,18 @@ autoplot.mediation_qtl2 <- function(x, ...)
   ggplot_mediation_qtl2(x, ...)
 #' @export
 #' @rdname mediation_qtl2
-ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"), ...) {
+ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"), 
+                                  pattern_name = "pattern", ...) {
   best <- 
-    dplyr::filter(
-      x$best,
-      pos_end > pos_start)
+    dplyr::rename(
+      dplyr::filter(
+        x$best,
+        pos_end > pos_start),
+      index1 = "pos_start",
+      index2 = "pos_end",
+      id = "snp_id")
+  if(!(pattern_name %in% names(best)))
+    best$pattern <- "black"
   
   # Fix up x$best for plot as mediation_index object
   x$best <-
@@ -204,25 +212,35 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"), ...) {
           id = snp_id),
         place, pos, dplyr::contains("pos_")),
       -place)
+  
 
-  p <- ggplot_mediation_index(x, response, ...)
-  switch(response,
-         pvalue = {
-           p + ggplot2::geom_segment(
-             aes(x = pos_start, 
-                 xend = pos_end, 
-                 y = -log10(pvalue),
-                 yend = -log10(pvalue)),
-             data = best,
-             inherit.aes = FALSE)
-         },
-         IC = {
-           p + ggplot2::geom_segment(
-             aes(x = pos_start, 
-                 xend = pos_end, 
-                 y = IC,
-                 yend = IC),
-             data = best,
-             inherit.aes = FALSE)
-         })
+  response <- match.arg(response)
+  p <- ggplot_mediation_index(x, response, pattern_name = pattern_name, ...)
+  switch(
+    response,
+    pvalue = { 
+      p <- p + 
+        ggplot2::geom_segment(
+          aes(x = index1, 
+              xend = index2, 
+              y = -log10(pvalue),
+              yend = -log10(pvalue),
+              col = get(pattern_name),
+              id = id, pattern = pattern),
+          data = best,
+          inherit.aes = FALSE)
+      },
+    IC = {
+      p <- p + 
+        ggplot2::geom_segment(
+          aes(x = index1, 
+              xend = index2, 
+              y = IC,
+              yend = IC,
+              col = get(pattern_name),
+              id = id, pattern = pattern),
+          data = best,
+          inherit.aes = FALSE)
+      })
+  p
 }

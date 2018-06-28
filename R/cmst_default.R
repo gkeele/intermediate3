@@ -5,6 +5,7 @@ cmst_default <- function(object, driver, target,
                          common = TRUE, 
                          flavor = "B",
                          fitRelate = TRUE,
+                         model_subset = modelset,
                          ...) {
   
   # Make sure we have driver or driver_med.
@@ -42,6 +43,15 @@ cmst_default <- function(object, driver, target,
     purrr::transpose(
       purrr::map(combos[,1:4],
                  combine_models, fits[c("LR", "indLR", "df")]))
+  
+  modelset <- c("causal", "reactive", "independent", "undecided")
+  if(!all(modelin <- modelset %in% model_subset)) {
+    model_subset <- modelset[modelin]
+    if(length(model_subset) < 2)
+      stop("need at least two models to compare")
+    models <-
+      purrr::transpose(purrr::transpose(models)[model_subset])
+  }
   
   models$LR <- unlist(models$LR)
   models$indLR <- as.data.frame(models$indLR)

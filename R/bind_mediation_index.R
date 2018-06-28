@@ -1,5 +1,5 @@
 #' @export
-bind_mediation_index <- function(object, ...) {
+bind_mediation_index <- function(object, id_name = "mediator_id", ...) {
   # Remake one element as mediation_index object.
   out <- object[[1]]
   
@@ -9,7 +9,7 @@ bind_mediation_index <- function(object, ...) {
     out[[i]] <-
       dplyr::bind_rows(
         object[[i]],
-        .id = "mediator_id")
+        .id = id_name)
   }
   # Bind elements that are vectors; set to NULL if empty.
   for(i in c("normF","driver_names","driver_levels")) {

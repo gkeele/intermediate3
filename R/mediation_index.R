@@ -102,7 +102,8 @@ autoplot.mediation_index <- function(x, ...)
   ggplot_mediation_index(x, ...)
 #' @export
 #' @rdname mediation_index
-ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5, ...) {
+ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
+                                   pattern_name = "pattern", ...) {
   response <- match.arg(response)
   index_name <- x$params$index_name
   
@@ -129,8 +130,13 @@ ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5, 
         ggplot2::aes(index, IC) +
         ggplot2::ylab("BIC on log10 scale")
       })
-  if("pattern" %in% names(best))
-    p <- p + ggplot2::aes(col = pattern)
+  if(pattern_name %in% names(best)) {
+    p <- p + 
+      ggplot2::aes(col = get(pattern_name)) +
+      ggplot2::guides(color = ggplot2::guide_legend(pattern_name))
+  }
+  if(pattern_name != "pattern" & "pattern" %in% names(best))
+    p <- p + ggplot2::aes(pattern = pattern)
   p <- p +
     ggplot2::aes(group = triad, id = id)
   if(!is.null(target_index <- x$params$target_index)) {
