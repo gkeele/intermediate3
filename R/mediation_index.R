@@ -11,12 +11,14 @@
 #' @param kinship optional kinship matrix among individuals
 #' @param driver_med driver array for mediators
 #' @param driver_index index to driver array
+#' @param facet_name name of facet column (default `chr`)
+#' @param index_name name of index column (default `pos`)
 #' @param ... additional parameters
 #'
 #' @importFrom purrr map transpose
 #' @importFrom stringr str_replace
 #' @importFrom qtl2 decomp_kinship fit1 get_common_ids
-#' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
+#' @importFrom dplyr arrange as_tibble bind_rows desc filter group_by left_join mutate one_of rename ungroup
 #' @importFrom tidyr gather
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
 #' geom_hline geom_point geom_rug geom_vline ggplot guides guide_legend
@@ -56,7 +58,7 @@
 mediation_index <- function(target, mediator, driver = NULL,
                             annotation = NULL, covar_tar = NULL, covar_med = NULL, kinship = NULL,
                             driver_med = NULL, driver_index = colnames(mediator),
-                            index_name = "pos", ...) {
+                            facet_name = "chr", index_name = "pos", ...) {
   # Mediation test over interval
   
   nmed <- ifelse(is.array(driver_med), dim(driver_med)[3], length(driver_med))
@@ -76,6 +78,12 @@ mediation_index <- function(target, mediator, driver = NULL,
   annotation$driver_names <- colnames(mediator)
   stopifnot(length(driver_index) == nmed)
   annotation[[index_name]] <- driver_index
+  if(is.null(annotation[[facet_name]]))
+    annotation[[facet_name]] <- ""
+  if(!is.data.frame(annotation)) {
+    # Could happen if was NULL originally
+    annotation <- dplyr::as_tibble(annotation)
+  }
   
   #   run mediation test and find the best models (using BIC among the four models)
   out <- intermediate::mediation_test(

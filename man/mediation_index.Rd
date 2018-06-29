@@ -9,7 +9,8 @@
 \usage{
 mediation_index(target, mediator, driver = NULL, annotation = NULL,
   covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
-  driver_index = colnames(mediator), index_name = "pos", ...)
+  driver_index = colnames(mediator), facet_name = "chr",
+  index_name = "pos", ...)
 
 \method{plot}{mediation_index}(x, ...)
 
@@ -36,6 +37,10 @@ ggplot_mediation_index(x, response = c("pvalue", "IC"), alpha = 0.5,
 \item{driver_med}{driver array for mediators}
 
 \item{driver_index}{index to driver array}
+
+\item{facet_name}{name of facet column (default `chr`)}
+
+\item{index_name}{name of index column (default `pos`)}
 
 \item{...}{additional parameters}
 }

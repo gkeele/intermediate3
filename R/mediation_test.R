@@ -224,16 +224,18 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   
   # Reorganize annotation and mediator data.
   # Need to make sure elements of mediator have same ids.
-  annotation <- dplyr::filter(
-    annotation,
-    id %in% colnames(mediator))
-  # Make sure annotation is in same order as mediator.
-  m <- match(colnames(mediator), annotation$id)
-  if(any(is.na(m))) {
-    cat("mediator and annotation do not match\n", file = stderr())
-    return(NULL)
+  if(!is.null(annotation)) {
+    annotation <- dplyr::filter(
+      annotation,
+      id %in% colnames(mediator))
+    # Make sure annotation is in same order as mediator.
+    m <- match(colnames(mediator), annotation$id)
+    if(any(is.na(m))) {
+      cat("mediator and annotation do not match\n", file = stderr())
+      return(NULL)
+    }
+    annotation <- annotation[m,]
   }
-  annotation <- annotation[m,]
   
   # Workhorse: CMST on each mediator.
   mediator <- as.data.frame(mediator)
