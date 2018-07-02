@@ -152,7 +152,9 @@ mediation_qtl2 <- function(target, mediator,
             topsnps,
             index %in% med_index$best$index),
           sdp, index),
-        snp_id = ifelse(n() == 1, snp_id, paste0("snp_ct_", n())),
+        id = ifelse(n() == 1, # id is snp_id or range of snp_id's
+                        snp_id, 
+                        paste(snp_id[1], n(), snp_id[n()], sep = "_")),
         pos_start = pos[1],
         pos_end = pos[n()],
         ensembl_gene = paste(unique(ensembl_gene), collapse = ","),
@@ -198,8 +200,7 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
         x$best,
         pos_end > pos_start),
       index1 = "pos_start",
-      index2 = "pos_end",
-      id = "snp_id")
+      index2 = "pos_end")
   if(!(pattern_name %in% names(best)))
     best$pattern <- "black"
   
@@ -207,9 +208,7 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
   x$best <-
     dplyr::select(
       tidyr::gather(
-        dplyr::mutate(
-          x$best,
-          id = snp_id),
+        x$best,
         place, pos, dplyr::contains("pos_")),
       -place)
   
@@ -225,8 +224,7 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
               xend = index2, 
               y = -log10(pvalue),
               yend = -log10(pvalue),
-              col = get(pattern_name),
-              id = id, pattern = pattern),
+              col = get(pattern_name)),
           data = best,
           inherit.aes = FALSE)
       },
@@ -237,8 +235,7 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
               xend = index2, 
               y = IC,
               yend = IC,
-              col = get(pattern_name),
-              id = id, pattern = pattern),
+              col = get(pattern_name)),
           data = best,
           inherit.aes = FALSE)
       })

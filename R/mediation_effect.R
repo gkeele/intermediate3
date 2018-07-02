@@ -13,15 +13,24 @@
 #' ggplot_mediation_effect(out)
 #' 
 mediation_effect <- function(object,
-                          id_name = "^id$",
-                          driver_levels = unique(unlist(object$driver))) {
+                          id_name = "id",
+                          driver_levels = unique(unlist(object$driver_levels))) {
+  
+  for(element in c("best","fit")) {
+    if(id_name != "id" & "id" %in% names(object[[element]])) {
+      # Make sure we don't clash with column named id.
+      object[[element]]$id <- NULL
+    }
+    object[[element]] <- dplyr::rename(object[[element]], id = id_name)
+  }
+
   coefs <- 
     tidyr::gather(
       dplyr::rename(
         dplyr::inner_join(
           dplyr::select(
             object$best,
-            id, triad, pvalue, dplyr::matches(id_name)),
+            id, triad, pvalue),
           dplyr::mutate(
             dplyr::select(
               object$fit,
@@ -30,7 +39,7 @@ mediation_effect <- function(object,
             response = factor(response, c("mediator","target","adjusted"))),
           by = "id"),
         mediator = "id"),
-      level, effect, -mediator, -dplyr::matches(id_name), -triad, -pvalue, -response)
+      level, effect, -mediator, -triad, -pvalue, -response)
   
   if(length(m <- grep(id_name, names(coefs)))) {
     coefs$mediator <- coefs[[m]]
@@ -71,7 +80,8 @@ ggplot_mediation_effect <- function(object,
       purrr::map(
         split(object, object$response),
         function(x) c(mean = mean(x$effect), sd = sd(x$effect)))
-    sum_object$adjusted <- sum_object$target
+    # Use SD of target for adjusted
+    sum_object$adjusted["sd"] <- sum_object$target["sd"]
     object <- split(object, object$response)
     for(i in names(object)) {
       object[[i]] <-

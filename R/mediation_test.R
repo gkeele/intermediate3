@@ -92,6 +92,20 @@ mediation_test <- function(target, mediator, driver, annotation,
                    joint    = normJointIUCMST,
                    normal   = normIUCMST)
   
+  if(!is.matrix(mediator)) {
+    mediator <- as.matrix(mediator)
+    colnames(mediator) <- "mediator"
+  }
+  if(!is.null(annotation)) {
+    annotation <- purrr::transpose(
+      # Make sure order is maintained to match mediator.
+      dplyr::mutate(
+        annotation,
+        id = factor(id, id)))
+  } else {
+    annotation <- data.frame(id = factor(colnames(mediator), colnames(mediator)))
+  }
+  
   result <- mediation_test_internal(target, mediator, driver, annotation,
                                     covar_tar, covar_med, kinship,
                                     driver_med, intcovar,
@@ -138,6 +152,8 @@ mediation_test <- function(target, mediator, driver, annotation,
       }
     }
   }
+  
+  annotation <- dplyr::mutate(annotation, id = as.character(id))
   
   result$best <-
     dplyr::arrange(
@@ -239,15 +255,11 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   
   # Workhorse: CMST on each mediator.
   mediator <- as.data.frame(mediator)
+    
   purrr::map(
     purrr::transpose(list(
       mediator = mediator,
-      annotation = 
-        purrr::transpose(
-          # Make sure order is maintained to match mediator.
-          dplyr::mutate(
-            annotation,
-            id = factor(id, id))))),
+      annotation = annotation)),
     cmstfn, driver, target, 
     kinship, covar_tar, covar_med,
     driver_med, intcovar,
@@ -268,36 +280,19 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
   # Change out facet and index names for now.
   facet_name <- object$params$facet_name
   index_name <- object$params$index_name
-  if(index_name != "index" & "index" %in% names(object$best)) {
-    # Make sure we don't clash with column named index.
-    object$best$index <- NULL
-  }
-  if(facet_name != "facet" & "facet" %in% names(object$best)) {
-    # Make sure we don't clash with column named facet.
-    object$best$facet <- NULL
-  }
-  
-  best <-
-    dplyr::rename(
-      object$best,
-      facet = facet_name,
-      index = index_name)
-  
+
   out <- dplyr::select(
     dplyr::mutate(
       dplyr::arrange(
-        best,
+        object$best,
         pvalue),
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
       mediation = signif(mediation, 3),
       LRmed = signif(LRmed, 3)),
-    id, symbol, facet, index, mediation, triad, pvalue, LRmed,
+    id, dplyr::matches(facet_name), dplyr::matches(index_name), mediation, triad, pvalue, LRmed,
     dplyr::everything())
   
-  # Change facet and index names back in now.
-  names(out)[3:4] <- c(facet_name, index_name)
-
   if(lod) {
     out <- 
       dplyr::rename(
