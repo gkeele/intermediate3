@@ -73,6 +73,7 @@ i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 \examples{
 data(Tmem68)
 target <- Tmem68$target
+m <- match("Tmem68", Tmem68$annotation$symbol)
 
 med_scan <- mediation_scan(target = target,
                       mediator = Tmem68$mediator,

@@ -9,12 +9,7 @@ cmst_default <- function(object, driver, target,
                          ...) {
   
   # Make sure we have driver or driver_med.
-  if(!is.null(driver_med)) {
-    if(is.array(driver_med))
-      driver_med <- driver_med[,, object[[2]]$driver_names]
-    else # must be list
-      driver_med <- driver_med[[object[[2]]$driver_names]]
-  }
+  driver_med <- get_driver_med(driver_med, object)
   if(is.null(driver)) {
     if(!is.null(driver_med))
       driver <- driver_med
@@ -121,4 +116,17 @@ combine_models <- function(combos, fits) {
        indLR = fits$indLR %*% combos,
        df = sum(fits$df * combos),
        coef = fits$coef)
+}
+get_driver_med <- function(driver_med, object) {
+  if(!is.null(driver_med)) {
+    driver_names <- object[[2]]$driver_names
+    if(is.null(driver_names))
+      stop("must supply driver_names in annotation if including driver_med")
+    
+    if(is.array(driver_med))
+      driver_med <- driver_med[,, driver_names]
+    else # must be list
+      driver_med <- driver_med[[driver_names]]
+  }
+  driver_med
 }

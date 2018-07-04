@@ -71,8 +71,6 @@ mediation_joint <- function(target, mediator, driver, annotation,
   if(ncol(mediator) == 1) {
     mediator <- mediator[, rep(1, nrow(annotation)), drop = FALSE]
     colnames(mediator) <- annotation$id
-  } else {
-    stopifnot(ncol(mediator) == nrow(annotation))
   }
   
   result <- mediation_test_internal(target, mediator, driver, annotation,
@@ -102,12 +100,7 @@ fit_joint <- function(object, driver, target,
                       ...) {
   
   # Make sure we have driver or driver_med.
-  if(!is.null(driver_med)) {
-    if(is.array(driver_med))
-      driver_med <- driver_med[,, object[[2]]$driver_names]
-    else # must be list
-      driver_med <- driver_med[[object[[2]]$driver_names]]
-  }
+  driver_med <- get_driver_med(driver_med, object)
   if(is.null(driver)) {
     if(!is.null(driver_med))
       driver <- driver_med

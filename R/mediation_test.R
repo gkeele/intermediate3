@@ -96,15 +96,6 @@ mediation_test <- function(target, mediator, driver, annotation,
     mediator <- as.matrix(mediator)
     colnames(mediator) <- "mediator"
   }
-  if(!is.null(annotation)) {
-    annotation <- purrr::transpose(
-      # Make sure order is maintained to match mediator.
-      dplyr::mutate(
-        annotation,
-        id = factor(id, id)))
-  } else {
-    annotation <- data.frame(id = factor(colnames(mediator), colnames(mediator)))
-  }
   
   result <- mediation_test_internal(target, mediator, driver, annotation,
                                     covar_tar, covar_med, kinship,
@@ -153,21 +144,40 @@ mediation_test <- function(target, mediator, driver, annotation,
     }
   }
   
-  annotation <- dplyr::mutate(annotation, id = as.character(id))
+  if(is.null(annotation))
+    annotation <- data.frame(id = colnames(mediator))
   
   result$best <-
     dplyr::arrange(
       dplyr::rename(
-        dplyr::mutate(
+        dplyr::left_join(
           dplyr::left_join(
-            dplyr::bind_rows(
-              purrr::map(
-                split(result$test, result$test$id),
-                function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
-            annotation,
+            dplyr::left_join(
+              # Join best test with annotation.
+              dplyr::bind_rows(
+                purrr::map(
+                  split(result$test, result$test$id),
+                  function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
+              annotation,
+              by = "id"),
+            # Join with mediation LR.
+            dplyr::rename(
+              dplyr::select(
+                dplyr::filter(
+                  result$fit,
+                  response == "mediation"),
+                id, LR),
+              mediation = "LR"),
             by = "id"),
-          mediation = dplyr::filter(result$fit, response == "mediation")$LR,
-          LRmed = dplyr::filter(result$fit, response == "mediator")$LR),
+          # Join with mediator LR.
+          dplyr::rename(
+            dplyr::select(
+              dplyr::filter(
+                result$fit,
+                response == "mediator"),
+              id, LR),
+            LRmed = "LR"),
+          by = "id"),
         triad = "model"),
       pvalue)
   
@@ -250,16 +260,18 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
       cat("mediator and annotation do not match\n", file = stderr())
       return(NULL)
     }
-    annotation <- annotation[m,]
+    annotation <- annotation[m,, drop = FALSE]
+  } else {
+    annotation <- data.frame(id = colnames(mediator))
   }
-  
+
   # Workhorse: CMST on each mediator.
   mediator <- as.data.frame(mediator)
     
   purrr::map(
     purrr::transpose(list(
       mediator = mediator,
-      annotation = annotation)),
+      annotation = purrr::transpose(annotation))),
     cmstfn, driver, target, 
     kinship, covar_tar, covar_med,
     driver_med, intcovar,
@@ -285,7 +297,7 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
     dplyr::mutate(
       dplyr::arrange(
         object$best,
-        pvalue),
+        pvalue, id),
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
       mediation = signif(mediation, 3),

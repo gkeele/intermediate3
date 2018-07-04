@@ -52,7 +52,8 @@ mediation_effect <- function(object,
 #' @export
 ggplot_mediation_effect <- function(object,
                               colors = qtl2::CCcolors,
-                              max_facet = 12) {
+                              max_facet = 12,
+                              size_geom = 2) {
   udriver <- unique(object$level)
   if(length(colors) != length(udriver)) {
     colors <- seq_along(udriver)
@@ -104,8 +105,8 @@ ggplot_mediation_effect <- function(object,
   
   ggplot2::ggplot(object) +
     ggplot2::aes(response, effect, color = level, group = level) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point(size=2) +
+    ggplot2::geom_line(size = size_geom) +
+    ggplot2::geom_point(size = size_geom) +
     ggplot2::facet_wrap(~ mediator) +
     ggplot2::scale_color_manual(name = "driver",
                                 values = colors)
