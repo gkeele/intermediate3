@@ -21,7 +21,7 @@
 #' @importFrom stringr str_replace
 #' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
-#' @importFrom tidyr gather
+#' @importFrom tidyr gather spread
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
 #' geom_hline geom_point geom_vline ggplot 
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
@@ -152,31 +152,23 @@ mediation_test <- function(target, mediator, driver, annotation,
       dplyr::rename(
         dplyr::left_join(
           dplyr::left_join(
-            dplyr::left_join(
-              # Join best test with annotation.
-              dplyr::bind_rows(
-                purrr::map(
-                  split(result$test, result$test$id),
-                  function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
-              annotation,
-              by = "id"),
-            # Join with mediation LR.
-            dplyr::rename(
-              dplyr::select(
-                dplyr::filter(
-                  result$fit,
-                  response == "mediation"),
-                id, LR),
-              mediation = "LR"),
+            # Join best test with annotation.
+            dplyr::bind_rows(
+              purrr::map(
+                split(result$test, result$test$id),
+                function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
+            annotation,
             by = "id"),
-          # Join with mediator LR.
+          # Join with mediation and mediator LR.
           dplyr::rename(
-            dplyr::select(
+            tidyr::spread(
               dplyr::filter(
-                result$fit,
-                response == "mediator"),
-              id, LR),
-            LRmed = "LR"),
+                dplyr::select(
+                  result$fit,
+                  id, response, LR),
+                response %in% c("mediation", "mediator")),
+              response, LR),
+            LRmed = "mediator"),
           by = "id"),
         triad = "model"),
       pvalue)
