@@ -242,7 +242,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   
   # Reorganize annotation and mediator data.
   # Need to make sure elements of mediator have same ids.
-  if(!is.null(annotation)) {
+  if(!(driver_names <- is.null(annotation))) {
     annotation <- dplyr::filter(
       annotation,
       id %in% colnames(mediator))
@@ -252,18 +252,20 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
       cat("mediator and annotation do not match\n", file = stderr())
       return(NULL)
     }
-    annotation <- annotation[m,, drop = FALSE]
-  } else {
-    annotation <- data.frame(id = colnames(mediator))
+    driver_names <- annotation[m, "driver_names"]
   }
+  if(is.null(driver_names))
+    driver_names <- rep("", ncol(mediator))
+  names(driver_names) <- colnames(mediator)
 
   # Workhorse: CMST on each mediator.
-  mediator <- as.data.frame(mediator)
-    
+  mediator <- as.data.frame(mediator, make.names = FALSE)
+
   purrr::map(
-    purrr::transpose(list(
-      mediator = mediator,
-      annotation = purrr::transpose(annotation))),
+    purrr::transpose(
+      list(
+        mediator = mediator,
+        driver_names = driver_names)),
     cmstfn, driver, target, 
     kinship, covar_tar, covar_med,
     driver_med, intcovar,

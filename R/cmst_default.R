@@ -119,8 +119,8 @@ combine_models <- function(combos, fits) {
 }
 get_driver_med <- function(driver_med, object) {
   if(!is.null(driver_med)) {
-    driver_names <- object[[2]]$driver_names
-    if(is.null(driver_names))
+    driver_names <- object$driver_names
+    if(driver_names == "")
       stop("must supply driver_names in annotation if including driver_med")
     
     if(is.array(driver_med))
