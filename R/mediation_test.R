@@ -242,7 +242,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   
   # Reorganize annotation and mediator data.
   # Need to make sure elements of mediator have same ids.
-  if(!(driver_names <- is.null(annotation))) {
+  if(!is.null(annotation)) {
     annotation <- dplyr::filter(
       annotation,
       id %in% colnames(mediator))
@@ -252,7 +252,11 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
       cat("mediator and annotation do not match\n", file = stderr())
       return(NULL)
     }
-    driver_names <- annotation[m, "driver_names"]
+    driver_names <- annotation$driver_names
+    if(!is.null(driver_names))
+      driver_names <- driver_names[m]
+  } else {
+    driver_names <- NULL
   }
   if(is.null(driver_names))
     driver_names <- rep("", ncol(mediator))
@@ -296,7 +300,11 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
       pvalue = signif(pvalue, 3),
       mediation = signif(mediation, 3),
       LRmed = signif(LRmed, 3)),
-    id, dplyr::matches(facet_name), dplyr::matches(index_name), mediation, triad, pvalue, LRmed,
+    id, 
+    dplyr::matches("symbol"),
+    dplyr::matches(facet_name),
+    dplyr::matches(index_name),
+    mediation, triad, pvalue, LRmed,
     dplyr::everything())
   
   if(lod) {
