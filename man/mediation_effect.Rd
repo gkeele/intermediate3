@@ -2,13 +2,21 @@
 % Please edit documentation in R/mediation_effect.R
 \name{mediation_effect}
 \alias{mediation_effect}
+\alias{autoplot.mediation_effect}
+\alias{plot.mediation_effect}
 \title{Driver effect on target and mediator}
 \usage{
 mediation_effect(object, id_name = "id",
   driver_levels = unique(unlist(object$driver_levels)))
+
+\method{autoplot}{mediation_effect}(object, ...)
+
+\method{plot}{mediation_effect}(x, ...)
 }
 \arguments{
-\item{object}{data frame with effects}
+\item{object}{object from [mediation_test()]}
+
+\item{id_name}{name of identifier column}
 
 \item{driver_levels}{levels of driver}
 }

@@ -73,11 +73,12 @@ cmst_default <- function(object, driver, target,
   fit <- apply(fits$LR * combos[,5:7], 2, sum)
   coefs <- fits$coef[c(1,2,5)]
   names(coefs) <- names(fit)
-  coef_names <- unique(unlist(lapply(coefs, names)))
-  coefs <- lapply(coefs, function(x, coef_names) {
+  coef_names <- names(coefs[[1]])
+  coef_names <- coef_names[coef_names != ""]
+  coefs <- sapply(coefs, function(x, coef_names) {
     x[match(coef_names, names(x))]
   }, coef_names)
-  coefs <- t(as.data.frame(coefs, stringsAsFactors = FALSE))
+  coefs <- t(coefs)
   coefs <- 
     dplyr::select(
       dplyr::mutate(

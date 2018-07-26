@@ -97,6 +97,10 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     colnames(mediator) <- "mediator"
   }
   
+  # Convert any blank driver names to V1, V2, ...
+  driver <- driver_blank_names(driver)
+  driver_med <- driver_blank_names(driver_med)
+
   result <- mediation_test_internal(target, mediator, driver, annotation,
                                     covar_tar, covar_med, kinship,
                                     driver_med, intcovar,
@@ -319,4 +323,23 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
   }
   
   out
+}
+driver_blank_names <- function(driver) {
+  if(is.null(driver)) 
+    return(NULL)
+  
+  if(is.array(driver)) {
+    is_blank <- ("" == colnames(driver))
+    if(any(is_blank)) {
+      colnames(driver)[is_blank] <- paste0("V", seq_len(sum(is_blank)))
+    }
+  } else {
+    for(i in seq_along(driver)) {
+      is_blank <- ("" == colnames(driver[[i]]))
+      if(any(is_blank)) {
+        colnames(driver[[i]])[is_blank] <- paste0("V", seq_len(sum(is_blank)))
+      }
+    }
+  }
+  driver
 }

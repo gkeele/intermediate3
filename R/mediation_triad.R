@@ -51,6 +51,9 @@ mediation_triad <- function(target, mediator, driver,
   # Make sure covariates are numeric
   covar_tar <- covar_df_mx(covar_tar)
   covar_med <- covar_df_mx(covar_med)
+  
+  # Convert any blank driver names to V1, V2, ...
+  driver <- driver_blank_names(driver)
 
   # Would like to have option to have line per haplo.
   # But that requires some regression style approach, such as dividing up data
@@ -107,15 +110,18 @@ triad_data <- function(target, mediator, driver,
   # Set up point labels and groups.
   if(is.null(label_fn))
     label_fn <- function(driver, allele)
-      colnames(driver)[apply(driver, 1, function(x) which.max(x)[1])]
+      toupper(substr(colnames(driver), 1, 1))[apply(driver, 1, function(x) which.max(x)[1])]
   label <- label_fn(commons$driver, allele)
   if(is.null(group_fn))
     group_fn = function(label, a, b) label
   group <- as.character(group_fn(label, sdp, colnames(commons$driver)))
   
-  dat <- data.frame(commons$driver, commons$target, commons$mediator,
-             commons$covar_tar, commons$covar_med,
-             label = label, group = group)
+  dat <- data.frame(commons$driver, commons$target, commons$mediator)
+  if(length(commons$covar_tar))
+    dat <- data.frame(dat, commons$covar_tar)
+  if(length(commons$covar_med))
+    dat <- data.frame(dat, commons$covar_med)
+  dat <- data.frame(dat, label = label, group = group)
   
   if(!is.null(dat$sex))
     dat$Sex <- c("Female", "Male")[1 + dat$sex]
@@ -205,8 +211,14 @@ ggplot_mediation_triad <- function(x,
   }
   p
 }
+#' @rdname mediation_triad
 #' @export
-autoplot.mediation_triad <- function(x, ...) {
+autoplot.mediation_triad <- function(object, ...) {
+  ggplot_mediation_triad(object, ...)
+}
+#' @rdname mediation_triad
+#' @export
+plot.mediation_triad <- function(x, ...) {
   ggplot_mediation_triad(x, ...)
 }
 

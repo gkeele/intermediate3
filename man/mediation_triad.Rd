@@ -3,6 +3,8 @@
 \name{mediation_triad}
 \alias{mediation_triad}
 \alias{ggplot_mediation_triad}
+\alias{autoplot.mediation_triad}
+\alias{plot.mediation_triad}
 \title{Triad scatter plot for mediator and target}
 \usage{
 mediation_triad(target, mediator, driver, covar_tar = NULL,
@@ -12,6 +14,10 @@ ggplot_mediation_triad(x, tname = "target", mname = "mediator",
   dname = "driver", centerline = NULL, fitline = FALSE,
   main = paste(tname, "by", mname, "and", dname), colors = qtl2::CCcolors,
   ...)
+
+\method{autoplot}{mediation_triad}(object, ...)
+
+\method{plot}{mediation_triad}(x, ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}

@@ -2,7 +2,8 @@
 #' 
 #' Compare driver effect on mediator, target and target adjusted by mediator.
 #' 
-#' @param object data frame with effects
+#' @param object object from [mediation_test()]
+#' @param id_name name of identifier column
 #' @param driver_levels levels of driver
 #' 
 #' @export
@@ -112,5 +113,11 @@ ggplot_mediation_effect <- function(object,
                                 values = colors)
   
 }
+#' @rdname mediation_effect
 #' @export
-autoplot.mediation_effect <- function(...) ggplot_mediation_effect(...)
+autoplot.mediation_effect <- function(object, ...)
+  ggplot_mediation_effect(object, ...)
+#' @export
+#' @rdname mediation_effect
+plot.mediation_effect <- function(x, ...)
+  ggplot_mediation_effect(x, ...)
