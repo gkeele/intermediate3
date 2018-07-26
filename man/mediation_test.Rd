@@ -16,9 +16,9 @@ ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
   local_only = FALSE, significant = TRUE, lod = TRUE,
   target_index = NULL, ...)
 
-mediation_test(target, mediator, driver, annotation, covar_tar = NULL,
-  covar_med = NULL, kinship = NULL, driver_med = NULL, intcovar = NULL,
-  test = c("wilcoxon", "binomial", "joint", "normal"),
+mediation_test(target, mediator, driver, annotation = NULL,
+  covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
+  intcovar = NULL, test = c("wilcoxon", "binomial", "joint", "normal"),
   fitFunction = fitQtl2, facet_name = "chr", index_name = "pos", ...)
 }
 \arguments{

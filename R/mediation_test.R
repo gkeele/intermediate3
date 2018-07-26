@@ -64,7 +64,7 @@
 #'
 #' @export
 #'
-mediation_test <- function(target, mediator, driver, annotation,
+mediation_test <- function(target, mediator, driver, annotation = NULL,
                           covar_tar=NULL, covar_med=NULL, kinship=NULL,
                           driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
@@ -145,7 +145,8 @@ mediation_test <- function(target, mediator, driver, annotation,
   }
   
   if(is.null(annotation))
-    annotation <- data.frame(id = colnames(mediator))
+    annotation <- data.frame(id = colnames(mediator),
+                             stringsAsFactors = FALSE)
   
   result$best <-
     dplyr::arrange(

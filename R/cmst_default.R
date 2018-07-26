@@ -75,10 +75,7 @@ cmst_default <- function(object, driver, target,
   names(coefs) <- names(fit)
   coef_names <- unique(unlist(lapply(coefs, names)))
   coefs <- lapply(coefs, function(x, coef_names) {
-    out <- rep(NA, length(coef_names))
-    names(out) <- coef_names
-    out[names(x)] <- x
-    out
+    x[match(coef_names, names(x))]
   }, coef_names)
   coefs <- t(as.data.frame(coefs, stringsAsFactors = FALSE))
   coefs <- 
