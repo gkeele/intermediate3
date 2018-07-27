@@ -17,12 +17,11 @@ mediation_effect <- function(object,
                           id_name = "id",
                           driver_levels = unique(unlist(object$driver_levels))) {
   
-  for(element in c("best","fit")) {
-    if(id_name != "id" & "id" %in% names(object[[element]])) {
-      # Make sure we don't clash with column named id.
-      object[[element]]$id <- NULL
-    }
-    object[[element]] <- dplyr::rename(object[[element]], id = id_name)
+  if(id_name != "id" & id_name %in% names(object$best)) {
+    m <- match(object$fit$id, object$best$id)
+    object$fit$id <- object$best[[id_name]][m]
+    object$best$id <- object$best[[id_name]]
+    object$best[[id_name]] <- NULL
   }
 
   coefs <- 

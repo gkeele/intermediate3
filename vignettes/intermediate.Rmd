@@ -25,7 +25,7 @@ data(Tmem68)
 # target and Tmem68$mediator[,"Tmem68"] are identical.
 # so add some noise to make more interesting.
 target <- Tmem68$target
-target <- target + rnorm(length(target), sd = 0.5)
+#target <- target + rnorm(length(target), sd = 0.5)
 ```
 
 ```{r}
@@ -126,69 +126,33 @@ med_test <- mediation_test(target = target,
 plotly::ggplotly(autoplot(med_test))
 ```
 
+```{r}
+dat <- med_test$best
+dat$lod_tar <- med_test$params$target_LR / log(10)
+dat$lod_med <- dat$mediation / log(10)
+plotly::ggplotly(
+  ggplot(dat %>% filter(pvalue <= 0.05)) +
+    aes(lod_tar - lod_med, -log10(pvalue),
+        col = triad, symbol = symbol) +
+    geom_point(alpha = 0.5, size = 2))
+```
+
 ## Driver effects
 
 ```{r}
-meds <- 
-  dplyr::rename(
-    dplyr::mutate(
-      dplyr::select(
-        sum_med,
-        symbol, chr, pos, mediation, pvalue, dplyr::everything()),
-      mediation = mediation / log(10),
-      chr = as.character(chr),
-      LRmed = LRmed / log(10)),
-    lod_adj = "mediation",
-    mediator = "symbol",
-    lod_med = "LRmed")
+med_effect <- intermediate::mediation_effect(med_test, "symbol")
 ```
 
 ```{r}
-driver_levels <- LETTERS[1:8]
-```
-
-```{r}
-peaks <- fitDefault(driver, target,, covar)
-peaks <- data.frame(target = "target",
-                    pos_tar = annot_tar$pos,
-                    lod_tar = peaks$LR / log(10),
-                    group = "1",
-                    as.data.frame(t(peaks$coef[driver_levels])),
-                    stringsAsFactors = FALSE)
-m <- match(driver_levels, names(peaks))
-names(peaks)[m] <- paste0(driver_levels, "_p")
-```
-
-```{r}
-out <- 
-  data.frame(meds, peaks) %>%
-  dplyr::filter(pvalue <= 0.05)
-```
-
-```{r}
-plotly::ggplotly(
-  ggplot2::ggplot(out) +
-    ggplot2::aes(lod_tar - lod_adj, -log10(pvalue), col = triad,
-                 symbol = mediator, pvalue = pvalue) +
-    ggplot2::geom_point())
-```
-
-```{r}
-tmp <- rep(seq_len(ceiling(nrow(out) / 6)), each = 6, length = nrow(out))
-outp <- split(out, tmp)
-driver_effects <- purrr::map(outp, intermediate::driver_effect)
-```
-
-```{r fig.width = 12, fig.heigth = 9}
-invisible(sapply(driver_effects, function(x) print(intermediate::ggplot_driver_effect(x))))
+plot(med_effect)
 ```
 
 ## Mediation triad
 
 ```{r}
-m <- match("Tmem68", annotation$symbol)
+m <- match("Nnt", annotation$symbol)
 mediator <- mediators[, m, drop = FALSE]
-colnames(mediator) <- "Tmem68"
+colnames(mediator) <- "Nnt"
 ```
 
 ```{r}
