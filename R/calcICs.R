@@ -7,7 +7,7 @@
 calcZ <- function(models,
                   S.hat = calcShat(models),
                   ICs = calcICs(models, flavor),
-                  flavor = c("B","A"),
+                  flavor = c("B","A","N"),
                   ...) {
   
   n_ind <- nrow(models$indLR)
@@ -19,12 +19,12 @@ calcZ <- function(models,
 }
 #' @export
 #'
-calcICs <- function(models, flavor = c("B","A")) {
+calcICs <- function(models, flavor = c("B","A","N")) {
 
   flavor <- match.arg(flavor)
   n_ind <- nrow(models$indLR)
   -2 * models$LR + models$df * penalty(n_ind, flavor)
 }
 penalty <- function(n_ind, flavor) {
-  switch(flavor, A = 2, B = log(n_ind))
+  switch(flavor, A = 2, B = log(n_ind), N = 0)
 }
