@@ -20,13 +20,14 @@
 #' @param intcovar An optional matrix of interactive covariates.
 #' @param weights An optional vector of positive weights for the
 #' individuals. As with the other inputs, it must have `names`
-#' for individual identifiers. Ignored if `kinship` is provided.#' 
+#' for individual identifiers. Ignored if `kinship` is provided.#'
+#' @param model name of model (`normal` or `binary`); if `binary`, `kinship` must be `NULL` 
 #' 
 #' @return A list containing
 #' * `LR` - The overall likelihood ratio.
 #' * `indLR` - Vector of individual contributions to the likelihood ratio.
 #' * `df` - Model degrees of freedom.
-#' Currently `kinship` and `weights` are ignored.
+#' Currently `weights` is ignored.
 #' 
 #' @export
 fitDefault <- function(driver,
@@ -34,10 +35,12 @@ fitDefault <- function(driver,
                   kinship = NULL,
                   addcovar = NULL,
                   intcovar=NULL, weights=NULL,
+                  model = c("normal","binary"),
                   ...) {
   
   # Routine below does not incorporate kinship. Use routine from R/qtl2 instead.
-  if(!is.null(kinship))
+  model <- match.arg(model)
+  if(!is.null(kinship) | model == "binary")
     return(fitQtl2(driver, target, kinship, addcovar, intcovar, weights, ...))
   
   no.na <- !is.na(target)

@@ -1,15 +1,10 @@
+#' @rdname fitDefault
 #' @export
 fitQtl2 <- function(driver,
                     target,
-                    kinship = NULL,
-                    addcovar = NULL,
-                    intcovar = NULL, weights=NULL,
                     ...) {
-  out <- qtl2::fit1(driver,
-             target,
-             kinship,
-             addcovar,
-             intcovar = intcovar)
+
+  out <- qtl2::fit1(driver, target, ...)
   
   # Replace lod names with LR
   names(out) <- stringr::str_replace(names(out), "lod", "LR")
