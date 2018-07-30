@@ -68,7 +68,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                           covar_tar=NULL, covar_med=NULL, kinship=NULL,
                           driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
-                          fitFunction = fitQtl2,
+                          fitFunction = fitDefault,
                           facet_name = "chr",
                           index_name = "pos",
                           ...) {
@@ -94,7 +94,8 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   
   if(!is.matrix(mediator)) {
     mediator <- as.matrix(mediator)
-    colnames(mediator) <- "mediator"
+    if(is.null(colnames(mediator)))
+      colnames(mediator) <- "mediator"
   }
   
   # Convert any blank driver names to V1, V2, ...

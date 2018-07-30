@@ -1,6 +1,6 @@
 #' @export
 #'
-binomIUCMST <- function(models, flavor = c("B","A")) {
+binomIUCMST <- function(models, flavor = "B") {
 
   # Penalize individual log likelihood ratios
   d <- dim(models$indLR)
@@ -9,7 +9,6 @@ binomIUCMST <- function(models, flavor = c("B","A")) {
                      alt = "",
                      pv = 1))
   
-  flavor <- match.arg(flavor)
   pen <- penalty(d[1], flavor) / (2 * d[1])
   indLR <- as.data.frame(t(t(models$indLR) - models$df * pen))
 

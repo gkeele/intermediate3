@@ -4,6 +4,9 @@ fitQtl2 <- function(driver,
                     target,
                     ...) {
 
+  if(is.null(rownames(driver)))
+    rownames(driver) <- seq_len(nrow(driver))
+  
   out <- qtl2::fit1(driver, target, ...)
   
   # Replace lod names with LR
