@@ -5,7 +5,7 @@ cmst_default <- function(object, driver, target,
                          common = TRUE, 
                          flavor = "B",
                          fitRelate = TRUE,
-                         model_subset = modelset,
+                         undecided_penalty = FALSE,
                          ...) {
   
   # Make sure we have driver or driver_med.
@@ -39,27 +39,36 @@ cmst_default <- function(object, driver, target,
       purrr::map(combos[,1:4],
                  combine_models, fits[c("LR", "indLR", "df")]))
   
-  modelset <- c("causal", "reactive", "independent", "undecided")
-  if(!all(modelin <- modelset %in% model_subset)) {
-    model_subset <- modelset[modelin]
-    if(length(model_subset) < 2)
-      stop("need at least two models to compare")
-    models <-
-      purrr::transpose(purrr::transpose(models)[model_subset])
-  }
-  
   models$LR <- unlist(models$LR)
   models$indLR <- as.data.frame(models$indLR)
   models$df <- unlist(models$df)
   
   n_ind <- length(models$indLR[[1]])
   
+  # P-values
+  if(undecided_penalty | flavor == "N") {
+    pvalues <- testFunction(models, flavor = flavor)
+  } else {
+    # Models without "undecided"
+    modelu <- 
+      purrr::transpose(
+        purrr::transpose(models)[c("causal", "reactive", "independent")])
+    modelu$LR <- unlist(modelu$LR)
+    modelu$indLR <- as.data.frame(modelu$indLR)
+    modelu$df <- unlist(modelu$df)
+    
+    pvalues <- testFunction(models, flavor = "N")
+    pvalue <- testFunction(modelu, flavor = flavor)
+    m <- match(pvalue$ref, pvalues$ref)
+    pvalues[m,] <- pvalue
+  }
+  
   # causal model tests
   test <- 
     dplyr::select(
       dplyr::mutate(
         dplyr::rename(
-          testFunction(models, flavor = flavor),
+          pvalues,
           model = "ref",
           pvalue = pv),
         alt = factor(alt, model),

@@ -209,7 +209,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   # Get common data.
   commons <- common_data(target, mediator, driver,
                          covar_tar, NULL, kinship, intcovar = intcovar,
-                         common = use_1_driver)
+                         common = use_1_driver, ...)
   if(is.null(commons))
     return(NULL)
   

@@ -6,4 +6,5 @@
 *.DS_Store
 *.html
 *.pdf
-inst/*
+inst
+data/restricted
