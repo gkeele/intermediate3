@@ -15,13 +15,13 @@
 
 \method{autoplot}{listof_mediation_qtl2}(x, ...)
 
-ggplot_listof_mediation_qtl2(x, plot_type = c("all", "causal", "reactive",
-  "independent", "undecided"), minpvalue = 0.05, id_name = "mediator_id",
-  ...)
+ggplot_listof_mediation_qtl2(x, plot_type = c("all", "causal",
+  "reactive", "independent", "undecided"), minpvalue = 0.05,
+  id_name = "mediator_id", ...)
 
 mediation_qtl2(target, mediator, annotation, covar_tar, covar_med, kinship,
-  genoprobs, map, drop_lod = 1.5, min_lod = 3, query_variant, cores = 1,
-  target_scan, ...)
+  genoprobs, map, drop_lod = 1.5, min_lod = 3, query_variant,
+  cores = 1, target_scan, ...)
 
 \method{plot}{mediation_qtl2}(x, ...)
 

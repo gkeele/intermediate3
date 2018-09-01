@@ -17,9 +17,10 @@ ggplot_mediation_test(x, type = c("pos_lod", "pos_pvalue", "pvalue_lod",
   target_index = NULL, ...)
 
 mediation_test(target, mediator, driver, annotation = NULL,
-  covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
-  intcovar = NULL, test = c("wilcoxon", "binomial", "joint", "normal"),
-  fitFunction = fitDefault, facet_name = "chr", index_name = "pos", ...)
+  covar_tar = NULL, covar_med = NULL, kinship = NULL,
+  driver_med = NULL, intcovar = NULL, test = c("wilcoxon",
+  "binomial", "joint", "normal"), fitFunction = fitDefault,
+  facet_name = "chr", index_name = "pos", ...)
 }
 \arguments{
 \item{...}{additional parameters}

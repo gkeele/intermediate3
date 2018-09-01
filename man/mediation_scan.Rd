@@ -7,16 +7,17 @@
 \alias{mediation_scan}
 \title{Plot of conditioned LOD scores against index}
 \usage{
-ggplot_mediation_scan(x, col = "firebrick4", cex = 1, xlab = index_name,
-  ylab = "Conditioned LOD", col_target = "blue", gap = 25)
+ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
+  xlab = index_name, ylab = "Conditioned LOD", col_target = "blue",
+  gap = 25)
 
 \method{autoplot}{mediation_scan}(x, ...)
 
 \method{plot}{mediation_scan}(x, ...)
 
 mediation_scan(target, mediator, driver, annotation, covar = NULL,
-  intcovar = NULL, kinship = NULL, method = c("double-lod-diff", "ignore",
-  "lod-diff"), fitFunction = fitDefault, facet_name = "chr",
+  intcovar = NULL, kinship = NULL, method = c("double-lod-diff",
+  "ignore", "lod-diff"), fitFunction = fitDefault, facet_name = "chr",
   index_name = "pos", verbose = TRUE)
 }
 \arguments{
@@ -59,9 +60,6 @@ mediation_scan(target, mediator, driver, annotation, covar = NULL,
 \description{
 Plot LOD statistics calculated by [mediation_scan()] against index
 using ggplot2.
-
-Mediation Scan
-Scan set of mediators for a target.
 }
 \details{
 For a given QTL haplotype probabilities `driver`` and target `target`,

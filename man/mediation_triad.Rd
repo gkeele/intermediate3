@@ -12,8 +12,8 @@ mediation_triad(target, mediator, driver, covar_tar = NULL,
 
 ggplot_mediation_triad(x, tname = "target", mname = "mediator",
   dname = "driver", centerline = NULL, fitline = FALSE,
-  main = paste(tname, "by", mname, "and", dname), colors = qtl2::CCcolors,
-  ...)
+  main = paste(tname, "by", mname, "and", dname),
+  colors = qtl2::CCcolors, ...)
 
 \method{autoplot}{mediation_triad}(object, ...)
 

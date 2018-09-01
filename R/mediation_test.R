@@ -153,31 +153,54 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     annotation <- data.frame(id = colnames(mediator),
                              stringsAsFactors = FALSE)
   
+  decided <- dplyr::filter(
+    result$test,
+    model != "undecided")
+  
   result$best <-
-    dplyr::arrange(
-      dplyr::rename(
-        dplyr::left_join(
+    dplyr::select(
+      dplyr::arrange(
+        dplyr::rename(
           dplyr::left_join(
-            # Join best test with annotation.
-            dplyr::bind_rows(
-              purrr::map(
-                split(result$test, result$test$id),
-                function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
-            annotation,
-            by = "id"),
-          # Join with mediation and mediator LR.
-          dplyr::rename(
-            tidyr::spread(
-              dplyr::filter(
+            dplyr::left_join(
+              # join undecided with other tests
+              dplyr::rename(
                 dplyr::select(
-                  result$fit,
-                  id, response, LR),
-                response %in% c("mediation", "mediator")),
-              response, LR),
-            LRmed = "mediator"),
-          by = "id"),
-        triad = "model"),
-      pvalue)
+                  dplyr::filter(
+                    result$test,
+                    model == "undecided"),
+                  id, pvalue),
+                undecided = "pvalue"),
+              dplyr::left_join(
+                # Join best test with annotation.
+                dplyr::bind_rows(
+                  purrr::map(
+                    split(
+                      decided,
+                      decided$id),
+                      function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
+                annotation,
+               by = "id"),
+              by = "id"),
+            # Join with mediation and mediator LR.
+            dplyr::rename(
+              tidyr::spread(
+                dplyr::filter(
+                  dplyr::select(
+                    result$fit,
+                    id, response, LR),
+                  response %in% c("mediation", "mediator")),
+                response, LR),
+              LRmed = "mediator"),
+            by = "id"),
+          triad = "model"),
+        pvalue),
+      id, 
+      dplyr::matches("symbol"),
+      dplyr::matches(facet_name),
+      dplyr::matches(index_name),
+      triad, pvalue, alt, undecided, mediation, LRmed, 
+      dplyr::everything())
   
   result$params <-
     list(target_LR = target_LR,
@@ -293,11 +316,7 @@ subset.mediation_test <- function(object, not_type, ...) {
 }
 #' @export
 summary.mediation_test <- function(object, ..., lod = FALSE) {
-  # Change out facet and index names for now.
-  facet_name <- object$params$facet_name
-  index_name <- object$params$index_name
-
-  out <- dplyr::select(
+  out <-
     dplyr::mutate(
       dplyr::arrange(
         object$best,
@@ -305,14 +324,8 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
       mediation = signif(mediation, 3),
-      LRmed = signif(LRmed, 3)),
-    id, 
-    dplyr::matches("symbol"),
-    dplyr::matches(facet_name),
-    dplyr::matches(index_name),
-    mediation, triad, pvalue, LRmed,
-    dplyr::everything())
-  
+      LRmed = signif(LRmed, 3))
+
   if(lod) {
     out <- 
       dplyr::rename(

@@ -1,8 +1,8 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.4-23
-Date: 2018-07-30
+Version: 0.5-1
+Date: 2018-09-01
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
 Maintainer: Brian Yandell <brian.yandell@wisc.edu>
 Description: Search for a mediator M that would explain D->T relationship.
@@ -21,4 +21,4 @@ Suggests:
 License: GPL-3
 LazyData: TRUE
 URL: https://github.com/churchill-lab/intermediate
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

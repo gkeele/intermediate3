@@ -6,7 +6,8 @@
 \title{Fit target relative to driver}
 \usage{
 fitDefault(driver, target, kinship = NULL, addcovar = NULL,
-  intcovar = NULL, weights = NULL, model = c("normal", "binary"), ...)
+  intcovar = NULL, weights = NULL, model = c("normal", "binary"),
+  ...)
 
 fitQtl2(driver, target, ...)
 }

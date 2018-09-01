@@ -8,9 +8,9 @@
 \title{Test mediation across set of indexed drivers}
 \usage{
 mediation_index(target, mediator, driver = NULL, annotation = NULL,
-  covar_tar = NULL, covar_med = NULL, kinship = NULL, driver_med = NULL,
-  driver_index = colnames(mediator), facet_name = "chr",
-  index_name = "pos", ...)
+  covar_tar = NULL, covar_med = NULL, kinship = NULL,
+  driver_med = NULL, driver_index = colnames(mediator),
+  facet_name = "chr", index_name = "pos", ...)
 
 \method{plot}{mediation_index}(x, ...)
 
