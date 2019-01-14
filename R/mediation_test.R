@@ -320,7 +320,7 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
     dplyr::mutate(
       dplyr::arrange(
         object$best,
-        pvalue, id),
+        pmin(pvalue, undecided), id),
       mediation = mediation / log(10),
       pvalue = signif(pvalue, 3),
       mediation = signif(mediation, 3),
