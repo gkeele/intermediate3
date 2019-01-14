@@ -24,7 +24,7 @@ _Trends Genet 26_: 493-498.
 [doi:10.1016/j.tig.2010.09.002](http://dx.doi.org/10.1016/j.tig.2010.09.002).
 This article has 10 models (see figure below) with driver $Q=D$, mediator $T1=M$ and target $T2=T$). There are three additional models (green) that imply additional interaction terms to modulate the causal relationship of $T$ with $M$.
 
-![Li et al. (2010)](../inst/doc/nihms-249591-f0001.jpg)
+![Li et al. (2010)](https://ars.els-cdn.com/content/image/1-s2.0-S0168952510001885-gr1.jpg)
 
 The key models are in blue, corresponding to situations where the driver is known already to affect both the target and mediator, either directly or indirectly. To be exact, it is important to consider the joint distribution of $T$ and $M$ given $D$.
 Write $f()$ as the likelihood (or density) for a given model. Thus $f(T\vert D)$ is the likelihood for the target given the driver, and $f(T)$ is the unconditional likelihood for the target. The four models can be written as

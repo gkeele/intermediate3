@@ -1,7 +1,7 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.5-2
+Version: 0.5-3
 Date: 2019-01-14
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
 Maintainer: Brian Yandell <brian.yandell@wisc.edu>
