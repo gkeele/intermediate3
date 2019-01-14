@@ -14,6 +14,7 @@
 #' @param facet_name name of facet column (default `chr`)
 #' @param index_name name of index column (default `pos`)
 #' @param verbose If TRUE display information about the progress
+#' @param ... additional parameters
 #' 
 #' @details 
 #' For a given QTL haplotype probabilities `driver`` and target `target`,
@@ -50,7 +51,7 @@ mediation_scan <- function(target,
                            fitFunction = fitDefault,
                            facet_name = "chr",
                            index_name = "pos",
-                           verbose=TRUE) {
+                           verbose=TRUE, ...) {
   
   # Make sure covariates are numeric
   covar <- covar_df_mx(covar)
@@ -64,7 +65,8 @@ mediation_scan <- function(target,
   loglik0 <- fitFunction(driver_tar, target, kinship, covar, intcovar)$LR
   
   # Get common data.
-  commons <- common_data(target, mediator, driver, covar, intcovar = intcovar)
+  commons <- common_data(target, mediator, driver, covar, intcovar = intcovar,
+                         ...)
   if(is.null(commons))
     return(NULL)
   
@@ -103,8 +105,18 @@ mediation_scan <- function(target,
       else
         driver <- driver[,, dcol]
     }
-    loglik <- c(fitFunction(driver, target, kinship,
-                            cbind(covar, x$mediator), intcovar)$LR,
+
+    loglik <- fitFunction(driver, target, kinship,
+                          cbind(covar, x$mediator), intcovar)$LR
+    if(!is.null(x$mediator)) {
+      if(is.matrix(x$mediator)) {
+        na <- apply(x$mediator, 1, function(x) any(is.na(x)))
+      } else {
+        na <- is.na(x$mediator)
+      }
+      target[na] <- NA
+    }
+    loglik <- c(loglik,
                 fitFunction(driver, target, kinship,
                             covar, intcovar)$LR)
     lodfn(loglik, loglik0)

@@ -67,7 +67,8 @@ fitDefault_internal <- function(driver,
                        kinship = NULL,
                        addcovar = NULL,
                        intcovar=NULL, weights=NULL,
-                       ...) {
+                       ...,
+                       tol = 1e-16) {
   
   # Construct design matrix X
   if(is.null(driver))
@@ -110,8 +111,14 @@ fitDefault_internal <- function(driver,
   dX <- qrX$rank
   resid <- qr.resid(qrX, target)
   RSS <- sum(resid ^ 2)
+  if(RSS <= tol) {
+    RSS <- 0
+    LR <- 0
+  } else {
+    LR <- as.vector(- (n/2) * (log(RSS)))
+  }
 
-  list(LR = as.vector(- (n/2) * (log(RSS))), #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
+  list(LR = LR, #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
        indLR = dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
        coef = qr.coef(qrX, target),
        df = dX,
