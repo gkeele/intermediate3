@@ -2,7 +2,11 @@
 title: "Mediation with R/intermediate"
 author: "Brian S. Yandell"
 date: "4/23/2018"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mediation Scans and Tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}

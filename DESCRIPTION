@@ -1,8 +1,8 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.5-3
-Date: 2019-01-14
+Version: 0.5-4
+Date: 2019-01-15
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
 Maintainer: Brian Yandell <brian.yandell@wisc.edu>
 Description: Search for a mediator M that would explain D->T relationship.
@@ -18,7 +18,9 @@ Imports: ggplot2,
          purrr,
          qtl2
 Suggests:
-         plotly
+         plotly,
+    knitr, rmarkdown
+VignetteBuilder: knitr
 License: GPL-3
 LazyData: TRUE
 URL: https://github.com/churchill-lab/intermediate
