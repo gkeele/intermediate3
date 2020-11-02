@@ -17,7 +17,7 @@ ggplot_listof_mediation_qtl2 <- function(x,
   out$best <-
     dplyr::filter(
       out$best,
-      pvalue <= minpvalue)
+      .data$pvalue <= minpvalue)
   
   plot_type <- match.arg(plot_type)
   
@@ -34,8 +34,8 @@ ggplot_listof_mediation_qtl2 <- function(x,
         dplyr::mutate(
           dplyr::filter(
             out$best,
-            triad == plot_type),
-          symbol = reorder(symbol, -pvalue))
+            .data$triad == plot_type),
+          symbol = reorder(.data$symbol, -.data$pvalue))
       if(!nrow(out$best))
         return(NULL)
       ggplot_mediation_qtl2(out, pattern_name = "symbol")

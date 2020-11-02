@@ -7,16 +7,26 @@
 \alias{ggplot_mediation_joint}
 \title{Fit joint likelihood for `target` and `mediator` given `driver`.}
 \usage{
-mediation_joint(target, mediator, driver, annotation, covar_tar = NULL,
-  covar_med = NULL, kinship = NULL, driver_med = NULL,
-  intcovar = NULL, fitFunction = fitQtl2, index_name = "pos", ...)
+mediation_joint(
+  target,
+  mediator,
+  driver,
+  annotation,
+  covar_tar = NULL,
+  covar_med = NULL,
+  kinship = NULL,
+  driver_med = NULL,
+  intcovar = NULL,
+  fitFunction = fitQtl2,
+  index_name = "pos",
+  ...
+)
 
 \method{plot}{mediation_joint}(x, ...)
 
 \method{autoplot}{mediation_joint}(x, ...)
 
-ggplot_mediation_joint(x, lod = TRUE, xlab = index_name,
-  ylab = ylab_name, ...)
+ggplot_mediation_joint(x, lod = TRUE, xlab = index_name, ylab = ylab_name, ...)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}

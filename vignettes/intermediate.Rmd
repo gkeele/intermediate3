@@ -127,7 +127,8 @@ med_test <- mediation_test(target = target,
 ```
 
 ```{r}
-plotly::ggplotly(autoplot(med_test))
+autoplot(med_test)
+#plotly::ggplotly(autoplot(med_test))
 ```
 
 ```{r}

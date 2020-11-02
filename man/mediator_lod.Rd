@@ -4,9 +4,17 @@
 \alias{mediator_lod}
 \title{Mediator LOD}
 \usage{
-mediator_lod(mediator, driver, annotation, covar_med = NULL,
-  intcovar = NULL, kinship = NULL, facet_name = "chr",
-  index_name = "pos", verbose = TRUE)
+mediator_lod(
+  mediator,
+  driver,
+  annotation,
+  covar_med = NULL,
+  intcovar = NULL,
+  kinship = NULL,
+  facet_name = "chr",
+  index_name = "pos",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{mediator}{A matrix, each column is one gene/protein's expression}

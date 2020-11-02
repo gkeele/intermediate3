@@ -44,9 +44,9 @@ binomIUCMST <- function(models, flavor = "B") {
       dplyr::mutate(
         left_right(pos),
         nz = rep(nz, 2),
-        Z = ifelse(Z > 0, Z, nz + Z)),
-      pos = Z),
-    pv = pbinom(pos - 1, nz, 0.5, lower.tail = FALSE))
+        Z = ifelse(.data$Z > 0, .data$Z, .data$nz + .data$Z)),
+      pos = .data$Z),
+    pv = pbinom(.data$pos - 1, .data$nz, 0.5, lower.tail = FALSE))
   
   comp_pv(LR2)
 }

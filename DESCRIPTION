@@ -16,6 +16,7 @@ Imports: ggplot2,
          grid,
          stats,
          purrr,
+         corpcor, mnormt, rlang,
          qtl2
 Suggests:
          plotly,
@@ -24,4 +25,4 @@ VignetteBuilder: knitr
 License: GPL-3
 LazyData: TRUE
 URL: https://github.com/churchill-lab/intermediate
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1

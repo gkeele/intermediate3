@@ -70,13 +70,13 @@ cmst_default <- function(object, driver, target,
         dplyr::rename(
           pvalues,
           model = "ref",
-          pvalue = pv),
-        alt = factor(alt, model),
-        model = factor(model, model),
+          pvalue = "pv"),
+        alt = factor(.data$alt, .data$model),
+        model = factor(.data$model, .data$model),
         LR = models$LR,
         df = models$df,
-        IC = LR - df * penalty(n_ind, flavor) / 2),
-      model, LR, df, IC, pvalue, alt)
+        IC = .data$LR - .data$df * penalty(n_ind, flavor) / 2),
+      .data$model, .data$LR, .data$df, .data$IC, .data$pvalue, .data$alt)
 
   # target and mediator fits
   fit <- apply(fits$LR * combos[,5:7], 2, sum)
@@ -94,7 +94,7 @@ cmst_default <- function(object, driver, target,
         as.data.frame(coefs, stringsAsFactors = FALSE),
         response = rownames(coefs),
         LR = fit),
-      response, LR, dplyr::everything())
+      .data$response, .data$LR, dplyr::everything())
   
   list(test = test, fit = coefs, fitsLR = fits$LR, normF = fits$normF)
 }

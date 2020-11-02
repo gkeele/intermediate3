@@ -1,10 +1,12 @@
 # From qtl2pattern::covar_df_mx
+#' @importFrom stats formula model.matrix
+#' 
 covar_df_mx <- function(addcovar) {
   if(is.null(addcovar))
     return(NULL)
   if(is.data.frame(addcovar)) {
-    f <- formula(paste("~", paste(names(addcovar), collapse = "+")))
-    addcovar <- model.matrix(f, addcovar)[,-1, drop = FALSE]
+    f <- stats::formula(paste("~", paste(names(addcovar), collapse = "+")))
+    addcovar <- stats::model.matrix(f, addcovar)[,-1, drop = FALSE]
   }
   wh_sex(addcovar)
 }

@@ -7,18 +7,35 @@
 \alias{mediation_scan}
 \title{Plot of conditioned LOD scores against index}
 \usage{
-ggplot_mediation_scan(x, col = "firebrick4", cex = 1,
-  xlab = index_name, ylab = "Conditioned LOD", col_target = "blue",
-  gap = 25)
+ggplot_mediation_scan(
+  x,
+  col = "firebrick4",
+  cex = 1,
+  xlab = index_name,
+  ylab = "Conditioned LOD",
+  col_target = "blue",
+  gap = 25
+)
 
 \method{autoplot}{mediation_scan}(x, ...)
 
 \method{plot}{mediation_scan}(x, ...)
 
-mediation_scan(target, mediator, driver, annotation, covar = NULL,
-  intcovar = NULL, kinship = NULL, method = c("double-lod-diff",
-  "ignore", "lod-diff"), fitFunction = fitDefault, facet_name = "chr",
-  index_name = "pos", verbose = TRUE)
+mediation_scan(
+  target,
+  mediator,
+  driver,
+  annotation,
+  covar = NULL,
+  intcovar = NULL,
+  kinship = NULL,
+  method = c("double-lod-diff", "ignore", "lod-diff"),
+  fitFunction = fitDefault,
+  facet_name = "chr",
+  index_name = "pos",
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{mediation object}
@@ -32,6 +49,8 @@ mediation_scan(target, mediator, driver, annotation, covar = NULL,
 \item{col_target}{color for target LOD line}
 
 \item{gap}{gap between facets (default `25`)}
+
+\item{...}{additional parameters}
 
 \item{target}{A numeric vector with gene/protein expression}
 

@@ -1,5 +1,6 @@
 #' @importFrom dplyr bind_cols
 #' @importFrom purrr map
+#' @importFrom stats cov
 #' @export
 #'
 calcShat <- function(indLR) {
@@ -24,5 +25,5 @@ calcShat <- function(indLR) {
   LR <- LR[, rep(seq(d[2]), each = d[2]) < rep(seq(d[2]), d[2])]
 
   #Shat
-  (1 - 1 / d[1]) * cov(LR)
+  (1 - 1 / d[1]) * stats::cov(LR)
 }

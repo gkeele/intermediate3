@@ -17,7 +17,7 @@
 #' @param ... additional parameters for [mediation_index()]
 #'
 #' @importFrom qtl2 genoprob_to_snpprob get_common_ids scan1snps top_snps
-#' @importFrom dplyr arrange desc distinct filter mutate rename
+#' @importFrom dplyr arrange desc distinct filter first last mutate n rename
 #' 
 #' @return Object of class `mediation_qtl2`, which inherits from class [mediation_index()]
 #' 
@@ -62,8 +62,8 @@ mediation_qtl2 <- function(target, mediator,
       qtl2::top_snps(
         target_scan$lod,
         target_scan$snpinfo),
-      lod >= max(lod) - drop_lod,
-      lod >= min_lod)
+      .data$lod >= max(.data$lod) - drop_lod,
+      .data$lod >= min_lod)
   ts_sdp <- unique(ts$sdp)
   ts_sdp <- unique(c(ts_sdp, 2 ^ length(prob_alleles) - 1 - ts_sdp))
   
@@ -107,7 +107,7 @@ mediation_qtl2 <- function(target, mediator,
         covar_med,
         kinship,
         driver_med),
-      LR >= max(LR) - drop_lod * log(10))
+      .data$LR >= max(.data$LR) - drop_lod * log(10))
   
   # Mediation test indexed by SNPs identified with med_joint.
   med_index <- 
@@ -135,9 +135,9 @@ mediation_qtl2 <- function(target, mediator,
       map,
       dplyr::filter(
         query_variant(chr_id, start, end),
-        pos >= min(med_index$best$pos),
-        pos <= max(med_index$best$pos),
-        sdp %in% ts_sdp))
+        .data$pos >= min(med_index$best$pos),
+        .data$pos <= max(med_index$best$pos),
+        .data$sdp %in% ts_sdp))
   
   # Match up index for joining.
   m <- match(med_index$best$id, topsnps$snp_id)
@@ -150,15 +150,17 @@ mediation_qtl2 <- function(target, mediator,
         dplyr::group_by(
           dplyr::filter(
             topsnps,
-            index %in% med_index$best$index),
-          sdp, index),
-        id = ifelse(n() == 1, # id is snp_id or range of snp_id's
-                        snp_id, 
-                        paste(snp_id[1], n(), snp_id[n()], sep = "_")),
-        pos_start = pos[1],
-        pos_end = pos[n()],
-        ensembl_gene = paste(unique(ensembl_gene), collapse = ","),
-        consequence = paste(unique(consequence), collapse = ",")))
+            .data$index %in% med_index$best$index),
+          .data$sdp, .data$index),
+        id = ifelse(dplyr::n() == 1, # id is snp_id or range of snp_id's
+                    .data$snp_id, 
+                    paste(.data$snp_id[1],
+                          dplyr::n(),
+                          .data$snp_id[dplyr::n()], sep = "_")),
+        pos_start = dplyr::first(.data$pos),
+        pos_end = dplyr::last(.data$pos),
+        ensembl_gene = paste(unique(.data$ensembl_gene), collapse = ","),
+        consequence = paste(unique(.data$consequence), collapse = ",")))
 
   # Join topsnps to best to get all SNPs.
   med_index$best <- 
@@ -166,11 +168,11 @@ mediation_qtl2 <- function(target, mediator,
       dplyr::right_join(
         dplyr::select(
           med_index$best,
-          -chr, -pos, -sdp, -id),
+          -.data$chr, -.data$pos, -.data$sdp, -.data$id),
         topsnps,
         by = "index"),
-      sdp = pmin(sdp, 2 ^ length(prob_alleles) - 1 - sdp),
-      pattern = sdp_to_pattern(sdp, prob_alleles))
+      sdp = pmin(.data$sdp, 2 ^ length(prob_alleles) - 1 - .data$sdp),
+      pattern = sdp_to_pattern(.data$sdp, prob_alleles))
   
   med_index$joint <- mj
   med_index$map <- map[[chr_id]]
@@ -198,7 +200,7 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
     dplyr::rename(
       dplyr::filter(
         x$best,
-        pos_end > pos_start),
+        .data$pos_end > .data$pos_start),
       index1 = "pos_start",
       index2 = "pos_end")
   if(!(pattern_name %in% names(best)))
@@ -209,8 +211,8 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
     dplyr::select(
       tidyr::gather(
         x$best,
-        place, pos, dplyr::contains("pos_")),
-      -place)
+        .data$place, .data$pos, dplyr::contains("pos_")),
+      -.data$place)
   
 
   response <- match.arg(response)
@@ -220,10 +222,10 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
     pvalue = { 
       p <- p + 
         ggplot2::geom_segment(
-          aes(x = index1, 
-              xend = index2, 
-              y = -log10(pvalue),
-              yend = -log10(pvalue),
+          aes(x = .data$index1, 
+              xend = .data$index2, 
+              y = -log10(.data$pvalue),
+              yend = -log10(.data$pvalue),
               col = get(pattern_name)),
           data = best,
           inherit.aes = FALSE)
@@ -231,10 +233,10 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
     IC = {
       p <- p + 
         ggplot2::geom_segment(
-          aes(x = index1, 
-              xend = index2, 
-              y = IC,
-              yend = IC,
+          aes(x = .data$index1, 
+              xend = .data$index2, 
+              y = .data$IC,
+              yend = .data$IC,
               col = get(pattern_name)),
           data = best,
           inherit.aes = FALSE)

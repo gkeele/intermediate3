@@ -1,4 +1,5 @@
 #' @export
+#' @importFrom stats pnorm
 #' 
 normIUCMST <- function(models,
                              Zscores = calcZ(models, ...),
@@ -13,7 +14,7 @@ normIUCMST <- function(models,
   Zscores <- left_right(Zscores)
   
   # Add p-value
-  Zscores$pv <- pnorm(Zscores$Z, lower.tail = FALSE)
+  Zscores$pv <- stats::pnorm(Zscores$Z, lower.tail = FALSE)
 
   comp_pv(Zscores)
 }
@@ -24,9 +25,9 @@ comp_pv <- function(object) {
       dplyr::summarize(
         dplyr::group_by(
           dplyr::mutate(object,
-                        ref = factor(ref, unique(ref))),
-          ref),
-        alt = alt[which.max(pv)][1],
-        pv = max(pv))),
-    ref = as.character(ref))
+                        ref = factor(.data$ref, unique(.data$ref))),
+          .data$ref),
+        alt = .data$alt[which.max(.data$pv)][1],
+        pv = max(.data$pv))),
+    ref = as.character(.data$ref))
 }

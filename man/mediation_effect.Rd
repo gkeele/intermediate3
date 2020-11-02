@@ -6,8 +6,11 @@
 \alias{plot.mediation_effect}
 \title{Driver effect on target and mediator}
 \usage{
-mediation_effect(object, id_name = "id",
-  driver_levels = unique(unlist(object$driver_levels)))
+mediation_effect(
+  object,
+  id_name = "id",
+  driver_levels = unique(unlist(object$driver_levels))
+)
 
 \method{autoplot}{mediation_effect}(object, ...)
 

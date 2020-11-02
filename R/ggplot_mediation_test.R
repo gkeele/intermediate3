@@ -35,7 +35,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
   }
   
   if(!("symbol" %in% names(x)))
-    x <- dplyr::rename(x, symbol = id)
+    x <- dplyr::rename(x, symbol = "id")
   
   if(tmp <- any(is.na(x$triad))) {
     warning(paste("some triad are NA:", sum(tmp)))
@@ -47,7 +47,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     significant <- TRUE
   if(significant) {
     x <- dplyr::filter(x, 
-                       x$pvalue <= maxPvalue)
+                       .data$pvalue <= maxPvalue)
   } else {
     relabel <- c(relabel, 
                  paste0("n.s. (p>", round(maxPvalue, 2), ")"))
@@ -55,7 +55,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     tmp[x$pvalue > maxPvalue] <- relabel[5]
     x$triad <- factor(tmp, levels = relabel)
   }
-  x <- dplyr::arrange(x, dplyr::desc(triad))
+  x <- dplyr::arrange(x, dplyr::desc(.data$triad))
   
   if(index_name != "index" & "index" %in% names(x)) {
     # Make sure we don't clash with column named index.
@@ -69,14 +69,17 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
       x <- dplyr::filter(x, local)
     else {
       if("qtl_pos" %in% names(x))
-        x <- dplyr::mutate(x, pos = ifelse(local, pos, qtl_pos))
+        x <- dplyr::mutate(x,
+                           pos = ifelse(.data$local,
+                                        .data$pos, .data$qtl_pos))
     }
     
     if(all(c("local","qtl_ct") %in% names(x))) {
       # Set up plot symbol.
       shapes <- c(17,16,2,1)
       names(shapes) <- c("distal", "local", "distal_info", "local_info")
-      x <- dplyr::mutate(x, shape = names(shapes)[1 + local + 2 * (qtl_ct > 1)])
+      x <- dplyr::mutate(x,
+                         shape = names(.data$shapes)[1 + .data$local + 2 * (.data$qtl_ct > 1)])
     }
   }
 
@@ -88,46 +91,57 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     switch(type,
            pos_pvalue = {
              p <- ggplot2::ggplot(x) +
-               ggplot2::aes(x=pos, y=-log10(pvalue)) +
-               ggplot2::aes(symbol=symbol, mediation=mediation) +
-               ggplot2::facet_grid(~triad, scales = "free_x") +
+               ggplot2::aes(x = .data$pos,
+                            y = -log10(.data$pvalue)) +
+               ggplot2::aes(symbol = .data$symbol,
+                            mediation = .data$mediation) +
+               ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("-log10 of p-value")
              if(!is.null(target_index))
                p <- p +
-                 ggplot2::geom_vline(xintercept = target_index, col = "darkgrey")
+                 ggplot2::geom_vline(xintercept = .data$target_index,
+                                     col = "darkgrey")
            },
            pvalue_lod = {
              p <- ggplot2::ggplot(x) +
-               ggplot2::aes(y=mediation, x=-log10(pvalue)) +
-               ggplot2::aes(symbol=symbol, position=pos) +
-               ggplot2::facet_grid(~triad, scales = "free_x") +
-               ggplot2::geom_hline(yintercept = unmediated, col = "darkgrey") +
+               ggplot2::aes(y = .data$mediation,
+                            x = -log10(.data$pvalue)) +
+               ggplot2::aes(symbol = .data$symbol,
+                            position = .data$pos) +
+               ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
+               ggplot2::geom_hline(yintercept = .data$unmediated,
+                                   col = "darkgrey") +
                ggplot2::xlab("-log10 of p-value") +
                ggplot2::ylab("Mediation LOD")
            },
            pos_lod = {
              p <- ggplot2::ggplot(x) + 
-               ggplot2::aes(y=mediation, x=pos) +
-               ggplot2::aes(symbol=symbol, pvalue=pvalue) +
-               ggplot2::geom_hline(yintercept = unmediated, col = "darkgrey") +
+               ggplot2::aes(y = .data$mediation,
+                            x = .data$pos) +
+               ggplot2::aes(symbol = .data$symbol,
+                            pvalue = .data$pvalue) +
+               ggplot2::geom_hline(yintercept = .data$unmediated,
+                                   col = "darkgrey") +
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("Mediation LOD")
 #               ggplot2::scale_color_manual(values = cols)
              if(!is.null(target_index))
                p <- p +
-                 ggplot2::geom_vline(xintercept = target_index, col = "darkgrey")
+                 ggplot2::geom_vline(xintercept = .data$target_index,
+                                     col = "darkgrey")
            })
     if("biotype" %in% names(x)) {
-      p <- p + ggplot2::aes(col = biotype)
+      p <- p + ggplot2::aes(col = .data$biotype)
     }
     if("info" %in% names(x)) {
-      p <- p + ggplot2::aes(info = info)
+      p <- p + ggplot2::aes(info = .data$info)
     }
     if(exists("shapes")) {
-      p <- p + ggplot2::geom_point(aes(shape = shape), size = 2, alpha = 0.5) +
-        ggplot2::aes(chr = chr, qtl_pos = qtl_pos) +
+      p <- p + ggplot2::geom_point(aes(shape = .data$shape),
+                                   size = 2, alpha = 0.5) +
+        ggplot2::aes(chr = .data$chr, qtl_pos = .data$qtl_pos) +
         ggplot2::scale_shape_manual(values = shapes)
     } else {
       p <- p + 
@@ -145,11 +159,15 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     
     plotfn <- function(x, type, targetCoef, layout.pos.row, ylabel = type) {
       p <- ggplot2::ggplot(allele_prep(x, type)) +
-        ggplot2::aes(x=-log10(pvalue), y=value, col = geno, symbol = symbol) +
-        ggplot2::facet_wrap(~triad, scales = "free_x") +
+        ggplot2::aes(x = -log10(.data$pvalue),
+                     y = .data$value,
+                     col = .data$geno,
+                     symbol = .data$symbol) +
+        ggplot2::facet_wrap(~ .data$triad, scales = "free_x") +
         ggplot2::scale_color_manual(values = CCSanger::CCcolors) +
         ggplot2::geom_hline(data = targetCoef, 
-                            ggplot2::aes(yintercept = value, col = geno),
+                            ggplot2::aes(yintercept = .data$value,
+                                         col = .data$geno),
                             linetype = "dashed") +
         ggplot2::geom_point(size = 2) +
         ggplot2::ylab(ylabel)
@@ -173,7 +191,8 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
            alleles = {
              plotfn(x, "mediator",
                     dplyr::mutate(targetCoef,
-                                  value = (value - min(value)) / diff(range(value))),
+                                  value = (.data$value - min(.data$value)) /
+                                    diff(range(.data$value))),
                     2, "mediator effects")
              plotfn(x, "alleles", targetCoef, 1, "allele effects")
            },
@@ -181,7 +200,8 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
              plotfn(x, "alleles", targetCoef, 1, "allele effects")
              plotfn(x, "mediator",
                     dplyr::mutate(targetCoef,
-                                  value = (value - min(value)) / diff(range(value))),
+                                  value = (.data$value - min(.data$value)) /
+                                    diff(range(.data$value))),
                     2, "mediator effects")
            })
   }
@@ -196,11 +216,12 @@ target_prep <- function(targetFit, type, col = CCSanger::CCcolors) {
   col_names <- names(col)
   targetFit <- targetFit[m]
   names(targetFit) <- col_names
-  out <- tidyr::gather(targetFit, geno, value)
-  out <- dplyr::mutate(out, geno = factor(geno, col_names))
+  out <- tidyr::gather(targetFit, .data$geno, .data$value)
+  out <- dplyr::mutate(out, geno = factor(.data$geno, col_names))
   switch(type,
-         alleles  = dplyr::mutate(out, value = value - mean(value)),
-         mediator = dplyr::mutate(out, value = (value - min(value)) / diff(range(value))))
+         alleles  = dplyr::mutate(out, value = .data$value - mean(.data$value)),
+         mediator = dplyr::mutate(out, value = (.data$value - min(.data$value)) /
+                                    diff(range(.data$value))))
 }
 allele_prep <- function(x, type, col = CCSanger::CCcolors) {
   codes <- LETTERS[seq_along(col)]
@@ -214,16 +235,18 @@ allele_prep <- function(x, type, col = CCSanger::CCcolors) {
     tidyr::gather(
       dplyr::select(
         x,
-        symbol, triad, pvalue, chr, qtl_pos, dplyr::one_of(col_names)),
-      geno, value, -symbol, -triad, -pvalue, -chr, -qtl_pos
+        .data$symbol, .data$triad, .data$pvalue, .data$chr, .data$qtl_pos, 
+        dplyr::one_of(col_names)),
+      .data$geno, .data$value, -.data$symbol, -.data$triad, -.data$pvalue, -.data$chr, -.data$qtl_pos
     ),
-    symbol
+    .data$symbol
   )
-  out <- dplyr::mutate(out, geno = factor(geno, col_names))
+  out <- dplyr::mutate(out, geno = factor(.data$geno, col_names))
   out <- switch(type,
-                alleles  = dplyr::mutate(out, value = value - mean(value)),
-                mediator = dplyr::mutate(out, value = (value - min(value)) / diff(range(value))))
+                alleles  = dplyr::mutate(out, value = .data$value - mean(.data$value)),
+                mediator = dplyr::mutate(out, value = (.data$value - min(.data$value))
+                                         / diff(range(.data$value))))
   dplyr::arrange(
     dplyr::ungroup(out),
-    pvalue)
+    .data$pvalue)
 }

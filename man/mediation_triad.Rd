@@ -7,13 +7,28 @@
 \alias{plot.mediation_triad}
 \title{Triad scatter plot for mediator and target}
 \usage{
-mediation_triad(target, mediator, driver, covar_tar = NULL,
-  covar_med = NULL, kinship = NULL, fitFunction = fitQtl2, ...)
+mediation_triad(
+  target,
+  mediator,
+  driver,
+  covar_tar = NULL,
+  covar_med = NULL,
+  kinship = NULL,
+  fitFunction = fitQtl2,
+  ...
+)
 
-ggplot_mediation_triad(x, tname = "target", mname = "mediator",
-  dname = "driver", centerline = NULL, fitline = FALSE,
+ggplot_mediation_triad(
+  x,
+  tname = "target",
+  mname = "mediator",
+  dname = "driver",
+  centerline = NULL,
+  fitline = FALSE,
   main = paste(tname, "by", mname, "and", dname),
-  colors = qtl2::CCcolors, ...)
+  colors = qtl2::CCcolors,
+  ...
+)
 
 \method{autoplot}{mediation_triad}(object, ...)
 

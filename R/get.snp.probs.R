@@ -17,7 +17,7 @@
 get.snp.probs = function(chr, pos, genoprobs, map, query_fxn) {
   
   # Get genoprobs closest to the requested position.
-  gp = get.allele.probs(chr, pos, genoprobs, map)
+  gp = get_allele_probs(chr, pos, genoprobs, map)
   
   # Get SNPs in a window around the requested position.
   variants = query_fxn(chr, pos - 0.25, pos + 0.25)

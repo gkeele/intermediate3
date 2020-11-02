@@ -137,7 +137,7 @@ suppressPackageStartupMessages({
 ```
 
 ```{r}
-datapath <- "~/Documents/Research/attie_alan/DO/data/DerivedData/"
+datapath <- "~/Documents/Research/attie_alan/DO/data/DerivedData/wave4"
 ```
 
 ```{r}

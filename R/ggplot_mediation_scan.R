@@ -39,8 +39,8 @@ ggplot_mediation_scan <- function(x,
   x <- dplyr::arrange_at(x, c(facet_name, "index"))
 
   p <- ggplot2::ggplot(x) +
-    ggplot2::aes(index, lod, symbol = symbol) +
-    ggplot2::facet_grid(formula(paste("~", facet_name)),
+    ggplot2::aes(.data$index, .data$lod, symbol = .data$symbol) +
+    ggplot2::facet_grid(stats::formula(paste("~", facet_name)),
                         scales = "free_x", space = "free") +
     ggplot2::xlab(xlab)
 

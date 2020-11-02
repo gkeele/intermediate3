@@ -7,17 +7,32 @@
 \alias{ggplot_mediation_index}
 \title{Test mediation across set of indexed drivers}
 \usage{
-mediation_index(target, mediator, driver = NULL, annotation = NULL,
-  covar_tar = NULL, covar_med = NULL, kinship = NULL,
-  driver_med = NULL, driver_index = colnames(mediator),
-  facet_name = "chr", index_name = "pos", ...)
+mediation_index(
+  target,
+  mediator,
+  driver = NULL,
+  annotation = NULL,
+  covar_tar = NULL,
+  covar_med = NULL,
+  kinship = NULL,
+  driver_med = NULL,
+  driver_index = colnames(mediator),
+  facet_name = "chr",
+  index_name = "pos",
+  ...
+)
 
 \method{plot}{mediation_index}(x, ...)
 
 \method{autoplot}{mediation_index}(x, ...)
 
-ggplot_mediation_index(x, response = c("pvalue", "IC"), alpha = 0.5,
-  pattern_name = "pattern", ...)
+ggplot_mediation_index(
+  x,
+  response = c("pvalue", "IC"),
+  alpha = 0.5,
+  pattern_name = "pattern",
+  ...
+)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}

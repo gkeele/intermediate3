@@ -27,6 +27,7 @@
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
 #' @importFrom grid grid.newpage pushViewport viewport grid.layout
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom rlang .data
 #' 
 #' @return List with elements:
 #' - best best fit table
@@ -306,13 +307,16 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
 }
 
 #' @export
-subset.mediation_test <- function(object, not_type, ...) {
-  attrc <- class(object)
-  object$best <- dplyr::filter(object$best, 
-                               biotype != not_type)
-  class(object) <- attrc
+#' @param x object of class \code{mediation_test}
+#' @param not_type biotypes to not include
+#' 
+subset.mediation_test <- function(x, not_type, ...) {
+  attrc <- class(x)
+  x$best <- dplyr::filter(x$best, 
+                          biotype != not_type)
+  class(x) <- attrc
   
-  object
+  x
 }
 #' @export
 summary.mediation_test <- function(object, ..., lod = FALSE) {

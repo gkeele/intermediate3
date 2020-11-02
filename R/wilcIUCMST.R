@@ -48,9 +48,9 @@ wilcIUCMST <- function(models, flavor = "B") {
       dplyr::mutate(
         left_right(W),
         nz = rep(nz, 2),
-        v = nz * (nz + 1) * (2 * nz + 1) / 6),
-      W = Z),
-    pv = pnorm(W, 0, sqrt(v), lower.tail = FALSE))
+        v = .data$nz * (.data$nz + 1) * (2 * .data$nz + 1) / 6),
+      W = .data$Z),
+    pv = pnorm(.data$W, 0, sqrt(.data$v), lower.tail = FALSE))
   
   comp_pv(LR2)
 }

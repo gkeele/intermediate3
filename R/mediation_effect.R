@@ -6,6 +6,7 @@
 #' @param id_name name of identifier column
 #' @param driver_levels levels of driver
 #' 
+#' @importFrom tidyr pivot_longer
 #' @export
 #' 
 #' @examples
@@ -25,21 +26,24 @@ mediation_effect <- function(object,
   }
 
   coefs <- 
-    tidyr::gather(
+    tidyr::pivot_longer(
       dplyr::rename(
         dplyr::inner_join(
           dplyr::select(
             object$best,
-            id, triad, pvalue),
+            .data$id, .data$triad, .data$pvalue),
           dplyr::mutate(
             dplyr::select(
               object$fit,
-              id, response, dplyr::one_of(driver_levels)),
-            response = ifelse(response == "mediation", "adjusted", response),
-            response = factor(response, c("mediator","target","adjusted"))),
+              .data$id, .data$response, dplyr::one_of(driver_levels)),
+            response = ifelse(.data$response == "mediation",
+                              "adjusted",
+                              .data$response),
+            response = factor(.data$response,
+                              c("mediator","target","adjusted"))),
           by = "id"),
         mediator = "id"),
-      level, effect, -mediator, -triad, -pvalue, -response)
+      -(1:4), names_to = "level", values_to = "effect")
   
   if(length(m <- grep(id_name, names(coefs)))) {
     coefs$mediator <- coefs[[m]]
@@ -68,11 +72,11 @@ ggplot_mediation_effect <- function(object,
         dplyr::mutate(
           dplyr::arrange(
             object,
-            pvalue),
-          mediator = paste0(mediator, " (", signif(pvalue, 2), " ", triad, ")")),
-        mediator %in% unique(mediator)[seq_len(max_facet)]),
-      level = factor(driver_names[level], names(colors)),
-      mediator = factor(mediator, unique(mediator)))
+            .data$pvalue),
+          mediator = paste0(.data$mediator, " (", signif(.data$pvalue, 2), " ", .data$triad, ")")),
+        .data$mediator %in% unique(.data$mediator)[seq_len(max_facet)]),
+      level = factor(driver_names[.data$level], names(colors)),
+      mediator = factor(.data$mediator, unique(.data$mediator)))
   
   tmpfn <- function(object) {
     if(!nrow(object))
@@ -80,7 +84,7 @@ ggplot_mediation_effect <- function(object,
     sum_object <- 
       purrr::map(
         split(object, object$response),
-        function(x) c(mean = mean(x$effect), sd = sd(x$effect)))
+        function(x) c(mean = mean(x$effect), sd = stats::sd(x$effect)))
     # Use SD of target for adjusted
     sum_object$adjusted["sd"] <- sum_object$target["sd"]
     object <- split(object, object$response)
@@ -88,7 +92,7 @@ ggplot_mediation_effect <- function(object,
       object[[i]] <-
         dplyr::mutate(
           object[[i]],
-          effect = (effect - sum_object[[i]]["mean"]) / sum_object[[i]]["sd"])
+          effect = (.data$effect - sum_object[[i]]["mean"]) / sum_object[[i]]["sd"])
     }
     dplyr::bind_rows(object)
   }
@@ -104,10 +108,10 @@ ggplot_mediation_effect <- function(object,
         }))
   
   ggplot2::ggplot(object) +
-    ggplot2::aes(response, effect, color = level, group = level) +
+    ggplot2::aes(.data$response, .data$effect, color = .data$level, group = .data$level) +
     ggplot2::geom_line(size = size_geom) +
     ggplot2::geom_point(size = size_geom) +
-    ggplot2::facet_wrap(~ mediator) +
+    ggplot2::facet_wrap(~ .data$mediator) +
     ggplot2::scale_color_manual(name = "driver",
                                 values = colors)
   

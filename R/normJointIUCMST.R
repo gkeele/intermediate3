@@ -20,12 +20,14 @@ normJointIUCMST <- function(models,
       dplyr::summarize(
         dplyr::group_by(
           dplyr::mutate(Zscores,
-                        ref = factor(ref, unique(ref))),
+                        ref = factor(.data$ref, unique(.data$ref))),
           ref),
-        pv = as.vector(1 - mnormt::pmnorm(rep(min(Z), length(Z)),
-                                          varcov = corHat(alt, pair, Shat))),
-        alt = alt[which.min(Z)][1])),
-    ref = as.character(ref))
+        pv = as.vector(1 - mnormt::pmnorm(
+          rep(min(.data$Z),
+              length(.data$Z)),
+          varcov = corHat(.data$alt, .data$pair, .data$Shat))),
+        alt = .data$alt[which.min(.data$Z)][1])),
+    ref = as.character(.data$ref))
 }
 # Compare reference model with all others and get max pvalue.
 corHat <- function(alt, pair, Shat) {

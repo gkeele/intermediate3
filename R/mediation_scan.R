@@ -131,13 +131,14 @@ mediation_scan <- function(target,
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
 }
-#'
+#' @param x object of class \code{mediation_scan}
+#' @param facets names of facets to subset
 #' @export
-subset.mediation_scan <- function(object, facets=NULL, ...) {
-  facet_name <- attr(object, "facet_name")
+subset.mediation_scan <- function(x, facets=NULL, ...) {
+  facet_name <- attr(x, "facet_name")
   if(is.null(facets))
-    return(object)
+    return(x)
   
-  new_object <- object[object[[facet_name]] %in% facets,]
-  modify_object(object, new_object)
+  new_x <- x[x[[facet_name]] %in% facets,]
+  modify_object(x, new_x)
 }

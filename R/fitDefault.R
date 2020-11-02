@@ -30,6 +30,8 @@
 #' Currently `weights` is ignored.
 #' 
 #' @export
+#' @importFrom stats as.formula dnorm model.matrix
+#' 
 fitDefault <- function(driver,
                   target,
                   kinship = NULL,
@@ -77,8 +79,8 @@ fitDefault_internal <- function(driver,
   # Form model matrix from additive covariates.
   if(!is.null(addcovar)) {
     if(is.data.frame(addcovar)) {
-      form <- as.formula(paste(" ~ ", paste(colnames(addcovar), collapse = "+")))
-      addcovar <- model.matrix(form, data = addcovar)[,-1]
+      form <- stats::as.formula(paste(" ~ ", paste(colnames(addcovar), collapse = "+")))
+      addcovar <- stats::model.matrix(form, data = addcovar)[,-1]
     }
     X <- addcovar
     if(is.null(dim(X))) {
@@ -119,7 +121,7 @@ fitDefault_internal <- function(driver,
   }
 
   list(LR = LR, #as.vector(- (n/2) * (1 + log(2 * pi) + log(RSS / n))),
-       indLR = dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
+       indLR = stats::dnorm(target, qr.fitted(qrX, target), sqrt(RSS / n), log = TRUE),
        coef = qr.coef(qrX, target),
        df = dX,
        RSS = RSS,
