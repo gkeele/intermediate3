@@ -8,16 +8,18 @@
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
 #' @param kinship optional kinship matrix among individuals
-#' @param genoprob genoprob object of class [qtl2::calc_genoprob()]
+#' @param genoprobs genoprob object of class [qtl2::calc_genoprob()]
 #' @param map list of map positions
 #' @param drop_lod drop in `LOD` (= `LR/log(10)`) to define index set
+#' @param min_lod minimum lod to consider (default \code{3})
 #' @param query_variant function to query variant database
 #' @param cores number of cores to use
 #' @param target_scan optional object from [qtl2::scan1snps()] for target (created if missing)
 #' @param ... additional parameters for [mediation_index()]
 #'
 #' @importFrom qtl2 genoprob_to_snpprob get_common_ids scan1snps top_snps
-#' @importFrom dplyr arrange desc distinct filter first last mutate n rename
+#' @importFrom dplyr arrange desc distinct filter first last mutate n rename 
+#' @importFrom stats reorder
 #' 
 #' @return Object of class `mediation_qtl2`, which inherits from class [mediation_index()]
 #' 
@@ -47,7 +49,7 @@ mediation_qtl2 <- function(target, mediator,
         map = map, 
         pheno = target,
         kinship = kinship,
-        addcovar = addcovar,
+        addcovar = covar_tar,
         chr = chr_id, start = start, end = end,
         query_func = query_variant,
         cores = cores,
@@ -192,6 +194,11 @@ plot.mediation_qtl2 <- function(x, ...)
 #' @rdname mediation_qtl2
 autoplot.mediation_qtl2 <- function(x, ...)
   ggplot_mediation_qtl2(x, ...)
+#' @param x object of class \code{mediation_qtl2}
+#' @param response type of response from \code{c("pvalue","IC")}
+#' @param pattern_name name of pattern (default \code{"pattern"})
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_qtl2
 ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"), 
@@ -209,9 +216,9 @@ ggplot_mediation_qtl2 <- function(x, response = c("pvalue","IC"),
   # Fix up x$best for plot as mediation_index object
   x$best <-
     dplyr::select(
-      tidyr::gather(
+      tidyr::pivot_longer(
         x$best,
-        .data$place, .data$pos, dplyr::contains("pos_")),
+        dplyr::contains("pos_"), names_to = "place", values_to = "pos"),
       -.data$place)
   
 

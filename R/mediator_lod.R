@@ -17,8 +17,6 @@
 #' @param index_name name of index column (default `pos`)
 #' @param verbose If TRUE display information about the progress
 #' 
-#' @seealso \code{\link{plot.mediation}}, \code{\link{kplot}}
-#' 
 #' @examples
 #' data(Tmem68)
 #' med_lod <- mediator_lod(mediator = Tmem68$mediator,

@@ -1,4 +1,4 @@
-# From qtl2pattern::covar_df_mx
+# From qtl2shiny::covar_df_mx
 #' @importFrom stats formula model.matrix
 #' 
 covar_df_mx <- function(addcovar) {
@@ -10,7 +10,7 @@ covar_df_mx <- function(addcovar) {
   }
   wh_sex(addcovar)
 }
-# qtl2pattern:::wh_sex
+# qtl2shiny:::wh_sex
 wh_sex <- function(addcovar) {
   # Figure out which column is sex and make sure its name is "sex" 
   m <- match("sexm", tolower(colnames(addcovar)))

@@ -5,7 +5,7 @@
 #' each column of driver. Note that the plot uses column \code{info} to provide
 #' additional information, which here is the \code{chr} of mediator. The plot uses
 #' the mediator position on its home chromosome, which is not really what is wanted.
-#' See package \code{qtl2shiny} for a more elegant use.
+#' See package 'qtl2shiny' for a more elegant use.
 #' 
 #' @param target vector or 1-column matrix with target values
 #' @param mediator vector or 1-column matrix with mediator values
@@ -14,9 +14,7 @@
 #' @param covar_med optional covariates for mediator
 #' @param kinship optional kinship matrix among individuals
 #' @param fitFunction function to fit models with driver, target and mediator
-#' @param sdp SNP distribution pattern for plot colors
-#' @param allele Driver has alleles if \code{TRUE}, otherwise allele pairs.
-#' @param ... additional arguments to internal routine
+#' @param ... additional arguments
 #' 
 #' @examples
 #' data(Tmem68)
@@ -136,7 +134,6 @@ triad_data <- function(target, mediator, driver,
 #' @param fitline include fit line from coefficients in \code{x} if \code{TRUE}
 #' @param main main title (defautl \code{tname})
 #' @param colors named colors to use if \code{fitline} is \code{TRUE}
-#' @param \dots additional parameters for plotting
 #' 
 #' @rdname mediation_triad
 #' @export
@@ -152,7 +149,7 @@ ggplot_mediation_triad <- function(x,
   
   if("label" %in% names(x$data)) {
     p <- p + 
-      ggplot2::aes(label = label) +
+      ggplot2::aes(label = .data$label) +
       ggplot2::geom_text(size = 2)
   } else {
     p <- p +
@@ -161,12 +158,12 @@ ggplot_mediation_triad <- function(x,
   
   if("Sex" %in% names(x$data)) {
     p <- p +
-      ggplot2::facet_wrap(~ Sex)
+      ggplot2::facet_wrap(~ .data$Sex)
   }
   
   # set up mediator and target.
   p <- p + 
-    ggplot2::aes(mediator, target) +
+    ggplot2::aes(.data$mediator, .data$target) +
     ggplot2::xlab(mname) +
     ggplot2::ylab(tname)
 
@@ -193,9 +190,9 @@ ggplot_mediation_triad <- function(x,
     }
     p <- p +
       ggplot2::geom_abline(
-        ggplot2::aes(slope = slope,
-                     intercept = intercept,
-                     col = col),
+        ggplot2::aes(slope = .data$slope,
+                     intercept = .data$intercept,
+                     col = .data$col),
         data = dat)
     if(nrow(dat) == length(colors)) {
       p <- p +
@@ -205,12 +202,14 @@ ggplot_mediation_triad <- function(x,
     
   } else {
     p <- p + 
-      ggplot2::aes(col = group) +
+      ggplot2::aes(col = .data$group) +
       ggplot2::scale_color_discrete(name = dname) +
       ggplot2::geom_smooth(method = "lm", se=FALSE)
   }
   p
 }
+#' @param object object of class \code{mediation_triad}
+#' 
 #' @rdname mediation_triad
 #' @export
 autoplot.mediation_triad <- function(object, ...) {

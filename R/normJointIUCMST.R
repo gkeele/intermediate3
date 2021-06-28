@@ -1,3 +1,10 @@
+#' Joint Normal IUCMST
+#' 
+#' @param models Object with model information
+#' @param Zscores Calculated Z scores from \code{calcZ}
+#' @param Shat Matrix of variance and covariance estimates
+#' @param ... additional parameters
+#' 
 #' @export
 #'
 normJointIUCMST <- function(models,
@@ -21,7 +28,7 @@ normJointIUCMST <- function(models,
         dplyr::group_by(
           dplyr::mutate(Zscores,
                         ref = factor(.data$ref, unique(.data$ref))),
-          ref),
+          .data$ref),
         pv = as.vector(1 - mnormt::pmnorm(
           rep(min(.data$Z),
               length(.data$Z)),

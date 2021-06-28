@@ -52,7 +52,15 @@ ggplot_mediation_qtl2(
 )
 }
 \arguments{
-\item{...}{additional parameters for [mediation_index()]}
+\item{x}{object of class \code{mediation_qtl2}}
+
+\item{...}{additional parameters}
+
+\item{plot_type}{plot type from \code{c("all","causal","reactive","independent","undecided")}}
+
+\item{minpvalue}{minimum p-value with default \code{0.05}}
+
+\item{id_name}{ID name with default \code{mediator_id}}
 
 \item{target}{vector or 1-column matrix with target values}
 
@@ -66,9 +74,13 @@ ggplot_mediation_qtl2(
 
 \item{kinship}{optional kinship matrix among individuals}
 
+\item{genoprobs}{genoprob object of class [qtl2::calc_genoprob()]}
+
 \item{map}{list of map positions}
 
 \item{drop_lod}{drop in `LOD` (= `LR/log(10)`) to define index set}
+
+\item{min_lod}{minimum lod to consider (default \code{3})}
 
 \item{query_variant}{function to query variant database}
 
@@ -76,7 +88,9 @@ ggplot_mediation_qtl2(
 
 \item{target_scan}{optional object from [qtl2::scan1snps()] for target (created if missing)}
 
-\item{genoprob}{genoprob object of class [qtl2::calc_genoprob()]}
+\item{response}{type of response from \code{c("pvalue","IC")}}
+
+\item{pattern_name}{name of pattern (default \code{"pattern"})}
 }
 \value{
 Object of class `mediation_qtl2`, which inherits from class [mediation_index()]

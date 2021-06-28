@@ -1,6 +1,12 @@
+#' Wilcoxon IUCMST
+#' 
+#' @param models Object with model information
+#' @param flavor Flavor of penalty from \code{c("B","A","N")}
+#' @param ... additional paramters
+#' 
 #' @export
 #'
-wilcIUCMST <- function(models, flavor = "B") {
+wilcIUCMST <- function(models, flavor = "B", ...) {
 
   # Penalize individual log likelihood ratios
   d <- dim(models$indLR)
@@ -22,6 +28,7 @@ wilcIUCMST <- function(models, flavor = "B") {
   }
   # var = nz * (nz + 1) * (2 * nz + 1) / 6
 
+  # *** this is not yielding matrix or data frame ***
   LR <- dplyr::bind_cols(
     purrr::map(indLR,
                function(x,y) x - y,

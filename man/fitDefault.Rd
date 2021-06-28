@@ -35,9 +35,7 @@ for individual identifiers. Ignored if `kinship` is provided.#'}
 
 \item{model}{name of model (`normal` or `binary`); if `binary`, `kinship` must be `NULL`}
 
-\item{nullcovar}{An optional matrix of additional additive
-covariates that are used under the null hypothesis (of no driver)
-but not under the alternative (with driver).}
+\item{...}{additional parameters}
 }
 \value{
 A list containing

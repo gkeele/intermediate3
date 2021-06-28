@@ -1,3 +1,9 @@
+#' Normal IUCMST
+#' 
+#' @param models Object with model information
+#' @param Zscores Calculated Z scores from \code{calcZ}
+#' @param ... additional paramters
+#' 
 #' @export
 #' @importFrom stats pnorm
 #' 

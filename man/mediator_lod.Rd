@@ -52,6 +52,3 @@ ggplot2::autoplot(med_lod) +
   ggplot2::geom_hline(yintercept = 5, col = "blue")
 
 }
-\seealso{
-\code{\link{plot.mediation}}, \code{\link{kplot}}
-}

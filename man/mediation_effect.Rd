@@ -2,14 +2,23 @@
 % Please edit documentation in R/mediation_effect.R
 \name{mediation_effect}
 \alias{mediation_effect}
+\alias{ggplot_mediation_effect}
 \alias{autoplot.mediation_effect}
 \alias{plot.mediation_effect}
 \title{Driver effect on target and mediator}
 \usage{
 mediation_effect(
-  object,
+  test_object,
   id_name = "id",
-  driver_levels = unique(unlist(object$driver_levels))
+  driver_levels = unique(unlist(test_object$driver_levels))
+)
+
+ggplot_mediation_effect(
+  object,
+  colors = qtl2::CCcolors,
+  max_facet = 12,
+  size_geom = 2,
+  ...
 )
 
 \method{autoplot}{mediation_effect}(object, ...)
@@ -17,11 +26,23 @@ mediation_effect(
 \method{plot}{mediation_effect}(x, ...)
 }
 \arguments{
-\item{object}{object from [mediation_test()]}
+\item{test_object}{object of class \code{mediation_test}}
 
 \item{id_name}{name of identifier column}
 
 \item{driver_levels}{levels of driver}
+
+\item{object}{object of class \code{mediation_effect}}
+
+\item{colors}{colors for plotting}
+
+\item{max_facet}{maximum number of facets}
+
+\item{size_geom}{geometry size for points and lines}
+
+\item{...}{additional parameters}
+
+\item{x}{object of class \code{mediation_effect}}
 }
 \description{
 Compare driver effect on mediator, target and target adjusted by mediator.

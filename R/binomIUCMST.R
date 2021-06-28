@@ -1,6 +1,13 @@
+#' Binomial IUCMST
+#' 
+#' @param models Object with model information
+#' @param flavor Flavor of penalty from \code{c("B","A","N")}
+#' @param ... additional paramters
+#' 
 #' @export
+#' @importFrom stats pbinom
 #'
-binomIUCMST <- function(models, flavor = "B") {
+binomIUCMST <- function(models, flavor = "B", ...) {
 
   # Penalize individual log likelihood ratios
   d <- dim(models$indLR)
@@ -46,7 +53,7 @@ binomIUCMST <- function(models, flavor = "B") {
         nz = rep(nz, 2),
         Z = ifelse(.data$Z > 0, .data$Z, .data$nz + .data$Z)),
       pos = .data$Z),
-    pv = pbinom(.data$pos - 1, .data$nz, 0.5, lower.tail = FALSE))
+    pv = stats::pbinom(.data$pos - 1, .data$nz, 0.5, lower.tail = FALSE))
   
   comp_pv(LR2)
 }

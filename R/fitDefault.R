@@ -14,14 +14,12 @@
 #' @param target A numeric vector of target values
 #' @param kinship Optional kinship matrix.
 #' @param addcovar An optional matrix of additive covariates.
-#' @param nullcovar An optional matrix of additional additive
-#' covariates that are used under the null hypothesis (of no driver)
-#' but not under the alternative (with driver).
 #' @param intcovar An optional matrix of interactive covariates.
 #' @param weights An optional vector of positive weights for the
 #' individuals. As with the other inputs, it must have `names`
 #' for individual identifiers. Ignored if `kinship` is provided.#'
 #' @param model name of model (`normal` or `binary`); if `binary`, `kinship` must be `NULL` 
+#' @param ... additional parameters
 #' 
 #' @return A list containing
 #' * `LR` - The overall likelihood ratio.

@@ -11,7 +11,6 @@
 #' @param kinship optional kinship matrix among individuals
 #' @param driver_med optional driver matrix for mediators
 #' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
-#' @param test Type of CMST test.
 #' @param fitFunction function to fit models with driver, target and mediator
 #' @param index_name name of index column (default `pos`)
 #' @param ... additional parameters
@@ -20,7 +19,7 @@
 #' @importFrom stringr str_replace
 #' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
 #' geom_hline geom_point geom_vline ggplot 
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
@@ -135,6 +134,12 @@ plot.mediation_joint <- function(x, ...)
 #' @rdname mediation_joint
 autoplot.mediation_joint <- function(x, ...)
   ggplot_mediation_joint(x, ...)
+#' @param x object of class \code{mediation_joint}
+#' @param lod plot lod if \code{TRUE}
+#' @param xlab horizontal label
+#' @param ylab vertical label
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_joint
 ggplot_mediation_joint <- function(x, lod = TRUE,
@@ -146,15 +151,15 @@ ggplot_mediation_joint <- function(x, lod = TRUE,
   }
   x <- dplyr::rename(x, index = index_name)
   if(lod) {
-    x <- dplyr::mutate(x, LR = LR / log(10))
+    x <- dplyr::mutate(x, LR = .data$LR / log(10))
     ylab_name <- "LOD"
   } else {
     ylab_name <- "LR"
   }
   p <- ggplot2::ggplot(x) +
-    ggplot2::aes(index, LR)
+    ggplot2::aes(.data$index, .data$LR)
   if("pattern" %in% names(x))
-    p <- p + ggplot2::aes(col = pattern)
+    p <- p + ggplot2::aes(col = .data$pattern)
   p +
     ggplot2::geom_point() +
     ggplot2::xlab(xlab) +

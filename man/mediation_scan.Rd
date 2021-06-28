@@ -5,6 +5,7 @@
 \alias{autoplot.mediation_scan}
 \alias{plot.mediation_scan}
 \alias{mediation_scan}
+\alias{subset.mediation_scan}
 \title{Plot of conditioned LOD scores against index}
 \usage{
 ggplot_mediation_scan(
@@ -36,9 +37,11 @@ mediation_scan(
   verbose = TRUE,
   ...
 )
+
+\method{subset}{mediation_scan}(x, facets = NULL, ...)
 }
 \arguments{
-\item{x}{mediation object}
+\item{x}{object of class \code{mediation_scan}}
 
 \item{col}{color of points (default "firebrick4")}
 
@@ -75,6 +78,8 @@ mediation_scan(
 \item{index_name}{name of index column (default `pos`)}
 
 \item{verbose}{If TRUE display information about the progress}
+
+\item{facets}{names of facets to subset}
 }
 \description{
 Plot LOD statistics calculated by [mediation_scan()] against index

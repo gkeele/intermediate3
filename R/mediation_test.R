@@ -20,8 +20,9 @@
 #' @importFrom purrr map transpose
 #' @importFrom stringr str_replace
 #' @importFrom qtl2 decomp_kinship fit1 get_common_ids
-#' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
-#' @importFrom tidyr gather spread
+#' @importFrom dplyr any_of arrange bind_rows desc filter group_by left_join
+#' mutate one_of rename ungroup
+#' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
 #' geom_hline geom_point geom_vline ggplot 
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
@@ -64,6 +65,9 @@
 #' ggplot2::autoplot(med_test)
 #'
 #' @export
+#' @importFrom dplyr arrange bind_rows everything filter left_join matches
+#'             mutate rename select
+#' @importFrom purrr map transpose
 #'
 mediation_test <- function(target, mediator, driver, annotation = NULL,
                           covar_tar=NULL, covar_med=NULL, kinship=NULL,
@@ -156,7 +160,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   
   decided <- dplyr::filter(
     result$test,
-    model != "undecided")
+    .data$model_test != "undecided")
   
   result$best <-
     dplyr::select(
@@ -169,8 +173,8 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                 dplyr::select(
                   dplyr::filter(
                     result$test,
-                    model == "undecided"),
-                  id, pvalue),
+                    .data$model_test == "undecided"),
+                  .data$id, .data$pvalue),
                 undecided = "pvalue"),
               dplyr::left_join(
                 # Join best test with annotation.
@@ -185,22 +189,23 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
               by = "id"),
             # Join with mediation and mediator LR.
             dplyr::rename(
-              tidyr::spread(
+              tidyr::pivot_wider(
                 dplyr::filter(
                   dplyr::select(
                     result$fit,
-                    id, response, LR),
-                  response %in% c("mediation", "mediator")),
-                response, LR),
+                    .data$id, .data$response, .data$LR),
+                  .data$response %in% c("mediation", "mediator")),
+                names_from = "response", values_from = "LR"),
               LRmed = "mediator"),
             by = "id"),
-          triad = "model"),
-        pvalue),
-      id, 
+          triad = "model_test"),
+        .data$pvalue),
+      .data$id, 
       dplyr::matches("symbol"),
       dplyr::matches(facet_name),
       dplyr::matches(index_name),
-      triad, pvalue, alt, undecided, mediation, LRmed, 
+      .data$triad, .data$pvalue, .data$alt,
+      .data$undecided, .data$mediation, .data$LRmed, 
       dplyr::everything())
   
   result$params <-
@@ -275,7 +280,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   if(!is.null(annotation)) {
     annotation <- dplyr::filter(
       annotation,
-      id %in% colnames(mediator))
+      .data$id %in% colnames(mediator))
     # Make sure annotation is in same order as mediator.
     m <- match(colnames(mediator), annotation$id)
     if(any(is.na(m))) {
@@ -309,34 +314,38 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
 #' @export
 #' @param x object of class \code{mediation_test}
 #' @param not_type biotypes to not include
+#' @rdname mediation_test
 #' 
 subset.mediation_test <- function(x, not_type, ...) {
   attrc <- class(x)
   x$best <- dplyr::filter(x$best, 
-                          biotype != not_type)
+                          .data$biotype != not_type)
   class(x) <- attrc
   
   x
 }
+#' @param object object of class \code{mediation_test}
 #' @export
+#' @rdname mediation_test
+#' 
 summary.mediation_test <- function(object, ..., lod = FALSE) {
   out <-
     dplyr::mutate(
       dplyr::arrange(
         object$best,
-        pmin(pvalue, undecided), id),
-      mediation = mediation / log(10),
-      pvalue = signif(pvalue, 3),
-      mediation = signif(mediation, 3),
-      LRmed = signif(LRmed, 3))
+        pmin(.data$pvalue, .data$undecided), .data$id),
+      mediation = .data$mediation / log(10),
+      pvalue = signif(.data$pvalue, 3),
+      mediation = signif(.data$mediation, 3),
+      LRmed = signif(.data$LRmed, 3))
 
   if(lod) {
     out <- 
       dplyr::rename(
         dplyr::mutate(
           out,
-          mediation = mediation / log(10),
-          LRmed = LRmed / log(10)),
+          mediation = .data$mediation / log(10),
+          LRmed = .data$LRmed / log(10)),
         lodMediator = "LRmed")
   }
   

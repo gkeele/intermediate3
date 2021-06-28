@@ -134,6 +134,8 @@ mediation_scan <- function(target,
 #' @param x object of class \code{mediation_scan}
 #' @param facets names of facets to subset
 #' @export
+#' @rdname mediation_scan
+#' 
 subset.mediation_scan <- function(x, facets=NULL, ...) {
   facet_name <- attr(x, "facet_name")
   if(is.null(facets))

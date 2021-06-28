@@ -19,7 +19,7 @@
 #' @importFrom stringr str_replace
 #' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr arrange as_tibble bind_rows desc filter group_by left_join mutate one_of rename ungroup
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
 #' geom_hline geom_point geom_rug geom_vline ggplot guides guide_legend
 #' ggtitle scale_color_manual scale_shape_manual theme xlab ylab
@@ -49,7 +49,9 @@
 #'                       annotation = med_lod,
 #'                       covar_tar = Tmem68$covar,
 #'                       covar_med = Tmem68$covar,
-#'                       driver_med = driver_med, driver_index = names(driver_med), index_name = "probs")
+#'                       driver_med = driver_med,
+#'                       driver_index = names(driver_med),
+#'                       index_name = "probs")
 #' summary(med_index)
 #' ggplot2::autoplot(med_index)
 #' 
@@ -108,6 +110,12 @@ plot.mediation_index <- function(x, ...)
 #' @rdname mediation_index
 autoplot.mediation_index <- function(x, ...)
   ggplot_mediation_index(x, ...)
+#' @param x object of class \code{mediation_index}
+#' @param response type of response from \code{c("pvalue","IC")}
+#' @param alpha ggplot2 transparency parameter with default \code{0.5}
+#' @param pattern_name name of pattern with default \code{"pattern"}
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_index
 ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
@@ -131,11 +139,11 @@ ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
     response,
     pvalue = {
       p <- p +
-        ggplot2::aes(index, -log10(pvalue))
+        ggplot2::aes(.data$index, -log10(.data$pvalue))
       },
     IC     = {
       p <- p +
-        ggplot2::aes(index, IC) +
+        ggplot2::aes(.data$index, .data$IC) +
         ggplot2::ylab("BIC on log10 scale")
       })
   if(pattern_name %in% names(best)) {
@@ -144,9 +152,9 @@ ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
       ggplot2::guides(color = ggplot2::guide_legend(pattern_name))
   }
   if(pattern_name != "pattern" & "pattern" %in% names(best))
-    p <- p + ggplot2::aes(pattern = pattern)
+    p <- p + ggplot2::aes(pattern = .data$pattern)
   p <- p +
-    ggplot2::aes(group = triad, id = id)
+    ggplot2::aes(group = .data$triad, id = .data$id)
   if(!is.null(target_index <- x$params$target_index)) {
     if(target_index >= min(best$index) & target_index <= max(best$index))
       p <- p +
@@ -154,7 +162,7 @@ ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
   }
   p <- p +
     ggplot2::geom_point(alpha = alpha) +
-    ggplot2::facet_wrap(~ triad) +
+    ggplot2::facet_wrap(~ .data$triad) +
     ggplot2::xlab(index_name)
   if(!is.null(x$map)) {
     tmp <- 
@@ -163,7 +171,7 @@ ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
         map >= min(best$index),
         map <= max(best$index))
     p <- p +
-      ggplot2::geom_rug(aes(map), data = tmp, inherit.aes = FALSE, col = "gray")
+      ggplot2::geom_rug(aes(.data$map), data = tmp, inherit.aes = FALSE, col = "gray")
     
   }
   p

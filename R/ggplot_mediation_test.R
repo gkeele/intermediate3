@@ -6,6 +6,16 @@ plot.mediation_test <- function(x, ...)
 #' @rdname mediation_test
 autoplot.mediation_test <- function(x, ...)
   ggplot_mediation_test(x, ...)
+#' @param x object of class \code{mediation_test}
+#' @param type type of plot from \code{c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator")}
+#' @param main title for plot
+#' @param maxPvalue maximum p-value with default \code{0.1}
+#' @param local_only local only if \code{TRUE} (default \code{FALSE})
+#' @param significant whow signficant if \code{TRUE} (default)
+#' @param lod show lod plot if \code{TRUE} (default)
+#' @param target_index include vertical line at target if not \code{NULL}
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_test
 ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator"),
@@ -79,7 +89,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
       shapes <- c(17,16,2,1)
       names(shapes) <- c("distal", "local", "distal_info", "local_info")
       x <- dplyr::mutate(x,
-                         shape = names(.data$shapes)[1 + .data$local + 2 * (.data$qtl_ct > 1)])
+                         shape = names(shapes)[1 + .data$local + 2 * (.data$qtl_ct > 1)])
     }
   }
 
@@ -141,8 +151,10 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
     if(exists("shapes")) {
       p <- p + ggplot2::geom_point(aes(shape = .data$shape),
                                    size = 2, alpha = 0.5) +
-        ggplot2::aes(chr = .data$chr, qtl_pos = .data$qtl_pos) +
         ggplot2::scale_shape_manual(values = shapes)
+      if("qtl_pos" %in% names(x)) {
+        p <- p + ggplot2::aes(chr = .data$chr, qtl_pos = .data$qtl_pos)
+      }
     } else {
       p <- p + 
         ggplot2::geom_point(size = 2, alpha = 0.5)
@@ -164,7 +176,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                      col = .data$geno,
                      symbol = .data$symbol) +
         ggplot2::facet_wrap(~ .data$triad, scales = "free_x") +
-        ggplot2::scale_color_manual(values = CCSanger::CCcolors) +
+        ggplot2::scale_color_manual(values = qtl2::CCcolors) +
         ggplot2::geom_hline(data = targetCoef, 
                             ggplot2::aes(yintercept = .data$value,
                                          col = .data$geno),
@@ -206,7 +218,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
            })
   }
 }
-target_prep <- function(targetFit, type, col = CCSanger::CCcolors) {
+target_prep <- function(targetFit, type, col = qtl2::CCcolors) {
   targetFit <- as.data.frame(t(targetFit$coef))
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
@@ -216,29 +228,29 @@ target_prep <- function(targetFit, type, col = CCSanger::CCcolors) {
   col_names <- names(col)
   targetFit <- targetFit[m]
   names(targetFit) <- col_names
-  out <- tidyr::gather(targetFit, .data$geno, .data$value)
+  out <- tidyr::pivot_longer(targetFit, names_to = "geno", values_to = "value")
   out <- dplyr::mutate(out, geno = factor(.data$geno, col_names))
   switch(type,
          alleles  = dplyr::mutate(out, value = .data$value - mean(.data$value)),
          mediator = dplyr::mutate(out, value = (.data$value - min(.data$value)) /
                                     diff(range(.data$value))))
 }
-allele_prep <- function(x, type, col = CCSanger::CCcolors) {
+allele_prep <- function(x, type, col = qtl2::CCcolors) {
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
               alleles  = match(codes, names(x)),
               mediator = match(paste(codes, "m", sep = "_"), names(x)))
   
-  col_names <- names(col)
+  col_names <- c("qtl_pos", names(col))
   names(x)[m] <- col_names
   out <- dplyr::group_by(
-    tidyr::gather(
+    tidyr::pivot_longer(
       dplyr::select(
         x,
-        .data$symbol, .data$triad, .data$pvalue, .data$chr, .data$qtl_pos, 
+        .data$symbol, .data$triad, .data$pvalue, .data$chr, 
         dplyr::one_of(col_names)),
-      .data$geno, .data$value, -.data$symbol, -.data$triad, -.data$pvalue, -.data$chr, -.data$qtl_pos
-    ),
+      -dplyr::any_of(c("symbol", "triad", "pvalue", "chr", "qtl_pos")),
+      names_to = "geno", values_to = "value"),
     .data$symbol
   )
   out <- dplyr::mutate(out, geno = factor(.data$geno, col_names))

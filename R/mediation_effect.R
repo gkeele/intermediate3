@@ -2,7 +2,7 @@
 #' 
 #' Compare driver effect on mediator, target and target adjusted by mediator.
 #' 
-#' @param object object from [mediation_test()]
+#' @param test_object object of class \code{mediation_test}
 #' @param id_name name of identifier column
 #' @param driver_levels levels of driver
 #' 
@@ -14,15 +14,15 @@
 #' out <- mediation_effect(med_test, "symbol")
 #' ggplot_mediation_effect(out)
 #' 
-mediation_effect <- function(object,
+mediation_effect <- function(test_object,
                           id_name = "id",
-                          driver_levels = unique(unlist(object$driver_levels))) {
+                          driver_levels = unique(unlist(test_object$driver_levels))) {
   
-  if(id_name != "id" & id_name %in% names(object$best)) {
-    m <- match(object$fit$id, object$best$id)
-    object$fit$id <- object$best[[id_name]][m]
-    object$best$id <- object$best[[id_name]]
-    object$best[[id_name]] <- NULL
+  if(id_name != "id" & id_name %in% names(test_object$best)) {
+    m <- match(test_object$fit$id, test_object$best$id)
+    test_object$fit$id <- test_object$best[[id_name]][m]
+    test_object$best$id <- test_object$best[[id_name]]
+    test_object$best[[id_name]] <- NULL
   }
 
   coefs <- 
@@ -30,11 +30,11 @@ mediation_effect <- function(object,
       dplyr::rename(
         dplyr::inner_join(
           dplyr::select(
-            object$best,
+            test_object$best,
             .data$id, .data$triad, .data$pvalue),
           dplyr::mutate(
             dplyr::select(
-              object$fit,
+              test_object$fit,
               .data$id, .data$response, dplyr::one_of(driver_levels)),
             response = ifelse(.data$response == "mediation",
                               "adjusted",
@@ -53,11 +53,18 @@ mediation_effect <- function(object,
   class(coefs) <- c("mediation_effect", class(coefs))
   coefs
 }
+#' @param object object of class \code{mediation_effect}
+#' @param colors colors for plotting
+#' @param max_facet maximum number of facets
+#' @param size_geom geometry size for points and lines
+#' @param ... additional parameters
+#' 
 #' @export
+#' @rdname mediation_effect
 ggplot_mediation_effect <- function(object,
                               colors = qtl2::CCcolors,
                               max_facet = 12,
-                              size_geom = 2) {
+                              size_geom = 2, ...) {
   udriver <- unique(object$level)
   if(length(colors) != length(udriver)) {
     colors <- seq_along(udriver)
@@ -120,6 +127,9 @@ ggplot_mediation_effect <- function(object,
 #' @export
 autoplot.mediation_effect <- function(object, ...)
   ggplot_mediation_effect(object, ...)
+#' @param x object of class \code{mediation_effect}
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_effect
 plot.mediation_effect <- function(x, ...)

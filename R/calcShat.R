@@ -1,3 +1,7 @@
+#' Calculate variance-covariance matris
+#' 
+#' @param indLR Object with likelihood ratio information
+#' 
 #' @importFrom dplyr bind_cols
 #' @importFrom purrr map
 #' @importFrom stats cov

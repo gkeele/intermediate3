@@ -49,7 +49,7 @@ ggplot_mediation_triad(
 
 \item{fitFunction}{function to fit models with driver, target and mediator}
 
-\item{...}{additional arguments to internal routine}
+\item{...}{additional arguments}
 
 \item{x}{object of class \code{mediation_triad}}
 
@@ -67,11 +67,7 @@ ggplot_mediation_triad(
 
 \item{colors}{named colors to use if \code{fitline} is \code{TRUE}}
 
-\item{sdp}{SNP distribution pattern for plot colors}
-
-\item{allele}{Driver has alleles if \code{TRUE}, otherwise allele pairs.}
-
-\item{\dots}{additional parameters for plotting}
+\item{object}{object of class \code{mediation_triad}}
 }
 \description{
 Triad plot. Currently relies on \code{sdp} to provide lines, but want to use
@@ -79,7 +75,7 @@ coefficients from model fit with \code{\link{mediation_test}} to get lines for
 each column of driver. Note that the plot uses column \code{info} to provide
 additional information, which here is the \code{chr} of mediator. The plot uses
 the mediator position on its home chromosome, which is not really what is wanted.
-See package \code{qtl2shiny} for a more elegant use.
+See package 'qtl2shiny' for a more elegant use.
 }
 \examples{
 data(Tmem68)

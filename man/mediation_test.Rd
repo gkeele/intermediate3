@@ -5,6 +5,8 @@
 \alias{autoplot.mediation_test}
 \alias{ggplot_mediation_test}
 \alias{mediation_test}
+\alias{subset.mediation_test}
+\alias{summary.mediation_test}
 \title{Develop mediation models from driver, target and mediator}
 \usage{
 \method{plot}{mediation_test}(x, ...)
@@ -39,9 +41,29 @@ mediation_test(
   index_name = "pos",
   ...
 )
+
+\method{subset}{mediation_test}(x, not_type, ...)
+
+\method{summary}{mediation_test}(object, ..., lod = FALSE)
 }
 \arguments{
+\item{x}{object of class \code{mediation_test}}
+
 \item{...}{additional parameters}
+
+\item{type}{type of plot from \code{c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator")}}
+
+\item{main}{title for plot}
+
+\item{maxPvalue}{maximum p-value with default \code{0.1}}
+
+\item{local_only}{local only if \code{TRUE} (default \code{FALSE})}
+
+\item{significant}{whow signficant if \code{TRUE} (default)}
+
+\item{lod}{show lod plot if \code{TRUE} (default)}
+
+\item{target_index}{include vertical line at target if not \code{NULL}}
 
 \item{target}{vector or 1-column matrix with target values}
 
@@ -68,6 +90,10 @@ mediation_test(
 \item{facet_name}{name of facet column (default `chr`)}
 
 \item{index_name}{name of index column (default `pos`)}
+
+\item{not_type}{biotypes to not include}
+
+\item{object}{object of class \code{mediation_test}}
 }
 \value{
 List with elements:

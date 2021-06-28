@@ -6,6 +6,12 @@ plot.listof_mediation_qtl2 <- function(x, ...)
 #' @rdname mediation_qtl2
 autoplot.listof_mediation_qtl2 <- function(x, ...)
   ggplot_listof_mediation_qtl2(x, ...)
+#' @param x object of class \code{listof_mediation_qtl2}
+#' @param plot_type plot type from \code{c("all","causal","reactive","independent","undecided")}
+#' @param minpvalue minimum p-value with default \code{0.05}
+#' @param id_name ID name with default \code{mediator_id}
+#' @param ... additional parameters
+#' 
 #' @export
 #' @rdname mediation_qtl2
 ggplot_listof_mediation_qtl2 <- function(x, 
@@ -35,7 +41,7 @@ ggplot_listof_mediation_qtl2 <- function(x,
           dplyr::filter(
             out$best,
             .data$triad == plot_type),
-          symbol = reorder(.data$symbol, -.data$pvalue))
+          symbol = stats::reorder(.data$symbol, -.data$pvalue))
       if(!nrow(out$best))
         return(NULL)
       ggplot_mediation_qtl2(out, pattern_name = "symbol")

@@ -53,7 +53,13 @@ ggplot_mediation_joint(x, lod = TRUE, xlab = index_name, ylab = ylab_name, ...)
 
 \item{...}{additional parameters}
 
-\item{test}{Type of CMST test.}
+\item{x}{object of class \code{mediation_joint}}
+
+\item{lod}{plot lod if \code{TRUE}}
+
+\item{xlab}{horizontal label}
+
+\item{ylab}{vertical label}
 }
 \value{
 Data frame with `id` and `LR` as well as `annotation` columns.

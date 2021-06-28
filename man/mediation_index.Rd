@@ -58,6 +58,14 @@ ggplot_mediation_index(
 \item{index_name}{name of index column (default `pos`)}
 
 \item{...}{additional parameters}
+
+\item{x}{object of class \code{mediation_index}}
+
+\item{response}{type of response from \code{c("pvalue","IC")}}
+
+\item{alpha}{ggplot2 transparency parameter with default \code{0.5}}
+
+\item{pattern_name}{name of pattern with default \code{"pattern"}}
 }
 \description{
 Test mediation across set of indexed drivers
@@ -85,7 +93,9 @@ med_index <- mediation_index(target = target,
                       annotation = med_lod,
                       covar_tar = Tmem68$covar,
                       covar_med = Tmem68$covar,
-                      driver_med = driver_med, driver_index = names(driver_med), index_name = "probs")
+                      driver_med = driver_med,
+                      driver_index = names(driver_med),
+                      index_name = "probs")
 summary(med_index)
 ggplot2::autoplot(med_index)
 
