@@ -19,6 +19,8 @@ library(dplyr)
 library(ggplot2)
 ```
 
+The data and original 'intermediate' code come from <https://github.com/churchill-lab/intermediate>.
+
 ```{r}
 data(Tmem68)
 ```

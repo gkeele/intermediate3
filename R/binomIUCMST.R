@@ -27,7 +27,8 @@ binomIUCMST <- function(models, flavor = "B", ...) {
   LR <- dplyr::bind_cols(
     purrr::map(indLR,
                function(x,y) x - y,
-               indLR))
+               indLR),
+    .name_repair = "minimal")
 
   names(LR) <- paste(rep(names(models$indLR), each = ncol(models$indLR)),
                      rep(names(models$indLR), ncol(models$indLR)),
