@@ -1,7 +1,7 @@
 ---
 title: "Mediation with R/intermediate"
 author: "Brian S. Yandell"
-date: "4/23/2018"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Mediation Scans and Tests}
@@ -10,13 +10,12 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.width = 7, fig.height = 7)
 ```
 
 ```{r}
 library(intermediate)
-library(dplyr)
-library(ggplot2)
 ```
 
 The data and original 'intermediate' code come from <https://github.com/churchill-lab/intermediate>.
@@ -25,13 +24,17 @@ The data and original 'intermediate' code come from <https://github.com/churchil
 data(Tmem68)
 ```
 
+Note that the `target` and one of the mediators are identical
+
+```{r}
+m <- match("Tmem68", Tmem68$annotation$symbol)
+all.equal(Tmem68$target, Tmem68$mediator[,m])
+```
+
 ## Mediation scan
 
 ```{r}
-# target and Tmem68$mediator[,"Tmem68"] are identical.
-# so add some noise to make more interesting.
 target <- Tmem68$target
-#target <- target + rnorm(length(target), sd = 0.5)
 ```
 
 ```{r}
@@ -48,8 +51,7 @@ rownames(driver) <- rownames(Tmem68$qtl.geno)
 ```
 
 ```{r}
-annotation <- Tmem68$annotation %>%
-  mutate(chr = factor(chr, c(1:19,"X")))
+annotation <- dplyr::mutate(Tmem68$annotation, chr = factor(chr, c(1:19,"X")))
 mediators <- Tmem68$mediator
 ```
 
@@ -72,7 +74,11 @@ med_lod <- med_lod[order(med_lod$col, -med_lod$lod),]
 ```
 
 ```{r}
-autoplot(med_lod)
+ggplot2::autoplot(med_lod)
+```
+
+```{r}
+ggplot2::autoplot(subset(med_lod, chr = c("4","13")), size = 3)
 ```
 
 ## Mediation scan of target adjusted by mediators
@@ -89,14 +95,14 @@ med_col <- rep(1, nrow(med_scan))
 med_col[med_scan$id %in% med_signif] <- 2
 med_scan$col <- factor(med_col)
 med_scan <- med_scan[order(med_scan$col, -med_scan$lod),]
-ggplot_mediation_scan(med_scan)
+ggplot2::autoplot(med_scan)
 ```
 
-Or use `autoplot`, and maybe focus on one group and add a vertical line.
+Or use `ggplot2::autoplot`, and maybe focus on a few groups and add a vertical line.
 
 ```{r}
-autoplot(subset(med_scan, "4")) +
-  geom_vline(xintercept = annotation[m,"pos"], linetype = "dashed")
+ggplot2::autoplot(subset(med_scan, c("4","13")), size = 3) +
+  ggplot2::geom_vline(xintercept = annotation[m,"pos"], linetype = "dashed")
 
 ```
 
@@ -109,7 +115,7 @@ med_scan <- mediation_scan(target = target,
                       annotation = annotation,
                       covar = covar,
                       method = "double-lod-diff")
-ggplot_mediation_scan(med_scan)
+ggplot2::autoplot(med_scan)
 ```
 
 ## Mediation test
@@ -124,24 +130,21 @@ med_test <- mediation_test(target = target,
                       covar_tar = covar,
                       covar_med = covar,
                       method = "double-lod-diff")
-(sum_med <- summary(med_test) %>%
-    arrange(pvalue))
+(sum_med <- dplyr::arrange(summary(med_test), pvalue))
 ```
 
 ```{r}
-autoplot(med_test)
-#plotly::ggplotly(autoplot(med_test))
+ggplot2::autoplot(med_test)
 ```
 
 ```{r}
 dat <- med_test$best
 dat$lod_tar <- med_test$params$target_LR / log(10)
 dat$lod_med <- dat$mediation / log(10)
-plotly::ggplotly(
-  ggplot(dat %>% filter(pvalue <= 0.05)) +
-    aes(lod_tar - lod_med, -log10(pvalue),
-        col = triad, symbol = symbol) +
-    geom_point(alpha = 0.5, size = 2))
+ggplot2::ggplot(dplyr::filter(dat, pvalue <= 0.05)) +
+  ggplot2::aes(lod_tar - lod_med, -log10(pvalue),
+               col = triad, symbol = symbol) +
+  ggplot2::geom_point(alpha = 0.5, size = 2)
 ```
 
 ## Driver effects
@@ -151,7 +154,7 @@ med_effect <- intermediate::mediation_effect(med_test, "symbol")
 ```
 
 ```{r}
-plot(med_effect)
+ggplot2::autoplot(med_effect)
 ```
 
 ## Mediation triad
@@ -168,6 +171,250 @@ med_triad <- mediation_triad(target = target,
                       driver = driver,
                       covar_tar = covar,
                       sdp = 2)
-autoplot(med_triad)
+ggplot2::autoplot(med_triad, size = 3)
 ```
 
+# Mediation Details
+
+
+Mediation examines the change in likelihood ratio, LR, (or LOD in genetic studies) for the relationship of a target and a driver by adjusting one at a time for a set of mediators. [For now, we ignore covariates and kinship.]
+
+The idea is to compare the strength of evidence for effect of the driver ($D$) on the target ($T$) with or without a mediator ($M$). That is, how do the models $D\rightarrow T$ and $D \rightarrow M \rightarrow T$ compare? This is often done for a set of mediators ($M_1, M_2, ...$), looking for the strongest mediation, or drop in LOD attributable to the mediator.
+
+## Causal models
+
+A key reference for our work is: 
+Li Y1, Tesson BM, Churchill GA, Jansen RC (2010) 
+Critical reasoning on causal inference in genome-wide linkage and association studies.
+_Trends Genet 26_: 493-498.
+[doi:10.1016/j.tig.2010.09.002](http://dx.doi.org/10.1016/j.tig.2010.09.002).
+This article has 10 models (see figure below) with driver $Q=D$, mediator $T1=M$ and target $T2=T$). There are three additional models (green) that imply additional interaction terms to modulate the causal relationship of $T$ with $M$.
+
+![Li et al. (2010)](https://ars.els-cdn.com/content/image/1-s2.0-S0168952510001885-gr1.jpg)
+
+The key models are in blue, corresponding to situations where the driver is known already to affect both the target and mediator, either directly or indirectly. To be exact, it is important to consider the joint distribution of $T$ and $M$ given $D$.
+Write $f()$ as the likelihood (or density) for a given model. Thus $f(T\vert D)$ is the likelihood for the target given the driver, and $f(T)$ is the unconditional likelihood for the target. The four models can be written as
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $D \rightarrow M \rightarrow T$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M)$
+reactive | $D \rightarrow T \rightarrow M$ | $f(M,T\vert D) = f(M\vert T)f(T\vert D)$
+independent | $M \leftarrow D \rightarrow T$ | $f(M,T\vert D) = f(M\vert D)f(T\vert D)$
+undecided | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D) = f(M\vert T,D)f(T\vert D)$
+
+The last model (undecided or correlated) has driver affecting both mediator and target, with the latter two correlated with each other. There are multiple indistinguishable models that fall into this latter context. This is detailed in the following paper:
+Chaibub Neto E, Broman AT, Keller MP, Attie AD, Zhang B, Zhu J, Yandell BS (2013)
+Modeling causality for pairs of phenotypes in system genetics.
+_Genetics 193_: 1003-1013.
+[doi:10.1534/genetics.112.147124](http://dx.doi.org/10.1534/genetics.112.147124).
+
+## Mediation scans and likelihood ratios
+
+Mediation scans focus on comparing models for the target with and without adjusting for a mediator. That is, we compare the likelihood ratios (LRs) $f(T\vert D)/f(T)$ and $f(T\vert M,D)/f(T\vert M)$. If the mediator has no effect on the target, then the mediator LR is equal to the unmediated LR. Thus, as the argument goes, a plot of the mediation score
+
+$$\ell(\text{mediation}) = \log\left({f(T\vert D) \over f(T)}\right) - \log\left({f(T\vert M,D) \over f(T\vert M)}\right)$$
+
+across multiple mediators $M$ should be near zero except at causal mediators, where it will approach $\log(f(T\vert D)/f(T))$. 
+
+Under the causal model, the LR adjusted for mediator is 1, since $f(T\vert M,D) = f(T\vert M)$:
+
+$$\ell(\text{mediation}\,\vert\,\text{causal}) = \log\left({f(T\vert D) \over f(T)}\right)\,.$$
+
+If target and mediator are independent given the driver, $f(T\vert M,D) = f(T\vert D)$ and
+
+$$\ell(\text{mediation}\,\vert\, \text{independent}) = \log\left({f(T\vert M) \over f(T)}\right)\,,$$
+
+which could be either positive or negative. If target and mediator are unconditionally independent, then $f(T\vert M) = f(T)$ and this will be zero.
+
+For reactive mediators, $f(M\vert T,D) = f(M\vert T)$ and, using the chain rule, $f(T\vert M) = f(M,T)/f(M) = f(M\vert T)f(T)/f(M)$, with a similar identity conditioning on $D$. Thus,
+
+$${f(T\vert M,D)\over f(T\vert M)} = {f(T\vert D)\over f(T)}{f(M\vert T,D)\over f(M\vert T)}{f(M)\over f(M\vert D)} = {f(T\vert D)\over f(T)}{f(M)\over f(M\vert D)}$$
+and hence
+
+$$\ell(\text{mediation}\,\vert\, \text{reactive}) = \log\left({f(M\vert D) \over f(M)}\right)\,,$$
+
+which is the LR for the mediator given driver. Since we only consider mediators with significant effects, or large LR, this will be positive, and could be larger or smaller than the the LR for target given driver. Thus it is difficult to distinguish the causal and reactive model using only the mediation scan.
+
+No simplification results for the undecided case, and the mediation could be positive or negative.
+
+## Five relationships
+
+Comparing the four causal models and constructing the mediation scan involves fitting six building blocks:
+$f(T\vert D)$,
+$f(M\vert D)$,
+$f(T\vert M)$,
+$f(M\vert T)$,
+$f(T\vert M,D)$,
+and
+$f(M\vert T,D)$.
+Since we are comparing models, using ratios of likelihoods, it makes more sense to consider the related likelihood ratios:
+
+relationship | likelihood ratio | log likelihood ratio
+------------ | ---------------- | --------------------
+1: $D\rightarrow T$ | $f(T\vert D)/f(T)$ | $\ell_1 = \log f(T\vert D) - \log f(T)$
+2: $D\rightarrow M$ | $f(M\vert D)/f(M)$ | $\ell_2 = \log f(M\vert D) - \log f(M)$
+3: $M\rightarrow T$ | $f(T\vert M)/f(T)$ | $\ell_3 = \log f(T\vert M) - \log f(T)$
+4: $T\rightarrow M$ | $f(M\vert T)/f(M)$ | $\ell_4 = \log f(M\vert T) - \log f(M)$
+5: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M)$ | $\ell_5 = \log f(T\vert M,D) - \log f(T\vert M)$
+6: $D\rightarrow M\leftarrow T$ | $f(M\vert T,D)/f(M\vert T)$ | $\ell_6 = \log f(M\vert T,D) - \log f(M\vert T)$
+
+If there is no kinship (see last section), then $\ell_3 = \ell_4$ and $\ell_5 = \ell_6$ by the chain rule. That is, the first two are the likelihood ratio for the correlation of $M$ and $T$, while the latter two are the likelihood ratio for the conditional correlation of $M$ and $T$ given $D$. Below, we keep $\ell_3$ and $\ell_4$ but drop $\ell_6$.
+
+For the $k$th relationship comparing full versus reduced model, we compute LR$_k$ = $\ell_k = \log f(\text{full}_k) - \log f(\text{reduced}_k)$ = log likelihood ratio.
+The log likelihood ratios for the four causal models and mediation are constructed as:
+
+model | relationship | likelihood | log likelihood ratio
+----------- | ------------------- | ----------- | ---------------------
+causal | $D \rightarrow M \rightarrow T$ | $f(M\vert D)f(T\vert M)$ | $\ell(\text{causal}) = \ell_2 + \ell_3$
+reactive | $D \rightarrow T \rightarrow M$ | $f(M\vert T)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_1 + \ell_4$
+independent | $M \leftarrow D \rightarrow T$ | $f(M\vert D)f(T\vert D)$ | $\ell(\text{independent}) = \ell_1 + \ell_2$
+undecided | $D \rightarrow (M,T)$ | $f(M,T\vert D) = f(M\vert D)f(T\vert M,D)$ | $\ell(\text{undecided}) = \ell_2 + \ell_3 + \ell_5$
+mediation | $D \rightarrow T$ vs $(M,D) \rightarrow T$ | $f(T\vert D)f(T\vert M)/f(T)f(T\vert M,D)$ | $\ell(\text{mediation}) = \ell_1 - \ell_5$
+
+Here we are comparing the four models to $f(T)f(M)$, whereas technically they should be compared to $f(M,T)$. However, that is a simple ratio that cancels out when comparing any two models, as will be done below.
+
+## Causal model selection tests
+
+Causal model selection tests, presented in Chaibub Neto et al. (2013), compare the four models using Vuong's test coupled with intersection-union tests. The key idea of Vuong's test is that a pair of models is compared to find which one is closer to the true model. The true model may be much more complicated and is in general not known. 
+The comparison is done by considering the ratio of likelihood ratios to the true model, which is just the likelihood ratio of the pair of models.
+Chaibub Neto et al. (2013) showed that one can use an information criteria such as BIC in place of the likelihood ratio, thus adjusting for model complexity: $IC_k = \ell_k + \text{df}_k * \log(n)$, with $k$ identifying the model, and df being the model degrees of freedom.
+
+The LR is assessed by noting that $\text{LR}_k = \sum_i \text{indLR}_{ki}$, with the sum being of individual contributions,
+
+$$\text{indLR}_{ki} = \ell_{ki} = \log f(\text{full}_{ki}) - \log f(\text{reduced}_{ki})\,,$$
+
+and the individual contributions to $IC$ are
+
+$$IC_{ki} = \ell_{ki} + \text{df}_{k} * \log(n) / n\,.$$
+
+Vuong used the central limit theorem to construct a normal-based test for the sum of these terms. Clark developed a sign test with the same idea. We have developed as well a Wilcoxon rank-sum test.
+That is, for two models compare the $IC_{mi}$ vectors by replacing these values by their ranks, and finding the difference of the sum of ranks between the two models. This has the advantage of being nonparametric and almost as powerful as the normal test.
+
+Chaibub Neto et al. (2013) extended Vuong's test from a pair of models to a set of models, using the intersection-union test. 
+The six possible pairs among the four models are compared, and the smallest p-value is reported along with the model that best fit the data.
+That is, for model 1, let $p_1 = \max(p_{12},p_{13},p_{14})$, where $p_{jk}$ is the $p$-value for comparing models $j$ and $k$. The model with the minimum over these composite $p$-values is the closest model, with corresponding $p$-value. 
+This procedure has been shown to have good power for comparison of multiple entries; therefore we do not propose any adjustment.
+
+## Causal models with different drivers
+
+There are situations where the mediator and target may plausibly have different drivers. That is, potentially separate drivers affect target and mediator, leading to the need for somewhat more complicated causal models.
+For instance, in multi-parent populations developed over multiple generations enable fine mapping, taking advantage of multiple alleles and short linkange disequilibrium. In this setting, one driver may not be enough to distinguish causal model for two correlated traits. Consider the following which allows for drivers $C$ and $D$ for mediator $M$ and target $T$, respectively. The naive approach is to just allow for both in expanded relationships:
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $C \rightarrow M \rightarrow T \leftarrow D$ | $f(M\vert C)f(T\vert M,D)$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C$ | $f(M\vert T,C)f(T\vert D)$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
+undecided | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D)$
+
+However, we have to be very careful. The above makes sense if $C$ and $D$ are uncorrelated (unlinked in genetics). If they are totally correlated, then the above is incorrect and the problem reduces to the one-driver situation. In general, they will be partially correlated. One way to model this is to introduce uncorrelated latent, or unobserved, drivers, say $X$, $Y$ and $Z$, with
+
+$$X\rightarrow C \leftarrow Y \rightarrow D \leftarrow Z\,.$$
+
+That is, the unobserved $Y$ captures the correlation between observed drivers $C$ and $D$. For the causal model, we can write it more properly as
+
+$$(X,Y) \rightarrow C \rightarrow M \rightarrow T \leftarrow Z$$
+
+While $Z$ is unobserved, we can estimate the residual part of $D$ that is uncorrelated with $C$, and hence with $X$ and $Y$:
+
+$$D^* = [I-C(C^\text{T}C)^{-}C^\text{T}]D = Q_2Q_2^\text{T}D,\ \ \text{with}\ C=QR=\left[Q_1:Q_2\right]\left[{R \over 0}\right]$$
+
+with $C(C^\text{T}C)^{-}C^\text{T}=Q_1Q_1^\text{T}$ the projection matrix and $C=QR$ the Hausholder (QR) decomposition of $C$. A similar decomposition yields $C^*$.
+If $C$ and $D$ are uncorrelated, then $C^*=C$ and $D^*=D$. If $C=D$, then $C^*=0=D^*$.
+
+Incorporating $C^*$ and $D^*$ for the causal and reactive models yields the following models for two drivers. This works whether drivers $C$ and $D$ are uncorrelated, totally correlated, or partially correlated.
+
+model | relationship | likelihood
+----------- | ------------------- | -----------
+causal | $C \rightarrow M \rightarrow T \leftarrow D^*$ | $f(M\vert C)f(T\vert M,D^*)$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)f(T\vert D)$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$
+undecided | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D) = f(M\vert T,C)f(T\vert D)$
+
+Inference with two drivers requires some adjustments to the five relationships:
+
+2-driver relationship | likelihood ratio | log likelihood ratio
+------------ | ---------------- | ------------------------
+$1^*$: $D\rightarrow T$ | $f(T\vert D)/f(T)$ | $\ell_{1^*} = \log f(T\vert D) - \log f(T)$
+$2^*$: $C\rightarrow M$ | $f(M\vert C)/f(M)$ | $\ell_{2^*} = \log f(M\vert C) - \log f(M)$
+$3^*$: $M\rightarrow T \leftarrow D^*$ | $f(T\vert M,D^*)/f(T)$ | $\ell_{3^*} = \log f(T\vert M,D^*) - \log f(T)$
+$4^*$: $T\rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)/f(M)$ | $\ell_{4^*} = \log f(M\vert T,C^*) - \log f(M)$
+$5^*$: $D\rightarrow T\leftarrow M$ | $f(T\vert M,D)/f(T\vert M,D^*)$ | $\ell_{5^*} = \log f(T\vert M,D) - \log f(T\vert M,D^*)$
+
+and the four causal models and mediation with their likelihood ratios are:
+
+model | relationship | likelihood | log likelihood ratio
+----------- | ------------------- | ----------- | ---------------------
+causal | $C \rightarrow M \rightarrow T \leftarrow D^*$ | $f(M\vert C)f(T\vert M,D^*)$ | $\ell(\text{causal}) = \ell_{2^*} + \ell_{3^*}$
+reactive | $D \rightarrow T \rightarrow M \leftarrow C^*$ | $f(M\vert T,C^*)f(T\vert D)$ | $\ell(\text{reactive}) = \ell_{1^*} + \ell_{4^*}$
+independent | $M \leftarrow C \leftrightarrow D \rightarrow T$ | $f(M\vert C)f(T\vert D)$ | $\ell(\text{independent}) = \ell_{1^*} + \ell_{2^*}$
+undecided | $(C,D) \rightarrow (M,T)$ | $f(M,T\vert C,D) = f(M\vert C)f(T\vert M,D)$ | $\ell(\text{undecided}) = \ell_{2^*} + \ell_{3^*} + \ell_{5^*}$
+mediation | $D \rightarrow T$ vs $(M,D) \rightarrow T$ | $f(T\vert D)f(T\vert M,D^*)/f(T)f(T\vert M,D)$ | $\ell(\text{mediation}) = \ell_{1^*} - \ell_{5^*}$
+
+The challenge is that we don't know whether one or two drivers is appropriate in practice. Further, the above adjustment for correlated drivers introduces noise, and may be worse than treating drivers as uncorrelated. Without a clear reason to choose one or two drivers, we might use another Vuong-style test to compare these three approaches, remembering that all models we consider may be wrong.
+
+It turns out that in practice, this two-driver approach, while having some merit, may lead to ambiguous results. Another, more promising approach is to use a `driver` that is best for the `mediator`. This will usually favor the `causal` model over the other three models. A variant on this, which takes slightly more computing, is to find the driver that is best for the `undecided` model, which corresponds to the unrestricted joint likelihood of the `target` and the `mediator`. When the `mediator` has a much stronger `driver` (corresponding to larger likelihood) than the `target`, this `driver` will be close in some sense to the `driver` for the `mediator` alone. That is, pick the `driver` $C$ that is best for the joint likelihood $f(M,T\vert C)$ and then conduct the causal model selection test using this `driver`.
+
+## Implementation
+
+The causal model selection tests (CMST) are implemented in the [R/qtlhot](https://cran.r-project.org/web/packages/qtlhot) available on [CRAN](https://cran.r-project.org). They have been updated and extended in this [R/intermediate](https://github.com/byandell/intermediate).
+
+Computation of the (CMST) is orchestrated by the [mediation_test](https://github.com/byandell/intermediate/blob/master/R/mediation_test.R) function, which can process one target and multiple mediators. It is assumed that the mediators have already been screened to have a significant relationship to the driver. After some preprocessing, for instance to remove data with missing values, `mediation_test` calls an internal function `cmst_default`, which uses a fit function to compute LR, df, coef and indLR for the five relationships. The default fit function, `fitDefault`, allows for covariates; another fit function, `fitQtl2`, is a wrapper for [qtl2::fit1](https://github.com/rqtl/qtl2/blob/master/R/fit1.R), which allows for correlation of individuals using a `kinship` matrix. These fits are combined to yield the four models, and then compared with a test function (`wilcIUCMST`, `binomIUCMST`, `normIUCMST`, or `normJointIUCMST`) to conduct the six tests.
+
+The `fitDefault` uses the QR decomposition. Assume we have response `y` (say the target) and predictors `X` (say driver and mediator combined), the steps are:
+
+```
+n <- length(y)
+qrX <- qr(X)
+df <- qrX$rank
+RSS <- sum(qr.resid(qrX, y) ^ 2)
+LR <- -(n/2) * (log(RSS)))
+indLR <- dnorm(y, qr.fitted(qrX, y), sqrt(RSS / n), log = TRUE)
+coef <- qr.coef(qrX, y)
+```
+
+This approach by default does _not_ include an intercept. When fitting for $f(T\vert M)$, for instance, it is important to include an intercept (`X = cbind(1,M)`).
+If the driver $D$ has the property that all rows sum to 1, as is true for genotype probability matrices, then no column of 1s is needed.
+
+In the case of two drivers we need to calculate $f(T\vert M,D^*)$ and $f(M\vert T,C^*)$ for relationships 3 and 4.
+
+We compute $D^*$ by taking a QR decomposition of $C$ and getting the residuals applied to each column of $D$
+
+```
+qrC <- qr(C)
+Dstar <- D
+for(i in seq_along(ncol(D))) Dstar[,i] <- qr.resid(qrC, D[,i])
+```
+
+Note that in the special case $C=D$, the residuals will be zero, and there will be no contribution, as desired. When $C\perp D$ (uncorrelated drivers), the residuals will be the original matrix $D$.
+
+Analysis of multiple mediators is handled using the [purrr](https://jennybc.github.io/purrr-tutorial/) package functions `map()` and `transpose()`. There are a few arcane tricks burried in the code, such as using a `driver` column in the `annotation` data frame to identify which `driver` $C_k$ is appropriate for a given `mediator` $k$. If no driver $C_k$ is provided, then we set $C_k=D$ for the single `target`-based driver approach. Conversely, if no $D$ is provided, then for each `mediator` $k$ we set $D_k=C_k$, corresponding to the single `mediator`-based driver approach.
+
+## Covariates and Kinship
+
+More machinery is in place to accommodate covariates and kinship. 
+Covariates are fairly straightforward, and are incorporated in [fitDefault](https://github.com/byandell/intermediate/blob/master/R/fitDefault.R).
+The math carries through for covariates exactly as before.
+
+The challenge comes with kinship.
+Kinship has been already handled well by Karl Broman in [qtl2::fit1](https://github.com/rqtl/qtl2/blob/master/R/fit1.R), which we wrap with [fitQtl2](https://github.com/byandell/intermediate/blob/master/R/fitQtl2.R).
+See the [Kinship Decomposition](https://github.com/byandell/intermediate/blob/master/vignettes/decomp.Rmd) vignette for details about how kinship affects things. Basically,
+instead of having independent, equal variance errors, the covariance now has the form
+
+$$V = \sigma^2 (\gamma K + I)\,,$$
+
+with $K$ the kinship matrix and $\gamma = \sigma_g^2/\sigma^2$ the heritability. In this case,
+in general $f(M\vert T,K)/f(M\vert K) \neq f(T\vert M,K)/f(T\vert K)$ as these no longer correspond to simple likelihood ratios for the correlation of $M$ and $T$. There are now two variance components, and their ratio may be different for $M$ and $T$:
+
+$$V_T = \sigma_T^2 (\gamma_T K + I)\ \ V_M = \sigma_M^2 (\gamma_M K + I)\,.$$
+
+This is not easily overcome by making sure $M$ and $T$ have unit variance, because their correlation cannot be pulled out in a linear way. For instance, if we set $y = T$ and $X = [1,M]$,
+the likelihood $f(T\vert M)$ without kinship is (assuming normality) $y\sim N(X\beta, \sigma^2 I)$ with $\beta = (\beta_0, \beta_1)$ and the test of correlation is the same as the test whether $\beta_1$ is 0 or not.
+
+The kinship decomposition corresponds to premultiplying by the inverse transpose of an upper triangular matrix $G_1$, which depends on $\gamma_T$:
+
+$$y^*\sim N(X^*\beta^*, \sigma_*^2 I)\,,\ \text{ with }y^* = G_1^\text{-T}y=G_1^\text{-T}T\,, X^*=G_1^\text{-T}X=[G_1^\text{-T}1,G_1^\text{-T}M]\,.$$
+
+Now the first column in $X^*$ is no longer 1. While we could argue that the second column looks like a rotated form of $M$, the reverse setup for $f(M\vert T)$ would have a different upper triangular matrix $G_2$, which depends on $\gamma_M$. 
+
+In practice, we expect the random effects corresponding to kinship for target and mediator to be very similar, but they are not constrained to be identical. Thus, there will be numerical differences that will alter results somewhat. Further, since the building block LR relationships all depend on unknown $\gamma$ values, they are not strictly independent and cannot be simply added as we have done above. One pragmatic way to handle this, as it is only really a concern for the `undecided` model, is to use the form with the highest likelihood.

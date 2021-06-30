@@ -133,14 +133,20 @@ mediation_scan <- function(target,
 }
 #' @param x object of class \code{mediation_scan}
 #' @param facets names of facets to subset
+#' @param chrs chromosome names to subset
+#' 
 #' @export
 #' @rdname mediation_scan
 #' 
-subset.mediation_scan <- function(x, facets=NULL, ...) {
+subset.mediation_scan <- function(x, facets=NULL, chrs = NULL, ...) {
   facet_name <- attr(x, "facet_name")
-  if(is.null(facets))
-    return(x)
-  
-  new_x <- x[x[[facet_name]] %in% facets,]
-  modify_object(x, new_x)
+  if(!is.null(facets)) {
+    new_x <- x[x[[facet_name]] %in% facets,]
+    x <- modify_object(x, new_x)
+  }
+  if(!is.null(chrs)) {
+    new_x <- x[x[["chr"]] %in% chrs,]
+    x <- modify_object(x, new_x)
+  }
+  x
 }

@@ -11,7 +11,7 @@
 ggplot_mediation_scan(
   x,
   col = "firebrick4",
-  cex = 1,
+  size = 1,
   xlab = index_name,
   ylab = "Conditioned LOD",
   col_target = "blue",
@@ -38,14 +38,14 @@ mediation_scan(
   ...
 )
 
-\method{subset}{mediation_scan}(x, facets = NULL, ...)
+\method{subset}{mediation_scan}(x, facets = NULL, chrs = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{mediation_scan}}
 
 \item{col}{color of points (default "firebrick4")}
 
-\item{cex}{character expansion (default 2)}
+\item{size}{character size (default 2)}
 
 \item{xlab, ylab}{X and Y axis label (default `index_name` and "Conditioned LOD")}
 
@@ -80,6 +80,8 @@ mediation_scan(
 \item{verbose}{If TRUE display information about the progress}
 
 \item{facets}{names of facets to subset}
+
+\item{chrs}{chromosome names to subset}
 }
 \description{
 Plot LOD statistics calculated by [mediation_scan()] against index

@@ -134,6 +134,7 @@ triad_data <- function(target, mediator, driver,
 #' @param fitline include fit line from coefficients in \code{x} if \code{TRUE}
 #' @param main main title (defautl \code{tname})
 #' @param colors named colors to use if \code{fitline} is \code{TRUE}
+#' @param size size of text (default \code{2})
 #' 
 #' @rdname mediation_triad
 #' @export
@@ -142,6 +143,7 @@ ggplot_mediation_triad <- function(x,
                              centerline = NULL, fitline = FALSE,
                              main = paste(tname, "by", mname, "and", dname),
                              colors = qtl2::CCcolors,
+                             size = 2,
                              ...) {
   
   p <- ggplot2::ggplot(x$data) +
@@ -150,7 +152,7 @@ ggplot_mediation_triad <- function(x,
   if("label" %in% names(x$data)) {
     p <- p + 
       ggplot2::aes(label = .data$label) +
-      ggplot2::geom_text(size = 2)
+      ggplot2::geom_text(size = size)
   } else {
     p <- p +
       ggplot2::geom_point(alpha = 0.2)
@@ -204,7 +206,7 @@ ggplot_mediation_triad <- function(x,
     p <- p + 
       ggplot2::aes(col = .data$group) +
       ggplot2::scale_color_discrete(name = dname) +
-      ggplot2::geom_smooth(method = "lm", se=FALSE)
+      ggplot2::geom_smooth(method = "lm", se=FALSE, formula = "y ~ x")
   }
   p
 }

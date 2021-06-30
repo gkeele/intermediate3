@@ -27,6 +27,7 @@ ggplot_mediation_triad(
   fitline = FALSE,
   main = paste(tname, "by", mname, "and", dname),
   colors = qtl2::CCcolors,
+  size = 2,
   ...
 )
 
@@ -66,6 +67,8 @@ ggplot_mediation_triad(
 \item{main}{main title (defautl \code{tname})}
 
 \item{colors}{named colors to use if \code{fitline} is \code{TRUE}}
+
+\item{size}{size of text (default \code{2})}
 
 \item{object}{object of class \code{mediation_triad}}
 }

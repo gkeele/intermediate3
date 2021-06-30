@@ -9,8 +9,6 @@ driver = Tmem68$qtl.geno
 #annotation = Tmem68$annotation[-m,]
 covar = Tmem68$covar
 
-fitMediate(driver, target,, covar)$LR
-fitMediate(driver, target,, covar[,-1])$LR
 fitDefault(driver, target,, covar[,-1])$LR
 fitDefault(driver, target,, covar)$LR
 fitQtl2(driver, target,, covar[,-1])$LR
@@ -18,9 +16,8 @@ fitQtl2(driver, target,, covar)$LR
 
 # Below for fitQtl2 is what we want
 driver8 <- cbind(A = 1 - apply(driver, 1, sum), driver)
-fitMediate(driver8, target,, covar)$LR
-fitMediate(driver8, target,, covar[,-1])$LR
 fitDefault(driver8, target,, covar[,-1])$LR
 fitDefault(driver8, target,, covar)$LR
 fitQtl2(driver8, target,, covar[,-1])$LR
 fitQtl2(driver8, target,, covar)$LR
+

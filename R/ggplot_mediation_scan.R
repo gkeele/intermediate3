@@ -5,7 +5,7 @@
 #'
 #' @param x mediation object
 #' @param col color of points (default "firebrick4")
-#' @param cex character expansion (default 2)
+#' @param size character size (default 2)
 #' @param xlab,ylab X and Y axis label (default `index_name` and "Conditioned LOD")
 #' @param col_target color for target LOD line
 #' @param gap gap between facets (default `25`)
@@ -18,7 +18,7 @@
 
 ggplot_mediation_scan <- function(x, 
                            col="firebrick4",
-                           cex = 1,
+                           size = 1,
                            xlab = index_name,
                            ylab = "Conditioned LOD",
                            col_target = "blue",
@@ -47,11 +47,11 @@ ggplot_mediation_scan <- function(x,
   if(!is.null(x$col)) {
     p <- p +
       ggplot2::aes(col = col) +
-      ggplot2::geom_point(alpha = 0.5)
+      ggplot2::geom_point(alpha = 0.5, size = size)
     
   } else {
     p <- p +
-      ggplot2::geom_point(col = col, alpha = 0.5)
+      ggplot2::geom_point(col = col, alpha = 0.5, size = size)
   }
   # gap between facets
   p <- p +
