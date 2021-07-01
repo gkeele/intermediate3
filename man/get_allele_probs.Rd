@@ -21,6 +21,3 @@ n x 8 numeric matrix.
 \description{
 Get the haplotype probs nearest to the given chr and position.
 }
-\examples{
-ap = get_allele_probs(chr = "1", pos = 5.0, genoprobs = genoprobs, map = map)
-}

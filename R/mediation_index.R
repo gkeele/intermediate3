@@ -34,6 +34,7 @@
 #' # Mediator is Tmem68.
 #' m <- grep("Tmem68", Tmem68$annotation$symbol)
 #' mediator <- Tmem68$mediator[,m]
+#' annotation <- Tmem68$annotation[m,, drop = FALSE]
 #' 
 #' # Reconstruct 8-allele genotype probabilities.
 #' driver_allele <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
@@ -46,7 +47,7 @@
 #' med_index <- mediation_index(target = target,
 #'                       mediator = mediator,
 #'                       driver = NULL,
-#'                       annotation = med_lod,
+#'                       annotation = annotation,
 #'                       covar_tar = Tmem68$covar,
 #'                       covar_med = Tmem68$covar,
 #'                       driver_med = driver_med,

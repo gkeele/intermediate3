@@ -6,6 +6,7 @@ Date: 2021-06-30
 Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
 Maintainer: Brian Yandell <brian.yandell@wisc.edu>
 Description: Search for a mediator M that would explain D->T relationship.
+Depends: R (>= 2.10)
 Imports: ggplot2,
          dplyr,
          testthat,
@@ -23,5 +24,6 @@ Suggests:
     knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
+LazyData: true
 URL: https://github.com/churchill-lab/intermediate
 RoxygenNote: 7.1.1

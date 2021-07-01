@@ -5,8 +5,7 @@
 #' @param genoprobs qtl2-style list of genoprobs containing 3-dimensional arrays of allele probs, one for each chromosome. Samples in rows, 8 founders in columns, markers in slices.
 #' @param map qtl2-style list containing numeric vectors of marker positions in Mb.
 #' @return n x 8 numeric matrix.
-#' @examples
-#' ap = get_allele_probs(chr = "1", pos = 5.0, genoprobs = genoprobs, map = map)
+#' 
 #' @export
 get_allele_probs = function(chr, pos, genoprobs, map) {
 
