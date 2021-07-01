@@ -21,7 +21,7 @@ library(intermediate)
 The data and original 'intermediate' code come from <https://github.com/churchill-lab/intermediate>.
 
 ```{r}
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
 ```
 
 Note that the `target` and one of the mediators are identical
