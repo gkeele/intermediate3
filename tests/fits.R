@@ -1,5 +1,5 @@
 library(intermediate)
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
 # Find and remove Tmem68 from mediators because it is target.
 m <- match("Tmem68", Tmem68$annotation$symbol)
 Tmem68$annotation[m,]
