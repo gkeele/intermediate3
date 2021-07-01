@@ -18,6 +18,9 @@
 #' 
 #' @examples
 #' data(Tmem68, package = "Tmem68")
+#' # Focus on chromosome 13
+#' Tmem68 <- Tmem_helper(Tmem68, "13")
+#' 
 #' target <- cbind(Tmem68 = Tmem68$target)
 #' # Pick strongest mediator that is not target.
 #' m <- match("Nnt", Tmem68$annotation$symbol)
@@ -32,6 +35,7 @@
 #'                       driver = driver,
 #'                       covar_tar = Tmem68$covar,
 #'                       sdp = 2)
+#'                       
 #' ggplot2::autoplot(med_triad, tname = "Tmem68", mname = "Nnt")
 #' 
 #' @export

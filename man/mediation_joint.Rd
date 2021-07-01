@@ -69,6 +69,8 @@ Fit joint likelihood for `target` and `mediator` given `driver`.
 }
 \examples{
 data(Tmem68, package = "Tmem68")
+# Focus on chromosome 13
+Tmem68 <- Tmem_helper(Tmem68, "13")
  
 target <- Tmem68$target
 
@@ -91,5 +93,7 @@ med_joint <- mediation_joint(target = target,
                       annotation = med_lod,
                       covar_tar = Tmem68$covar,
                       covar_med = Tmem68$covar)
-plot(med_joint)
+                      
+ggplot_mediation_joint(med_joint)
+
 }

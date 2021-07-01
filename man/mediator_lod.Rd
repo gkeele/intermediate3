@@ -44,11 +44,14 @@ i.e. \code{m} is a mediator of causal relationship from \code{driver} to \code{t
 }
 \examples{
 data(Tmem68, package = "Tmem68")
+# Focus on chromosome 13
+Tmem68 <- Tmem_helper(Tmem68, "13")
+
 med_lod <- mediator_lod(mediator = Tmem68$mediator,
                       driver = Tmem68$qtl.geno,
                       annotation = Tmem68$annotation,
                       covar_med = NULL)
-ggplot2::autoplot(med_lod) +
+ggplot_mediation_lod(med_lod) +
   ggplot2::geom_hline(yintercept = 5, col = "blue")
 
 }

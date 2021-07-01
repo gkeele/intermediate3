@@ -13,6 +13,9 @@ test_that("equals to saved.version",{
 
   data("Tmem68.lod", package = "Tmem68")
 
+  # Should agree except at Tmem68
+  mm <- match("Tmem68", Tmem68$annotation$symbol)
+  
   m <- match(rownames(med), colnames(Tmem68$mediator))
-  expect_equal(med$lod, Tmem68.lod[m])
+  expect_equal(med$lod[-mm], Tmem68.lod[m][-mm])
 })

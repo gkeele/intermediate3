@@ -25,6 +25,9 @@
 #'
 #' @examples
 #' data(Tmem68, package = "Tmem68")
+#' # Focus on chromosome 13
+#' Tmem68 <- Tmem_helper(Tmem68, "13")
+#' 
 #' target <- Tmem68$target
 #' m <- match("Tmem68", Tmem68$annotation$symbol)
 #' 
@@ -34,9 +37,8 @@
 #'                       annotation = Tmem68$annotation,
 #'                       covar = Tmem68$covar,
 #'                       method = "double-lod-diff")
-#' ggplot2::autoplot(med_scan)
-#' ggplot2::autoplot(subset(med_scan, "4")) +
-#'   ggplot2::geom_vline(xintercept = Tmem68$annotation[m,"pos"], linetype = "dashed")
+#'                       
+#' ggplot_mediation_scan(med_scan)
 #' 
 #' @export
 

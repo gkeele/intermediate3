@@ -39,6 +39,8 @@
 #' 
 #' @examples
 #' data(Tmem68, package = "Tmem68")
+#' # Focus on chromosome 13
+#' Tmem68 <- Tmem_helper(Tmem68, "13")
 #'  
 #' target <- Tmem68$target
 #' 
@@ -62,7 +64,8 @@
 #'                       covar_tar = Tmem68$covar,
 #'                       covar_med = Tmem68$covar)
 #' summary(med_test)
-#' ggplot2::autoplot(med_test)
+#' 
+#' ggplot_mediation_test(med_test)
 #'
 #' @export
 #' @importFrom dplyr arrange bind_rows everything filter left_join matches
