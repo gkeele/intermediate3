@@ -68,7 +68,7 @@ Data frame with `id` and `LR` as well as `annotation` columns.
 Fit joint likelihood for `target` and `mediator` given `driver`.
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
  
 target <- Tmem68$target
 

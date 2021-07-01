@@ -56,6 +56,12 @@ fitDefault <- function(driver,
   full <- fitDefault_internal(driver, target, kinship, addcovar, intcovar, weights, ...) 
   red  <- fitDefault_internal(NULL,   target, kinship, addcovar, intcovar, weights, ...) 
   
+  # If LR is 0, then make sure individual contributions are 0.
+  if(full$LR == 0)
+    full$indLR <- rep(0, length(full$indLR))
+  if(red$LR == 0)
+    red$indLR <- rep(0, length(red$indLR))
+  
   full$LR <- full$LR - red$LR
   full$indLR <- full$indLR - red$indLR
   full$df <- full$df - red$df

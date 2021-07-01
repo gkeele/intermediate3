@@ -107,7 +107,7 @@ List with elements:
 Develop mediation models from driver, target and mediator
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
  
 target <- Tmem68$target
 

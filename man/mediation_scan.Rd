@@ -95,7 +95,7 @@ and calculates LOD statistic. The low LOD value indicates `driver` and
 i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
 target <- Tmem68$target
 m <- match("Tmem68", Tmem68$annotation$symbol)
 

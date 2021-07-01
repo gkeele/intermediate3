@@ -38,7 +38,7 @@
 #' - params list of parameter settings for use by summary and plot methods
 #' 
 #' @examples
-#' data(Tmem68)
+#' data(Tmem68, package = "Tmem68")
 #'  
 #' target <- Tmem68$target
 #' 

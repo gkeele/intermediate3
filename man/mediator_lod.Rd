@@ -43,7 +43,7 @@ and calculates LOD statistic. The low LOD value indicates \code{driver} and
 i.e. \code{m} is a mediator of causal relationship from \code{driver} to \code{target}.
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
 med_lod <- mediator_lod(mediator = Tmem68$mediator,
                       driver = Tmem68$qtl.geno,
                       annotation = Tmem68$annotation,

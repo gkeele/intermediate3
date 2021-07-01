@@ -81,7 +81,7 @@ the mediator position on its home chromosome, which is not really what is wanted
 See package 'qtl2shiny' for a more elegant use.
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
 target <- cbind(Tmem68 = Tmem68$target)
 # Pick strongest mediator that is not target.
 m <- match("Nnt", Tmem68$annotation$symbol)

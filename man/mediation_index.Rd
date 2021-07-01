@@ -71,7 +71,7 @@ ggplot_mediation_index(
 Test mediation across set of indexed drivers
 }
 \examples{
-data(Tmem68)
+data(Tmem68, package = "Tmem68")
  
 target <- Tmem68$target
 
@@ -84,7 +84,7 @@ annotation <- Tmem68$annotation[m,, drop = FALSE]
 driver_allele <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
 rownames(driver_allele) <- rownames(Tmem68$qtl.geno)
 
-# Reduce to SNP
+# Reduce to SNP for B6
 driver_SNP <- cbind(B6 = driver_allele[,2], rest = 1 - driver_allele[,2])
 driver_med <- list(allele = driver_allele, SNP = driver_SNP)
 

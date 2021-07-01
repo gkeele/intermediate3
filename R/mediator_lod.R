@@ -18,7 +18,7 @@
 #' @param verbose If TRUE display information about the progress
 #' 
 #' @examples
-#' data(Tmem68)
+#' data(Tmem68, package = "Tmem68")
 #' med_lod <- mediator_lod(mediator = Tmem68$mediator,
 #'                       driver = Tmem68$qtl.geno,
 #'                       annotation = Tmem68$annotation,
