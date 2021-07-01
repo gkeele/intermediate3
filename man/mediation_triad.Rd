@@ -100,6 +100,6 @@ med_triad <- mediation_triad(target = target,
                       covar_tar = Tmem68$covar,
                       sdp = 2)
                       
-ggplot2::autoplot(med_triad, tname = "Tmem68", mname = "Nnt")
+ggplot_mediation_triad(med_triad, tname = "Tmem68", mname = "Nnt")
 
 }

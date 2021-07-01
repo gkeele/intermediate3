@@ -51,7 +51,7 @@ med_lod <- mediator_lod(mediator = Tmem68$mediator,
                       driver = Tmem68$qtl.geno,
                       annotation = Tmem68$annotation,
                       covar_med = NULL)
-ggplot_mediation_lod(med_lod) +
+ggplot2::autoplot(med_lod) +
   ggplot2::geom_hline(yintercept = 5, col = "blue")
 
 }
