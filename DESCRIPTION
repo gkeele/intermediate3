@@ -24,6 +24,5 @@ Suggests:
     knitr, rmarkdown
 VignetteBuilder: knitr
 License: GPL-3
-LazyData: true
 URL: https://github.com/churchill-lab/intermediate
 RoxygenNote: 7.1.1
