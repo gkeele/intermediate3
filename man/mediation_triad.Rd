@@ -79,20 +79,18 @@ the mediator position on its home chromosome, which is not really what is wanted
 \examples{
 data(Tmem68, package = "Tmem68")
 # Focus on chromosome 13
-Tmem68 <- Tmem_helper(Tmem68, "13")
+Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
 
 target <- cbind(Tmem68 = Tmem68$target)
+
 # Pick strongest mediator that is not target.
 m <- match("Nnt", Tmem68$annotation$symbol)
 mediator <- Tmem68$mediator[, m, drop = FALSE]
 colnames(mediator) <- "Nnt"
-# Reconstruct 8-allele genotype probabilities.
-driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
-rownames(driver) <- rownames(Tmem68$qtl.geno)
 
 med_triad <- mediation_triad(target = target,
                       mediator = mediator,
-                      driver = driver,
+                      driver = Tmem68$driver,
                       covar_tar = Tmem68$covar,
                       sdp = 2)
                       

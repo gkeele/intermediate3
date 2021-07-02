@@ -34,13 +34,9 @@
 #' mediator <- Tmem68$mediator[,m]
 #' annotation <- Tmem68$annotation[m,, drop = FALSE]
 #' 
-#' # Reconstruct 8-allele genotype probabilities.
-#' driver_allele <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
-#' rownames(driver_allele) <- rownames(Tmem68$qtl.geno)
-#' 
 #' # Reduce to SNP for B6
-#' driver_SNP <- cbind(B6 = driver_allele[,2], rest = 1 - driver_allele[,2])
-#' driver_med <- list(allele = driver_allele, SNP = driver_SNP)
+#' driver_SNP <- cbind(B6 = Tmem68$driver[,2], rest = 1 - Tmem68$driver[,2])
+#' driver_med <- list(allele = Tmem68$driver, SNP = driver_SNP)
 #' 
 #' med_index <- mediation_index(target = target,
 #'                       mediator = mediator,

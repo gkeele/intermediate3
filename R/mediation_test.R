@@ -38,17 +38,13 @@
 #' @examples
 #' data(Tmem68, package = "Tmem68")
 #' # Focus on chromosome 13
-#' Tmem68 <- Tmem_helper(Tmem68, "13")
+#' Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
 #'  
 #' target <- Tmem68$target
 #' 
-#' # Reconstruct 8-allele genotype probabilities.
-#' driver <- cbind(A = 1 - apply(Tmem68$qtl.geno, 1, sum), Tmem68$qtl.geno)
-#' rownames(driver) <- rownames(Tmem68$qtl.geno)
-#' 
 #' # Find mediators with significant effect
 #' med_lod <- mediator_lod(mediator = Tmem68$mediator,
-#'                         driver = driver,
+#'                         driver = Tmem68$driver,
 #'                         annotation = Tmem68$annotation,
 #'                         covar_med = Tmem68$covar)
 #' med_signif <- med_lod$id[med_lod$lod >= 5]
@@ -57,7 +53,7 @@
 #' 
 #' med_test <- mediation_test(target = target,
 #'                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
-#'                       driver = driver,
+#'                       driver = Tmem68$driver,
 #'                       annotation = med_lod,
 #'                       covar_tar = Tmem68$covar,
 #'                       covar_med = Tmem68$covar)

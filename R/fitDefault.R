@@ -83,8 +83,9 @@ fitDefault_internal <- function(driver,
   if(!is.null(intcovar)) {
     if(ncol(driver) > 1) {
       int.sub.matrix <- 
-        model.matrix(as.formula(paste("~", colnames(intcovar))), intcovar)[,-1]
-      driverbyintcovar <- driver[,-1] * int.sub.matrix
+        model.matrix(as.formula(paste("~", paste(colnames(intcovar), collapse = "+"))), 
+                     as.data.frame(intcovar))[,-1]
+      driverbyintcovar <- driver[,-1, drop = FALSE] * int.sub.matrix
       X <- cbind(driver, X, driverbyintcovar)
     } else {
       X <- cbind(driver, X)
