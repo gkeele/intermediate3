@@ -15,7 +15,7 @@ mediation_effect(
 
 ggplot_mediation_effect(
   object,
-  colors = qtl2::CCcolors,
+  colors = intermediate::CCcolors,
   max_facet = 12,
   size_geom = 2,
   ...

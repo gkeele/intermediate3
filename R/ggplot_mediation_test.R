@@ -176,7 +176,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                      col = .data$geno,
                      symbol = .data$symbol) +
         ggplot2::facet_wrap(~ .data$triad, scales = "free_x") +
-        ggplot2::scale_color_manual(values = qtl2::CCcolors) +
+#        ggplot2::scale_color_manual(values = intermediate::CCcolors) +
         ggplot2::geom_hline(data = targetCoef, 
                             ggplot2::aes(yintercept = .data$value,
                                          col = .data$geno),
@@ -218,7 +218,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
            })
   }
 }
-target_prep <- function(targetFit, type, col = qtl2::CCcolors) {
+target_prep <- function(targetFit, type, col = intermediate::CCcolors) {
   targetFit <- as.data.frame(t(targetFit$coef))
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
@@ -235,7 +235,7 @@ target_prep <- function(targetFit, type, col = qtl2::CCcolors) {
          mediator = dplyr::mutate(out, value = (.data$value - min(.data$value)) /
                                     diff(range(.data$value))))
 }
-allele_prep <- function(x, type, col = qtl2::CCcolors) {
+allele_prep <- function(x, type, col = intermediate::CCcolors) {
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
               alleles  = match(codes, names(x)),

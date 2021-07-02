@@ -62,7 +62,7 @@ mediation_effect <- function(test_object,
 #' @export
 #' @rdname mediation_effect
 ggplot_mediation_effect <- function(object,
-                              colors = qtl2::CCcolors,
+                              colors = intermediate::CCcolors,
                               max_facet = 12,
                               size_geom = 2, ...) {
   udriver <- unique(object$level)

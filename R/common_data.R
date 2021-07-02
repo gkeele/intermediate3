@@ -1,5 +1,5 @@
 common_data <- function(target = NULL, mediator = NULL, driver = NULL,
-                        covar_tar = NULL, covar_med = NULL, kinship = NULL,
+                        covar_tar = NULL, covar_med = NULL,
                         driver_med = NULL, intcovar = NULL,
                         common = TRUE,
                         minN = 100, minCommon = 0.9, ...) {
@@ -22,16 +22,8 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
                              paste0("intcov", seq_len(ncol(intcovar))), 
                              rownames(target))
   
-  if(is.list(kinship)) {
-    if(is.matrix(kinship[[1]]))
-      kinship <- kinship[[1]]
-  }
-  K <- kinship  
-  if(!is.matrix(K))
-    K <- NULL
-  
   # Keep individuals with full records.
-  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, K, driver_med, intcovar,
+  ind2keep <- get_common_ids(driver, target, covar_tar, covar_med, driver_med, intcovar,
                              complete.cases = TRUE)
   
   # Drop mediator columns with too few non-missing data.
@@ -42,8 +34,7 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
     
     # This way considers only ind with no missing data.
     # Might want another way if pattern of missing different for some mediators.
-    # Then would not do decomp_kinship and need to do common_data for single mediator
-    
+
     # Count as number if not infinite and not missing
     is_num <- function(x) { !is.na(x) & is.finite(x) }
     # Drop mediators with too little data.
@@ -81,20 +72,9 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
   if(!is.null(intcovar))
     intcovar <- intcovar[ind2keep,, drop = FALSE]
   
-  if(!is.null(kinship)) {
-    if(is.matrix(kinship))
-      kinship <- kinship[ind2keep, ind2keep]
-    # Decompose kinship if all in common.
-    is_kinship <- attr(kinship, "eigen_decomp")
-    if(is.null(is_kinship))
-      is_kinship <- FALSE
-    if(common && !is_kinship)
-      kinship <- qtl2::decomp_kinship(kinship)
-  }
   list(driver = driver,
        target = target,
        mediator = mediator,
-       kinship = kinship,
        covar_tar = covar_tar,
        covar_med = covar_med,
        driver_med = driver_med,

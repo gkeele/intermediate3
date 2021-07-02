@@ -13,7 +13,7 @@ mediation_triad(
   driver,
   covar_tar = NULL,
   covar_med = NULL,
-  fitFunction = fitQtl2,
+  fitFunction = fitDefault,
   ...
 )
 
@@ -25,7 +25,7 @@ ggplot_mediation_triad(
   centerline = NULL,
   fitline = FALSE,
   main = paste(tname, "by", mname, "and", dname),
-  colors = qtl2::CCcolors,
+  colors = intermediate::CCcolors,
   size = 2,
   ...
 )
@@ -75,7 +75,6 @@ coefficients from model fit with \code{\link{mediation_test}} to get lines for
 each column of driver. Note that the plot uses column \code{info} to provide
 additional information, which here is the \code{chr} of mediator. The plot uses
 the mediator position on its home chromosome, which is not really what is wanted.
-See package 'qtl2shiny' for a more elegant use.
 }
 \examples{
 data(Tmem68, package = "Tmem68")

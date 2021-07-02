@@ -5,7 +5,6 @@
 #' each column of driver. Note that the plot uses column \code{info} to provide
 #' additional information, which here is the \code{chr} of mediator. The plot uses
 #' the mediator position on its home chromosome, which is not really what is wanted.
-#' See package 'qtl2shiny' for a more elegant use.
 #' 
 #' @param target vector or 1-column matrix with target values
 #' @param mediator vector or 1-column matrix with mediator values
@@ -45,7 +44,7 @@
 #' 
 mediation_triad <- function(target, mediator, driver,
                         covar_tar = NULL, covar_med = NULL,
-                        fitFunction = fitQtl2,
+                        fitFunction = fitDefault,
                         ...) {
   
   # Make sure covariates are numeric
@@ -144,7 +143,7 @@ ggplot_mediation_triad <- function(x,
                              tname = "target", mname = "mediator", dname = "driver",
                              centerline = NULL, fitline = FALSE,
                              main = paste(tname, "by", mname, "and", dname),
-                             colors = qtl2::CCcolors,
+                             colors = intermediate::CCcolors,
                              size = 2,
                              ...) {
   

@@ -5,7 +5,21 @@ med_fits <- function(driver, target, mediator, fitFunction,
                      fit_list = c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m","t.md_t"),
                      verbose = FALSE,
                      fitFunction_med = fitFunction, 
+                     common = FALSE,
                      ...) {
+  
+  # Need to look where common_data is found to adjust.
+  if(!common) {
+    commons <- common_data(target, mediator, driver,
+                           covar_tar, covar_med, driver_med, intcovar)
+    driver <- commons$driver
+    target <- commons$target
+    mediator <- commons$mediator
+    covar_tar <- commons$covar_tar
+    covar_med <- commons$covar_med
+    driver_med <- commons$driver_med
+    intcovar <- commons$intcovar
+  }
   
   if(is.null(driver_med)) {
     driver_med <- driver
