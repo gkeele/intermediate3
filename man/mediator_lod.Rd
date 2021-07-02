@@ -10,10 +10,11 @@ mediator_lod(
   annotation,
   covar_med = NULL,
   intcovar = NULL,
-  kinship = NULL,
   facet_name = "chr",
   index_name = "pos",
-  verbose = TRUE
+  verbose = TRUE,
+  fitFunction = fitDefault,
+  ...
 )
 }
 \arguments{
@@ -27,13 +28,15 @@ mediator_lod(
 
 \item{intcovar}{A matrix of covariate interacting with driver}
 
-\item{kinship}{kinship object}
-
 \item{facet_name}{name of facet column (default `chr`)}
 
 \item{index_name}{name of index column (default `pos`)}
 
 \item{verbose}{If TRUE display information about the progress}
+
+\item{fitFunction}{function to fit models with driver, target and mediator}
+
+\item{...}{additional parameters}
 }
 \description{
 For a given QTL haplotype probabilities \code{driver} and target \code{target},

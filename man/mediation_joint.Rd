@@ -14,10 +14,9 @@ mediation_joint(
   annotation,
   covar_tar = NULL,
   covar_med = NULL,
-  kinship = NULL,
   driver_med = NULL,
   intcovar = NULL,
-  fitFunction = fitQtl2,
+  fitFunction = fitDefault,
   index_name = "pos",
   ...
 )
@@ -40,8 +39,6 @@ ggplot_mediation_joint(x, lod = TRUE, xlab = index_name, ylab = ylab_name, ...)
 \item{covar_tar}{optional covariates for target}
 
 \item{covar_med}{optional covariates for mediator}
-
-\item{kinship}{optional kinship matrix among individuals}
 
 \item{driver_med}{optional driver matrix for mediators}
 

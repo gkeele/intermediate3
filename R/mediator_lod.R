@@ -12,10 +12,11 @@
 #' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
 #' @param covar_med A matrix with additive covariates
 #' @param intcovar A matrix of covariate interacting with driver
-#' @param kinship kinship object
 #' @param facet_name name of facet column (default `chr`)
 #' @param index_name name of index column (default `pos`)
 #' @param verbose If TRUE display information about the progress
+#' @param fitFunction function to fit models with driver, target and mediator
+#' @param ... additional parameters
 #' 
 #' @examples
 #' data(Tmem68, package = "Tmem68")
@@ -36,10 +37,11 @@ mediator_lod <- function(mediator,
                          annotation, 
                          covar_med=NULL, 
                          intcovar = NULL,
-                         kinship = NULL,
                          facet_name = "chr",
                          index_name = "pos",
-                         verbose=TRUE) {
+                         verbose=TRUE, 
+                         fitFunction = fitDefault,
+                         ...) {
 
   # Make sure covariates are numeric
   covar_med <- covar_df_mx(covar_med)
@@ -78,15 +80,15 @@ mediator_lod <- function(mediator,
            annotation = split(annotation, rownames(annotation))))
   
   # Fit likelihood on subset with no missing mediator data for a given mediator.
-  mapfn <- function(x, driver, covar_med, intcovar, kinship, med_rownames) {
+  mapfn <- function(x, driver, covar_med, intcovar, med_rownames, ...) {
     mediator <- x$mediator
     names(mediator) <- med_rownames
-    fitDefault(driver, mediator, kinship = kinship, addcovar = covar_med, intcovar = intcovar)$LR
+    fitFunction(driver, mediator, addcovar = covar_med, intcovar = intcovar, ...)$LR
   }
   
   output <- annotation
-  output$lod <- unlist(purrr::map(med_pur, mapfn, driver, covar_med, intcovar, kinship,
-                                  rownames(mediator))) / log(10)
+  output$lod <- unlist(purrr::map(med_pur, mapfn, driver, covar_med, intcovar,
+                                  rownames(mediator), ...)) / log(10)
   attr(output, "targetFit") <- min(output$lod)
   attr(output, "facet_name") <- facet_name
   attr(output, "index_name") <- index_name

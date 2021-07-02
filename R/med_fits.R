@@ -1,26 +1,12 @@
 med_fits <- function(driver, target, mediator, fitFunction,
-                     kinship=NULL, covar_tar=NULL, covar_med=NULL,
+                     covar_tar=NULL, covar_med=NULL,
                      driver_med = NULL, intcovar = NULL,
-                     common = FALSE,
                      frobenius = 0.01,
                      fit_list = c("t.d_t", "m.d_m", "t.m_t", "m.t_m", "t.md_t.m","t.md_t"),
                      verbose = FALSE,
-                     fitFunction_med = fitFunction, ...) {
+                     fitFunction_med = fitFunction, 
+                     ...) {
   
-  # Probably want to move this to fitDefault as fitQtl2 does this.
-  # Need to look where common_data is found to adjust.
-  if(!common) {
-    commons <- common_data(target, mediator, driver,
-                           covar_tar, covar_med, kinship, driver_med, intcovar)
-    driver <- commons$driver
-    target <- commons$target
-    mediator <- commons$mediator
-    kinship <- commons$kinship
-    covar_tar <- commons$covar_tar
-    covar_med <- commons$covar_med
-    driver_med <- commons$driver_med
-    intcovar <- commons$intcovar
-  }
   if(is.null(driver_med)) {
     driver_med <- driver
     normF <- c(target = NA, mediator = NA)
@@ -43,24 +29,18 @@ med_fits <- function(driver, target, mediator, fitFunction,
     fits[[i]] <- 
       switch(
         i,
-        t.d_t    = fitFunction(driver,
-                               target, kinship,
-                               covar_tar, intcovar),
-        m.d_m    = fitFunction_med(driver_med,
-                                   mediator, kinship,
-                                   covar_med, intcovar),
-        t.m_t    = fitFunction_med(bind_stuff(1, mediator, perp_tar),
-                                   target, kinship,
-                                   covar_tar, intcovar),
-        m.t_m    = fitFunction(bind_stuff(1, target, perp_med),
-                               mediator, kinship,
-                               covar_med, intcovar),
-        t.md_t.m = fitFunction(driver,
-                               target, kinship, 
-                               bind_stuff(covar_tar, mediator, perp_tar), intcovar),
-        t.md_t   = fitFunction(bind_stuff(driver, mediator, perp_tar),
-                               target, kinship, 
-                               covar_tar, intcovar))
+        t.d_t    = fitFunction(driver, target,
+                               covar_tar, intcovar, ...),
+        m.d_m    = fitFunction_med(driver_med, mediator,
+                                   covar_med, intcovar, ...),
+        t.m_t    = fitFunction_med(bind_stuff(1, mediator, perp_tar), target,
+                                   covar_tar, intcovar, ...),
+        m.t_m    = fitFunction(bind_stuff(1, target, perp_med), mediator,
+                               covar_med, intcovar, ...),
+        t.md_t.m = fitFunction(driver, target, 
+                               bind_stuff(covar_tar, mediator, perp_tar), intcovar, ...),
+        t.md_t   = fitFunction(bind_stuff(driver, mediator, perp_tar), target, 
+                               covar_tar, intcovar, ...))
   }
 
   # Transpose list of model fits

@@ -8,7 +8,6 @@
 #' @param annotation A data frame with mediators' annotation with columns `facet_name` and `index_name`
 #' @param covar A matrix with additive covariates
 #' @param intcovar A matrix of covariate interacting with driver
-#' @param kinship kinship object
 #' @param method A method to handle missing cases
 #' @param fitFunction function to fit models
 #' @param facet_name name of facet column (default `chr`)
@@ -48,7 +47,6 @@ mediation_scan <- function(target,
                            annotation,
                            covar=NULL,
                            intcovar=NULL,
-                           kinship = NULL,
                            method=c("double-lod-diff", "ignore", "lod-diff"), 
                            fitFunction = fitDefault,
                            facet_name = "chr",
@@ -64,7 +62,7 @@ mediation_scan <- function(target,
     driver_tar <- driver
   else
     driver_tar <- driver[,,1]
-  loglik0 <- fitFunction(driver_tar, target, kinship, covar, intcovar)$LR
+  loglik0 <- fitFunction(driver_tar, target, covar, intcovar, ...)$LR
   
   # Get common data.
   commons <- common_data(target, mediator, driver, covar, intcovar = intcovar,
@@ -108,8 +106,7 @@ mediation_scan <- function(target,
         driver <- driver[,, dcol]
     }
 
-    loglik <- fitFunction(driver, target, kinship,
-                          cbind(covar, x$mediator), intcovar)$LR
+    loglik <- fitFunction(driver, target, cbind(covar, x$mediator), intcovar, ...)$LR
     if(!is.null(x$mediator)) {
       if(is.matrix(x$mediator)) {
         na <- apply(x$mediator, 1, function(x) any(is.na(x)))
@@ -119,8 +116,7 @@ mediation_scan <- function(target,
       target[na] <- NA
     }
     loglik <- c(loglik,
-                fitFunction(driver, target, kinship,
-                            covar, intcovar)$LR)
+                fitFunction(driver, target, covar, intcovar, ...)$LR)
     lodfn(loglik, loglik0)
   }
   output <- annotation

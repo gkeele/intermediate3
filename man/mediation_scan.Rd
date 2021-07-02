@@ -29,7 +29,6 @@ mediation_scan(
   annotation,
   covar = NULL,
   intcovar = NULL,
-  kinship = NULL,
   method = c("double-lod-diff", "ignore", "lod-diff"),
   fitFunction = fitDefault,
   facet_name = "chr",
@@ -66,8 +65,6 @@ mediation_scan(
 \item{covar}{A matrix with additive covariates}
 
 \item{intcovar}{A matrix of covariate interacting with driver}
-
-\item{kinship}{kinship object}
 
 \item{method}{A method to handle missing cases}
 

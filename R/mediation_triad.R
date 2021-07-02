@@ -12,7 +12,6 @@
 #' @param driver vector or matrix with driver values
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
-#' @param kinship optional kinship matrix among individuals
 #' @param fitFunction function to fit models with driver, target and mediator
 #' @param ... additional arguments
 #' 
@@ -46,7 +45,6 @@
 #' 
 mediation_triad <- function(target, mediator, driver,
                         covar_tar = NULL, covar_med = NULL,
-                        kinship = NULL, 
                         fitFunction = fitQtl2,
                         ...) {
   
@@ -66,10 +64,10 @@ mediation_triad <- function(target, mediator, driver,
   
   # Fit target and target|mediator models
   fit <- med_fits(driver, target, mediator,
-                  fitFunction, kinship, covar_tar, covar_med)
+                  fitFunction, covar_tar, covar_med)
   
   dat <- triad_data(target, mediator, driver, 
-                    covar_tar, covar_med, kinship, ...)
+                    covar_tar, covar_med, ...)
   
   for(i in c("t.d_t","t.md_t.m")) {
     tmp <- fit$coef[[i]][seq_len(ncol(driver))]
@@ -86,7 +84,7 @@ mediation_triad <- function(target, mediator, driver,
   out
 }
 triad_data <- function(target, mediator, driver, 
-                       covar_tar, covar_med, kinship,
+                       covar_tar, covar_med,
                        sdp = NULL,
                        allele = TRUE,
                        label_fn = pattern_label,
@@ -95,7 +93,7 @@ triad_data <- function(target, mediator, driver,
   
   # Find common data.
   commons <- common_data(target, mediator, driver, 
-                         covar_tar, covar_med, kinship)
+                         covar_tar, covar_med)
   
   # Get covariations from covar_med that are not in covar_tar
   if(!is.null(covar_med)) {

@@ -32,7 +32,6 @@ mediation_test(
   annotation = NULL,
   covar_tar = NULL,
   covar_med = NULL,
-  kinship = NULL,
   driver_med = NULL,
   intcovar = NULL,
   test = c("wilcoxon", "binomial", "joint", "normal"),
@@ -76,8 +75,6 @@ mediation_test(
 \item{covar_tar}{optional covariates for target}
 
 \item{covar_med}{optional covariates for mediator}
-
-\item{kinship}{optional kinship matrix among individuals}
 
 \item{driver_med}{optional driver matrix for mediators}
 

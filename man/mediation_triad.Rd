@@ -13,7 +13,6 @@ mediation_triad(
   driver,
   covar_tar = NULL,
   covar_med = NULL,
-  kinship = NULL,
   fitFunction = fitQtl2,
   ...
 )
@@ -45,8 +44,6 @@ ggplot_mediation_triad(
 \item{covar_tar}{optional covariates for target}
 
 \item{covar_med}{optional covariates for mediator}
-
-\item{kinship}{optional kinship matrix among individuals}
 
 \item{fitFunction}{function to fit models with driver, target and mediator}
 

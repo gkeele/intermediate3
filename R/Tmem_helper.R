@@ -1,6 +1,6 @@
 #' Helper function to extract subset chromosomes from Tmem68
 #' 
-#' @param object list object with target, mediator, annotation, covar and qtl.geno
+#' @param object list object with mediator, annotation, and other elements
 #' @param chr chromosome(s) to select (all if \code{NULL})
 #' 
 #' @export

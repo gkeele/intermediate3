@@ -8,7 +8,6 @@
 #' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
-#' @param kinship optional kinship matrix among individuals
 #' @param driver_med optional driver matrix for mediators
 #' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
 #' @param fitFunction function to fit models with driver, target and mediator
@@ -17,7 +16,6 @@
 #'
 #' @importFrom purrr map transpose
 #' @importFrom stringr str_replace
-#' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr arrange bind_rows desc filter group_by left_join mutate one_of rename ungroup
 #' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
@@ -60,9 +58,9 @@
 #' @export
 #'
 mediation_joint <- function(target, mediator, driver, annotation,
-                          covar_tar=NULL, covar_med=NULL, kinship=NULL,
+                          covar_tar=NULL, covar_med=NULL,
                           driver_med = NULL, intcovar = NULL,
-                          fitFunction = fitQtl2,
+                          fitFunction = fitDefault,
                           index_name = "pos",
                           ...) {
   
@@ -77,7 +75,7 @@ mediation_joint <- function(target, mediator, driver, annotation,
   }
   
   result <- mediation_test_internal(target, mediator, driver, annotation,
-                                    covar_tar, covar_med, kinship,
+                                    covar_tar, covar_med,
                                     driver_med, intcovar,
                                     fitFunction, NULL,
                                     fit_joint,
@@ -96,7 +94,7 @@ mediation_joint <- function(target, mediator, driver, annotation,
 }
 
 fit_joint <- function(object, driver, target, 
-                      kinship, covar_tar, covar_med,
+                      covar_tar, covar_med,
                       driver_med, intcovar,
                       fitFunction, testFunction,
                       common = TRUE, 
@@ -124,7 +122,7 @@ fit_joint <- function(object, driver, target,
   
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
-                   kinship, covar_tar, covar_med, driver_med,
+                   covar_tar, covar_med, driver_med,
                    intcovar, common = common,
                    fit_list = c("m.d_m","t.md_t"), ...)
   data.frame(LR = sum(fits$LR))

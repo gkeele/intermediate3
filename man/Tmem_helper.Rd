@@ -7,7 +7,7 @@
 Tmem_helper(object, chr = NULL)
 }
 \arguments{
-\item{object}{list object with target, mediator, annotation, covar and qtl.geno}
+\item{object}{list object with mediator, annotation, and other elements}
 
 \item{chr}{chromosome(s) to select (all if \code{NULL})}
 }

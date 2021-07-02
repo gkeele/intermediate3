@@ -1,5 +1,5 @@
 cmst_default <- function(object, driver, target, 
-                         kinship, covar_tar, covar_med,
+                         covar_tar, covar_med,
                          driver_med, intcovar,
                          fitFunction, testFunction,
                          common = TRUE, 
@@ -30,7 +30,7 @@ cmst_default <- function(object, driver, target,
   
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
-                   kinship, covar_tar, covar_med, driver_med,
+                   covar_tar, covar_med, driver_med,
                    intcovar, common = common, ...)
   
   combos <- combo_models(fitRelate)

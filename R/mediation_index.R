@@ -8,7 +8,6 @@
 #' @param annotation optional annotation data frame for mediators
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
-#' @param kinship optional kinship matrix among individuals
 #' @param driver_med driver array for mediators
 #' @param driver_index index to driver array
 #' @param facet_name name of facet column (default `chr`)
@@ -17,7 +16,6 @@
 #'
 #' @importFrom purrr map transpose
 #' @importFrom stringr str_replace
-#' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr arrange as_tibble bind_rows desc filter group_by left_join mutate one_of rename ungroup
 #' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 aes autoplot element_blank facet_grid facet_wrap 
@@ -59,7 +57,7 @@
 #' @export
 #'
 mediation_index <- function(target, mediator, driver = NULL,
-                            annotation = NULL, covar_tar = NULL, covar_med = NULL, kinship = NULL,
+                            annotation = NULL, covar_tar = NULL, covar_med = NULL,
                             driver_med = NULL, driver_index = colnames(mediator),
                             facet_name = "chr", index_name = "pos", ...) {
   # Mediation test over interval
@@ -95,7 +93,6 @@ mediation_index <- function(target, mediator, driver = NULL,
     annotation = annotation,
     covar_tar = covar_tar,
     covar_med = covar_med,
-    kinship = kinship,
     driver = driver,
     driver_med = driver_med,
     index_name = index_name, ...)

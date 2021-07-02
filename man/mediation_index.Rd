@@ -14,7 +14,6 @@ mediation_index(
   annotation = NULL,
   covar_tar = NULL,
   covar_med = NULL,
-  kinship = NULL,
   driver_med = NULL,
   driver_index = colnames(mediator),
   facet_name = "chr",
@@ -46,8 +45,6 @@ ggplot_mediation_index(
 \item{covar_tar}{optional covariates for target}
 
 \item{covar_med}{optional covariates for mediator}
-
-\item{kinship}{optional kinship matrix among individuals}
 
 \item{driver_med}{driver array for mediators}
 

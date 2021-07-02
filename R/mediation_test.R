@@ -8,7 +8,6 @@
 #' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
-#' @param kinship optional kinship matrix among individuals
 #' @param driver_med optional driver matrix for mediators
 #' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
 #' @param test Type of CMST test.
@@ -19,7 +18,6 @@
 #'
 #' @importFrom purrr map transpose
 #' @importFrom stringr str_replace
-#' @importFrom qtl2 decomp_kinship fit1 get_common_ids
 #' @importFrom dplyr any_of arrange bind_rows desc filter group_by left_join
 #' mutate one_of rename ungroup
 #' @importFrom tidyr pivot_longer pivot_wider
@@ -73,7 +71,7 @@
 #' @importFrom purrr map transpose
 #'
 mediation_test <- function(target, mediator, driver, annotation = NULL,
-                          covar_tar=NULL, covar_med=NULL, kinship=NULL,
+                          covar_tar=NULL, covar_med=NULL,
                           driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
                           fitFunction = fitDefault,
@@ -87,7 +85,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     return(NULL)
   
   if(!is.null(driver)) {
-    scan_max <- fitFunction(driver, target, kinship, covar_df_mx(covar_tar))
+    scan_max <- fitFunction(driver, target, covar_df_mx(covar_tar), ...)
   } else {
     scan_max <- NULL
   }
@@ -111,7 +109,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   driver_med <- driver_blank_names(driver_med)
 
   result <- mediation_test_internal(target, mediator, driver, annotation,
-                                    covar_tar, covar_med, kinship,
+                                    covar_tar, covar_med,
                                     driver_med, intcovar,
                                     fitFunction, testFunction,
                                     cmst_default,
@@ -223,7 +221,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   result
 }
 mediation_test_internal <- function(target, mediator, driver, annotation,
-                                    covar_tar, covar_med, kinship,
+                                    covar_tar, covar_med,
                                     driver_med, intcovar,
                                     fitFunction,
                                     testFunction,
@@ -240,7 +238,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   
   # Get common data.
   commons <- common_data(target, mediator, driver,
-                         covar_tar, NULL, kinship, intcovar = intcovar,
+                         covar_tar, NULL, intcovar = intcovar,
                          common = use_1_driver, ...)
   if(is.null(commons))
     return(NULL)
@@ -248,7 +246,6 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
   target <- commons$target
   mediator <- commons$mediator
   driver <- commons$driver
-  kinship <- commons$kinship
   covar_tar <- commons$covar_tar
   intcovar <- commons$intcovar
   common <- commons$common
@@ -309,7 +306,7 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
         mediator = mediator,
         driver_names = driver_names)),
     cmstfn, driver, target, 
-    kinship, covar_tar, covar_med,
+    covar_tar, covar_med,
     driver_med, intcovar,
     fitFunction, testFunction, common, ...)
 }
