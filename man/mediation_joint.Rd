@@ -25,7 +25,13 @@ mediation_joint(
 
 \method{autoplot}{mediation_joint}(x, ...)
 
-ggplot_mediation_joint(x, lod = TRUE, xlab = index_name, ylab = ylab_name, ...)
+ggplot_mediation_joint(
+  x,
+  lod = FALSE,
+  xlab = index_name,
+  ylab = ylab_name,
+  ...
+)
 }
 \arguments{
 \item{target}{vector or 1-column matrix with target values}
@@ -65,25 +71,25 @@ Data frame with `id` and `LR` as well as `annotation` columns.
 Fit joint likelihood for `target` and `mediator` given `driver`.
 }
 \examples{
-data(Tmem68, package = "Tmem68")
-# Focus on chromosome 13
-Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+data(Tmem68)
  
 target <- Tmem68$target
 
 # Find mediators with significant effect
-med_lod <- mediator_lod(mediator = Tmem68$mediator,
+med_LR <- mediator_LR(mediator = Tmem68$mediator,
                         driver = Tmem68$driver,
                         annotation = Tmem68$annotation,
                         covar_med = Tmem68$covar)
-med_signif <- med_lod$id[med_lod$lod >= 5]
+med_signif <- med_LR$id[med_LR$LR >= 5 * log(10)]
 # Add info column.
-med_lod$info <- paste("chr =", med_lod$chr)
+med_LR$info <- paste("chr =", med_LR$chr)
+# Rename mediator LR column to not conflict with mediation test LR.
+med_LR <- dplyr::rename(med_LR, mediatorLR = "LR")
 
 med_joint <- mediation_joint(target = target,
                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
                       driver = Tmem68$driver,
-                      annotation = med_lod,
+                      annotation = med_LR,
                       covar_tar = Tmem68$covar,
                       covar_med = Tmem68$covar)
                       

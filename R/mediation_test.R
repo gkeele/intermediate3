@@ -36,25 +36,23 @@
 #' - params list of parameter settings for use by summary and plot methods
 #' 
 #' @examples
-#' data(Tmem68, package = "Tmem68")
-#' # Focus on chromosome 13
-#' Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+#' data(Tmem68)
 #'  
 #' target <- Tmem68$target
 #' 
 #' # Find mediators with significant effect
-#' med_lod <- mediator_lod(mediator = Tmem68$mediator,
+#' med_LR <- mediator_LR(mediator = Tmem68$mediator,
 #'                         driver = Tmem68$driver,
 #'                         annotation = Tmem68$annotation,
 #'                         covar_med = Tmem68$covar)
-#' med_signif <- med_lod$id[med_lod$lod >= 5]
+#' med_signif <- med_LR$id[med_LR$LR >= 5 * log(10)]
 #' # Add info column.
-#' med_lod$info <- paste("chr =", med_lod$chr)
+#' med_LR$info <- paste("chr =", med_LR$chr)
 #' 
 #' med_test <- mediation_test(target = target,
 #'                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
 #'                       driver = Tmem68$driver,
-#'                       annotation = med_lod,
+#'                       annotation = med_LR,
 #'                       covar_tar = Tmem68$covar,
 #'                       covar_med = Tmem68$covar)
 #' summary(med_test)
@@ -330,7 +328,7 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
       dplyr::arrange(
         object$best,
         pmin(.data$pvalue, .data$undecided), .data$id),
-      mediation = .data$mediation / log(10),
+      mediation = .data$mediation,
       pvalue = signif(.data$pvalue, 3),
       mediation = signif(.data$mediation, 3),
       LRmed = signif(.data$LRmed, 3))

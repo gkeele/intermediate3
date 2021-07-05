@@ -1,8 +1,8 @@
-#' Mediator LOD
+#' Mediator Likelihood Ratio
 #'
 #' For a given QTL haplotype probabilities \code{driver} and target \code{target},
 #' the function sequentially tries to add each column \code{m} of \code{mediator} matrix as a covariate
-#' and calculates LOD statistic. The low LOD value indicates \code{driver} and
+#' and calculates LR statistic. A low LR value indicates \code{driver} and
 #' \code{target} are conditionally independent given \code{m},
 #' i.e. \code{m} is a mediator of causal relationship from \code{driver} to \code{target}.
 #'
@@ -19,20 +19,18 @@
 #' @param ... additional parameters
 #' 
 #' @examples
-#' data(Tmem68, package = "Tmem68")
-#' # Focus on chromosome 13
-#' Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+#' data(Tmem68)
 #' 
-#' med_lod <- mediator_lod(mediator = Tmem68$mediator,
+#' med_LR <- mediator_LR(mediator = Tmem68$mediator,
 #'                       driver = Tmem68$driver,
 #'                       annotation = Tmem68$annotation,
 #'                       covar_med = NULL)
-#' ggplot2::autoplot(med_lod) +
+#' ggplot2::autoplot(med_LR) +
 #'   ggplot2::geom_hline(yintercept = 5, col = "blue")
 #' 
 #' @export
 
-mediator_lod <- function(mediator, 
+mediator_LR <- function(mediator, 
                          driver, 
                          annotation, 
                          covar_med=NULL, 
@@ -87,9 +85,10 @@ mediator_lod <- function(mediator,
   }
   
   output <- annotation
-  output$lod <- unlist(purrr::map(med_pur, mapfn, driver, covar_med, intcovar,
-                                  rownames(mediator), ...)) / log(10)
-  attr(output, "targetFit") <- min(output$lod)
+  output$LR <- unlist(
+    purrr::map(med_pur, mapfn, driver, covar_med, intcovar,
+               rownames(mediator), ...))
+  attr(output, "targetFit") <- min(output$LR)
   attr(output, "facet_name") <- facet_name
   attr(output, "index_name") <- index_name
   class(output) <- c("mediation_scan", "data.frame")

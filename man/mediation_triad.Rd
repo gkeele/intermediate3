@@ -77,9 +77,7 @@ additional information, which here is the \code{chr} of mediator. The plot uses
 the mediator position on its home chromosome, which is not really what is wanted.
 }
 \examples{
-data(Tmem68, package = "Tmem68")
-# Focus on chromosome 13
-Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+data(Tmem68)
 
 target <- cbind(Tmem68 = Tmem68$target)
 

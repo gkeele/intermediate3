@@ -18,20 +18,36 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
 library(intermediate)
 ```
 
-The data and original 'intermediate' code come from <https://github.com/churchill-lab/intermediate>.
+## Overview
+
+The process of mediation involves a `driver` that affects the `target` and a `mediator`. The question addressed is whether the `mediator` adjusts the `driver` signal on the `target`. That is, after regressing the `target` on the `mediator`, is there any significant effect of the `driver` on the `target`?
+
+In many situations, there may be many possible mediators, and even many possible drivers. Some of the routines in this package help investigate these relationships:
+
+- mediator_LR: likelihood ratio driver effect on mediators
+- mediation_scan: scan target adjusted by driver and mediator(s)
+- mediation_test: causal model selection test for mediation
+- mediation_effect: driver effects on mediators
+- mediation_triad: scatterplot of target on mediator by driver
+
+The manuscript ends with mathematical details of mediation.
+
+## Tmem68 dataset
+
+The data come from <https://github.com/churchill-lab/intermediate>. 
+This version only contains data for chr 4 and 13, and has had the following changes
+to elements. See [package Tmem68](\href{https://github.com/byandell/Tmem68) for more details.
 
 ```{r}
-data(Tmem68, package = "Tmem68")
+data(Tmem68)
 ```
 
-Note that the `target` and one of the mediators are identical
+Note that the `target` and the mediators are mRNA expression levels. One of the mediators (Tmem68) is identical to the target.
 
 ```{r}
 m <- match("Tmem68", Tmem68$annotation$symbol)
 all.equal(Tmem68$target, Tmem68$mediator[,m])
 ```
-
-## Mediation scan
 
 ```{r}
 target <- Tmem68$target
@@ -49,30 +65,26 @@ annotation <- dplyr::mutate(Tmem68$annotation, chr = factor(chr, c(1:19,"X")))
 mediators <- Tmem68$mediator
 ```
 
-## Scan of mediators
+## Mediator LR
 
-First fine mediators that have significant LOD. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
+First fine mediators that have significant LR. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
 
 ```{r}
-med_lod <- mediator_lod(mediator = mediators,
+med_LR <- mediator_LR(mediator = mediators,
                         driver = driver,
                         annotation = annotation,
                         covar_med = covar)
-med_signif <- med_lod$id[med_lod$lod >= 5]
+med_signif <- med_LR$id[med_LR$LR >= 5 * log(10)]
 # Add info column.
-med_lod$info <- paste("chr =", med_lod$chr)
-med_col <- rep(1, nrow(med_lod))
-med_col[med_lod$lod >= 5] <- 2
-med_lod$col <- factor(med_col)
-med_lod <- med_lod[order(med_lod$col, -med_lod$lod),]
+med_LR$info <- paste("chr =", med_LR$chr)
+med_col <- rep(1, nrow(med_LR))
+med_col[med_LR$LR >= 5 * log(10)] <- 2
+med_LR$col <- factor(med_col)
+med_LR <- med_LR[order(med_LR$col, -med_LR$LR),]
 ```
 
 ```{r}
-ggplot2::autoplot(med_lod)
-```
-
-```{r}
-ggplot2::autoplot(subset(med_lod, chr = c("4","13")), size = 3)
+ggplot2::autoplot(med_LR)
 ```
 
 ## Mediation scan of target adjusted by mediators
@@ -82,22 +94,13 @@ med_scan <- mediation_scan(target = target,
                       mediator = mediators,
                       driver = driver,
                       annotation = annotation,
-                      covar = covar,
-                      method = "double-lod-diff")
-# Add color for mediators with significant LOD.
+                      covar = covar)
+# Add color for mediators with significant LR.
 med_col <- rep(1, nrow(med_scan))
 med_col[med_scan$id %in% med_signif] <- 2
 med_scan$col <- factor(med_col)
-med_scan <- med_scan[order(med_scan$col, -med_scan$lod),]
-ggplot2::autoplot(med_scan)
-```
-
-Or use `ggplot2::autoplot`, and maybe focus on a few groups and add a vertical line.
-
-```{r}
-ggplot2::autoplot(subset(med_scan, c("4","13")), size = 3) +
-  ggplot2::geom_vline(xintercept = annotation[m,"pos"], linetype = "dashed")
-
+med_scan <- med_scan[order(med_scan$col, -med_scan$LR),]
+ggplot2::autoplot(med_scan, size = 3)
 ```
 
 Alternatively, only do scan on significant mediators
@@ -107,9 +110,8 @@ med_scan <- mediation_scan(target = target,
                       mediator = mediators[, med_signif],
                       driver = driver,
                       annotation = annotation,
-                      covar = covar,
-                      method = "double-lod-diff")
-ggplot2::autoplot(med_scan)
+                      covar = covar)
+ggplot2::autoplot(med_scan, size = 3)
 ```
 
 ## Mediation test
@@ -120,10 +122,9 @@ Causal model selection tests.
 med_test <- mediation_test(target = target,
                       mediator = mediators[, med_signif, drop = FALSE],
                       driver = driver,
-                      annotation = med_lod,
+                      annotation = med_LR,
                       covar_tar = covar,
-                      covar_med = covar,
-                      method = "double-lod-diff")
+                      covar_med = covar)
 (sum_med <- dplyr::arrange(summary(med_test), pvalue))
 ```
 
@@ -133,10 +134,10 @@ ggplot2::autoplot(med_test)
 
 ```{r}
 dat <- med_test$best
-dat$lod_tar <- med_test$params$target_LR / log(10)
-dat$lod_med <- dat$mediation / log(10)
+dat$LR_tar <- med_test$params$target_LR / log(10)
+dat$LR_med <- dat$mediation / log(10)
 ggplot2::ggplot(dplyr::filter(dat, pvalue <= 0.05)) +
-  ggplot2::aes(lod_tar - lod_med, -log10(pvalue),
+  ggplot2::aes(LR_tar - LR_med, -log10(pvalue),
                col = triad, symbol = symbol) +
   ggplot2::geom_point(alpha = 0.5, size = 2)
 ```
@@ -173,7 +174,7 @@ ggplot2::autoplot(med_triad, size = 3)
 
 Mediation examines the change in likelihood ratio, LR, (or LOD in genetic studies) for the relationship of a target and a driver by adjusting one at a time for a set of mediators. [For now, we ignore covariates and kinship.]
 
-The idea is to compare the strength of evidence for effect of the driver ($D$) on the target ($T$) with or without a mediator ($M$). That is, how do the models $D\rightarrow T$ and $D \rightarrow M \rightarrow T$ compare? This is often done for a set of mediators ($M_1, M_2, ...$), looking for the strongest mediation, or drop in LOD attributable to the mediator.
+The idea is to compare the strength of evidence for effect of the driver ($D$) on the target ($T$) with or without a mediator ($M$). That is, how do the models $D\rightarrow T$ and $D \rightarrow M \rightarrow T$ compare? This is often done for a set of mediators ($M_1, M_2, ...$), looking for the strongest mediation, or drop in LR attributable to the mediator.
 
 ## Causal models
 

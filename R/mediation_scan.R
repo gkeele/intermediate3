@@ -18,14 +18,12 @@
 #' @details 
 #' For a given QTL haplotype probabilities `driver`` and target `target`,
 #' the function sequentially tries to add each column of `mediator` matrix as a covariate
-#' and calculates LOD statistic. The low LOD value indicates `driver` and
+#' and calculates LR statistic. The low LR value indicates `driver` and
 #' `target` are conditionally independent given `mediator`,
 #' i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 #'
 #' @examples
-#' data(Tmem68, package = "Tmem68")
-#' # Focus on chromosome 13
-#' Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+#' data(Tmem68)
 #' 
 #' target <- Tmem68$target
 #' m <- match("Tmem68", Tmem68$annotation$symbol)
@@ -34,8 +32,7 @@
 #'                       mediator = Tmem68$mediator,
 #'                       driver = Tmem68$driver,
 #'                       annotation = Tmem68$annotation,
-#'                       covar = Tmem68$covar,
-#'                       method = "double-lod-diff")
+#'                       covar = Tmem68$covar)
 #'                       
 #' ggplot_mediation_scan(med_scan)
 #' 
@@ -47,7 +44,7 @@ mediation_scan <- function(target,
                            annotation,
                            covar=NULL,
                            intcovar=NULL,
-                           method=c("double-lod-diff", "ignore", "lod-diff"), 
+                           method=c("double-LR-diff", "ignore", "LR-diff"), 
                            fitFunction = fitDefault,
                            facet_name = "chr",
                            index_name = "pos",
@@ -91,12 +88,12 @@ mediation_scan <- function(target,
     purrr::transpose(
       list(mediator = as.data.frame(mediator),
            annotation = split(annotation, rownames(annotation))))
-  lodfn <- 
+  LRfn <- 
     switch(
       method,
       ignore            = function(loglik, loglik0) loglik[1],
-      "lod-diff"        = function(loglik, loglik0) loglik[2] - loglik[1],
-      "double-lod-diff" = function(loglik, loglik0) loglik0 - (loglik[2] - loglik[1]))
+      "LR-diff"        = function(loglik, loglik0) loglik[2] - loglik[1],
+      "double-LR-diff" = function(loglik, loglik0) loglik0 - (loglik[2] - loglik[1]))
   
   mapfn <- function(x, target, covar, driver, loglik0) {
     if(length(dim(driver)) > 2) {
@@ -117,13 +114,12 @@ mediation_scan <- function(target,
     }
     loglik <- c(loglik,
                 fitFunction(driver, target, covar, intcovar, ...)$LR)
-    lodfn(loglik, loglik0)
+    LRfn(loglik, loglik0)
   }
   output <- annotation
-  # Compute LOD (fitFunction provides LL, so divide by log(10))
-  output$lod <- unlist(purrr::map(med_pur, mapfn, target, covar, driver, loglik0)) /
-    log(10)
-  attr(output, "targetFit") <- loglik0 / log(10)
+  # Compute Likelihood Ratio
+  output$LR <- unlist(purrr::map(med_pur, mapfn, target, covar, driver, loglik0))
+  attr(output, "targetFit") <- loglik0
   attr(output, "facet_name") <- facet_name
   attr(output, "index_name") <- index_name
   class(output) <- c("mediation_scan", "data.frame")

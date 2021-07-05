@@ -6,14 +6,14 @@
 \alias{plot.mediation_scan}
 \alias{mediation_scan}
 \alias{subset.mediation_scan}
-\title{Plot of conditioned LOD scores against index}
+\title{Plot of conditioned LR scores against index}
 \usage{
 ggplot_mediation_scan(
   x,
   col = "firebrick4",
   size = 1,
   xlab = index_name,
-  ylab = "Conditioned LOD",
+  ylab = "Conditioned LR",
   col_target = "blue",
   gap = 25
 )
@@ -29,7 +29,7 @@ mediation_scan(
   annotation,
   covar = NULL,
   intcovar = NULL,
-  method = c("double-lod-diff", "ignore", "lod-diff"),
+  method = c("double-LR-diff", "ignore", "LR-diff"),
   fitFunction = fitDefault,
   facet_name = "chr",
   index_name = "pos",
@@ -46,9 +46,9 @@ mediation_scan(
 
 \item{size}{character size (default 2)}
 
-\item{xlab, ylab}{X and Y axis label (default `index_name` and "Conditioned LOD")}
+\item{xlab, ylab}{X and Y axis label (default `index_name` and "Conditioned LR")}
 
-\item{col_target}{color for target LOD line}
+\item{col_target}{color for target LR line}
 
 \item{gap}{gap between facets (default `25`)}
 
@@ -81,20 +81,18 @@ mediation_scan(
 \item{chrs}{chromosome names to subset}
 }
 \description{
-Plot LOD statistics calculated by [mediation_scan()] against index
+Plot LR statistics calculated by [mediation_scan()] against index
 using ggplot2.
 }
 \details{
 For a given QTL haplotype probabilities `driver`` and target `target`,
 the function sequentially tries to add each column of `mediator` matrix as a covariate
-and calculates LOD statistic. The low LOD value indicates `driver` and
+and calculates LR statistic. The low LR value indicates `driver` and
 `target` are conditionally independent given `mediator`,
 i.e. `mediator` is a mediator of causal relationship from `driver` to `target`.
 }
 \examples{
-data(Tmem68, package = "Tmem68")
-# Focus on chromosome 13
-Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+data(Tmem68)
 
 target <- Tmem68$target
 m <- match("Tmem68", Tmem68$annotation$symbol)
@@ -103,8 +101,7 @@ med_scan <- mediation_scan(target = target,
                       mediator = Tmem68$mediator,
                       driver = Tmem68$driver,
                       annotation = Tmem68$annotation,
-                      covar = Tmem68$covar,
-                      method = "double-lod-diff")
+                      covar = Tmem68$covar)
                       
 ggplot_mediation_scan(med_scan)
 

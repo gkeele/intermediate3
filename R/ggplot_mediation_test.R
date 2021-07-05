@@ -7,23 +7,23 @@ plot.mediation_test <- function(x, ...)
 autoplot.mediation_test <- function(x, ...)
   ggplot_mediation_test(x, ...)
 #' @param x object of class \code{mediation_test}
-#' @param type type of plot from \code{c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator")}
+#' @param type type of plot from \code{c("pos_LR","pos_pvalue","pvalue_LR","alleles","mediator")}
 #' @param main title for plot
 #' @param maxPvalue maximum p-value with default \code{0.1}
 #' @param local_only local only if \code{TRUE} (default \code{FALSE})
 #' @param significant whow signficant if \code{TRUE} (default)
-#' @param lod show lod plot if \code{TRUE} (default)
+#' @param lod show as LOD plot if \code{TRUE} (default)
 #' @param target_index include vertical line at target if not \code{NULL}
 #' @param ... additional parameters
 #' 
 #' @export
 #' @rdname mediation_test
-ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator"),
+ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR","alleles","mediator"),
                                main = params$target,
                                maxPvalue = 0.1, 
                                local_only = FALSE, 
                                significant = TRUE,
-                               lod = TRUE,
+                               lod = FALSE,
                                target_index = NULL,
                                ...) {
   type <- match.arg(type)
@@ -53,7 +53,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
   
   relabel <- levels(x$triad)
 
-  if(type != "pos_lod")
+  if(type != "pos_LR")
     significant <- TRUE
   if(significant) {
     x <- dplyr::filter(x, 
@@ -113,7 +113,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                  ggplot2::geom_vline(xintercept = .data$target_index,
                                      col = "darkgrey")
            },
-           pvalue_lod = {
+           pvalue_LR = {
              p <- ggplot2::ggplot(x) +
                ggplot2::aes(y = .data$mediation,
                             x = -log10(.data$pvalue)) +
@@ -123,9 +123,9 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                ggplot2::geom_hline(yintercept = .data$unmediated,
                                    col = "darkgrey") +
                ggplot2::xlab("-log10 of p-value") +
-               ggplot2::ylab("Mediation LOD")
+               ggplot2::ylab("Mediation LR")
            },
-           pos_lod = {
+           pos_LR = {
              p <- ggplot2::ggplot(x) + 
                ggplot2::aes(y = .data$mediation,
                             x = .data$pos) +
@@ -135,7 +135,7 @@ ggplot_mediation_test <- function(x, type = c("pos_lod","pos_pvalue","pvalue_lod
                                    col = "darkgrey") +
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
-               ggplot2::ylab("Mediation LOD")
+               ggplot2::ylab("Mediation LR")
 #               ggplot2::scale_color_manual(values = cols)
              if(!is.null(target_index))
                p <- p +

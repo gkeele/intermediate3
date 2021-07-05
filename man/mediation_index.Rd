@@ -68,7 +68,7 @@ ggplot_mediation_index(
 Test mediation across set of indexed drivers
 }
 \examples{
-data(Tmem68, package = "Tmem68")
+data(Tmem68)
  
 target <- Tmem68$target
 

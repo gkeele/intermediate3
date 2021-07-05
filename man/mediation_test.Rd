@@ -15,12 +15,12 @@
 
 ggplot_mediation_test(
   x,
-  type = c("pos_lod", "pos_pvalue", "pvalue_lod", "alleles", "mediator"),
+  type = c("pos_LR", "pos_pvalue", "pvalue_LR", "alleles", "mediator"),
   main = params$target,
   maxPvalue = 0.1,
   local_only = FALSE,
   significant = TRUE,
-  lod = TRUE,
+  lod = FALSE,
   target_index = NULL,
   ...
 )
@@ -50,7 +50,7 @@ mediation_test(
 
 \item{...}{additional parameters}
 
-\item{type}{type of plot from \code{c("pos_lod","pos_pvalue","pvalue_lod","alleles","mediator")}}
+\item{type}{type of plot from \code{c("pos_LR","pos_pvalue","pvalue_LR","alleles","mediator")}}
 
 \item{main}{title for plot}
 
@@ -60,7 +60,7 @@ mediation_test(
 
 \item{significant}{whow signficant if \code{TRUE} (default)}
 
-\item{lod}{show lod plot if \code{TRUE} (default)}
+\item{lod}{show as LOD plot if \code{TRUE} (default)}
 
 \item{target_index}{include vertical line at target if not \code{NULL}}
 
@@ -104,25 +104,23 @@ List with elements:
 Develop mediation models from driver, target and mediator
 }
 \examples{
-data(Tmem68, package = "Tmem68")
-# Focus on chromosome 13
-Tmem68 <- Tmem68::subset_Tmem68(Tmem68, "13")
+data(Tmem68)
  
 target <- Tmem68$target
 
 # Find mediators with significant effect
-med_lod <- mediator_lod(mediator = Tmem68$mediator,
+med_LR <- mediator_LR(mediator = Tmem68$mediator,
                         driver = Tmem68$driver,
                         annotation = Tmem68$annotation,
                         covar_med = Tmem68$covar)
-med_signif <- med_lod$id[med_lod$lod >= 5]
+med_signif <- med_LR$id[med_LR$LR >= 5 * log(10)]
 # Add info column.
-med_lod$info <- paste("chr =", med_lod$chr)
+med_LR$info <- paste("chr =", med_LR$chr)
 
 med_test <- mediation_test(target = target,
                       mediator = Tmem68$mediator[, med_signif, drop = FALSE],
                       driver = Tmem68$driver,
-                      annotation = med_lod,
+                      annotation = med_LR,
                       covar_tar = Tmem68$covar,
                       covar_med = Tmem68$covar)
 summary(med_test)

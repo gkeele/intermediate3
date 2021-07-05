@@ -1,13 +1,13 @@
-#' Plot of conditioned LOD scores against index
+#' Plot of conditioned LR scores against index
 #'
-#' Plot LOD statistics calculated by [mediation_scan()] against index
+#' Plot LR statistics calculated by [mediation_scan()] against index
 #' using ggplot2.
 #'
 #' @param x mediation object
 #' @param col color of points (default "firebrick4")
 #' @param size character size (default 2)
-#' @param xlab,ylab X and Y axis label (default `index_name` and "Conditioned LOD")
-#' @param col_target color for target LOD line
+#' @param xlab,ylab X and Y axis label (default `index_name` and "Conditioned LR")
+#' @param col_target color for target LR line
 #' @param gap gap between facets (default `25`)
 #' 
 #' @export
@@ -20,7 +20,7 @@ ggplot_mediation_scan <- function(x,
                            col="firebrick4",
                            size = 1,
                            xlab = index_name,
-                           ylab = "Conditioned LOD",
+                           ylab = "Conditioned LR",
                            col_target = "blue",
                            gap = 25) {
   
@@ -39,7 +39,7 @@ ggplot_mediation_scan <- function(x,
   x <- dplyr::arrange_at(x, c(facet_name, "index"))
 
   p <- ggplot2::ggplot(x) +
-    ggplot2::aes(.data$index, .data$lod, symbol = .data$symbol) +
+    ggplot2::aes(.data$index, .data$LR, symbol = .data$symbol) +
     ggplot2::facet_grid(stats::formula(paste("~", facet_name)),
                         scales = "free_x", space = "free") +
     ggplot2::xlab(xlab)
