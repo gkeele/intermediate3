@@ -25,6 +25,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                significant = TRUE,
                                lod = FALSE,
                                target_index = NULL,
+                               colors = 
                                ...) {
   type <- match.arg(type)
   if(is.null(local_only) | !("local" %in% names(x$best)))
@@ -136,7 +137,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("Mediation LR")
-#               ggplot2::scale_color_manual(values = cols)
+               ggplot2::scale_color_manual(values = cols)
              if(!is.null(target_index))
                p <- p +
                  ggplot2::geom_vline(xintercept = .data$target_index,
@@ -176,7 +177,6 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                      col = .data$geno,
                      symbol = .data$symbol) +
         ggplot2::facet_wrap(~ .data$triad, scales = "free_x") +
-#        ggplot2::scale_color_manual(values = intermediate::CCcolors) +
         ggplot2::geom_hline(data = targetCoef, 
                             ggplot2::aes(yintercept = .data$value,
                                          col = .data$geno),
@@ -218,7 +218,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
            })
   }
 }
-target_prep <- function(targetFit, type, col = intermediate::CCcolors) {
+target_prep <- function(targetFit, type, col = RColorBrewer::brewer.pal(8, "Dark2")) {
   targetFit <- as.data.frame(t(targetFit$coef))
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
@@ -235,7 +235,7 @@ target_prep <- function(targetFit, type, col = intermediate::CCcolors) {
          mediator = dplyr::mutate(out, value = (.data$value - min(.data$value)) /
                                     diff(range(.data$value))))
 }
-allele_prep <- function(x, type, col = intermediate::CCcolors) {
+allele_prep <- function(x, type, col = RColorBrewer::brewer.pal(8, "Dark2")) {
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
               alleles  = match(codes, names(x)),

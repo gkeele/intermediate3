@@ -25,7 +25,7 @@ ggplot_mediation_triad(
   centerline = NULL,
   fitline = FALSE,
   main = paste(tname, "by", mname, "and", dname),
-  colors = intermediate::CCcolors,
+  colors = seq_len(nrow(dat)),
   size = 2,
   ...
 )

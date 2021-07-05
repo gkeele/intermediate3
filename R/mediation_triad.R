@@ -139,7 +139,7 @@ ggplot_mediation_triad <- function(x,
                              tname = "target", mname = "mediator", dname = "driver",
                              centerline = NULL, fitline = FALSE,
                              main = paste(tname, "by", mname, "and", dname),
-                             colors = intermediate::CCcolors,
+                             colors = seq_len(nrow(dat)),
                              size = 2,
                              ...) {
   

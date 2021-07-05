@@ -22,7 +22,7 @@ ggplot_mediation_test(
   significant = TRUE,
   lod = FALSE,
   target_index = NULL,
-  ...
+  colors = ...
 )
 
 mediation_test(

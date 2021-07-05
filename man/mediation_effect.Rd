@@ -15,7 +15,7 @@ mediation_effect(
 
 ggplot_mediation_effect(
   object,
-  colors = intermediate::CCcolors,
+  colors = seq_len(length(udriver)),
   max_facet = 12,
   size_geom = 2,
   ...
