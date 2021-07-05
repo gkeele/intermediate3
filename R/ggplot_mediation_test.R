@@ -14,6 +14,7 @@ autoplot.mediation_test <- function(x, ...)
 #' @param significant whow signficant if \code{TRUE} (default)
 #' @param lod show as LOD plot if \code{TRUE} (default)
 #' @param target_index include vertical line at target if not \code{NULL}
+#' @param colors colors to use with targets and alleles
 #' @param ... additional parameters
 #' 
 #' @export
@@ -25,7 +26,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                significant = TRUE,
                                lod = FALSE,
                                target_index = NULL,
-                               colors = 
+                               colors = RColorBrewer::brewer.pal(8, "Dark2"),
                                ...) {
   type <- match.arg(type)
   if(is.null(local_only) | !("local" %in% names(x$best)))
@@ -171,7 +172,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
         layout = grid::grid.layout(nrow = 2)))
     
     plotfn <- function(x, type, targetCoef, layout.pos.row, ylabel = type) {
-      p <- ggplot2::ggplot(allele_prep(x, type)) +
+      p <- ggplot2::ggplot(allele_prep(x, type, col = colors)) +
         ggplot2::aes(x = -log10(.data$pvalue),
                      y = .data$value,
                      col = .data$geno,
@@ -198,7 +199,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                 layout.pos.col = 1))
     }
     
-    targetCoef <- target_prep(targetFit, "alleles")
+    targetCoef <- target_prep(targetFit, "alleles", col = colors)
     switch(type,
            alleles = {
              plotfn(x, "mediator",

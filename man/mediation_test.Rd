@@ -22,7 +22,8 @@ ggplot_mediation_test(
   significant = TRUE,
   lod = FALSE,
   target_index = NULL,
-  colors = ...
+  colors = RColorBrewer::brewer.pal(8, "Dark2"),
+  ...
 )
 
 mediation_test(
@@ -63,6 +64,8 @@ mediation_test(
 \item{lod}{show as LOD plot if \code{TRUE} (default)}
 
 \item{target_index}{include vertical line at target if not \code{NULL}}
+
+\item{colors}{colors to use with targets and alleles}
 
 \item{target}{vector or 1-column matrix with target values}
 
