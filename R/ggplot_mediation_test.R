@@ -67,6 +67,9 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     tmp[x$pvalue > maxPvalue] <- relabel[5]
     x$triad <- factor(tmp, levels = relabel)
   }
+  if(!nrow(x))
+    stop(paste("no pvalues below", maxPvalue))
+  
   x <- dplyr::arrange(x, dplyr::desc(.data$triad))
   
   if(index_name != "index" & "index" %in% names(x)) {
@@ -122,7 +125,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                ggplot2::aes(symbol = .data$symbol,
                             position = .data$pos) +
                ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
-               ggplot2::geom_hline(yintercept = .data$unmediated,
+               ggplot2::geom_hline(yintercept = unmediated,
                                    col = "darkgrey") +
                ggplot2::xlab("-log10 of p-value") +
                ggplot2::ylab("Mediation LR")
@@ -133,7 +136,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                             x = .data$pos) +
                ggplot2::aes(symbol = .data$symbol,
                             pvalue = .data$pvalue) +
-               ggplot2::geom_hline(yintercept = .data$unmediated,
+               ggplot2::geom_hline(yintercept = unmediated,
                                    col = "darkgrey") +
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
