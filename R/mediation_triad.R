@@ -29,7 +29,9 @@
 #'                       driver = Tmem68$driver,
 #'                       covar_tar = Tmem68$covar,
 #'                       sdp = 2)
-#'                       
+#' 
+#' summary(med_triad)
+#' 
 #' ggplot_mediation_triad(med_triad, tname = "Tmem68", mname = "Nnt")
 #' 
 #' @export
@@ -122,6 +124,31 @@ triad_data <- function(target, mediator, driver,
     dat$Sex <- c("Female", "Male")[1 + dat$sex]
 
   dat
+}
+#' @param object object of class \code{mediation_triad}
+#' 
+#' @rdname mediation_triad
+#' @export
+#' 
+summary.mediation_triad <- function(object, ...) {
+    # Add fitted model line.
+    data.frame(slope = object$coef_med[object$med_name],
+               intercept = object$coef_med[object$drivers],
+               col = object$drivers,
+               row.names = object$drivers)
+  form1 <- paste(object$drivers, collapse = "+")
+  form2 <- "group"
+  if(m <- match("Sex", colnames(object$data))) {
+    form1 <- formula(paste0("target ~ 0 + Sex * mediator +", form1))
+    form2 <- formula(paste0("target ~ 0 + Sex * mediator +", form2))
+  } else {
+    form1 <- formula(paste0("target ~ 0 + mediator", form1))
+    form2 <- formula(paste0("target ~ 0 + mediator", form2))
+  }
+  dplyr::bind_rows(
+    driver = broom::tidy(lm(form2, object$data)),
+    allele = broom::tidy(lm(form1, object$data)),
+    .id = "model")
 }
 #' @param x object of class \code{mediation_triad}
 #' @param tname target name (default \code{"target"})

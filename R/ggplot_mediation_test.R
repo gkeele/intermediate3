@@ -15,6 +15,8 @@ autoplot.mediation_test <- function(x, ...)
 #' @param lod show as LOD plot if \code{TRUE} (default)
 #' @param target_index include vertical line at target if not \code{NULL}
 #' @param colors colors to use with targets and alleles
+#' @param size size of points (default 2)
+#' @param alpha symbol transparency (default 0.5)
 #' @param ... additional parameters
 #' 
 #' @export
@@ -27,6 +29,8 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                lod = FALSE,
                                target_index = NULL,
                                colors = RColorBrewer::brewer.pal(8, "Dark2"),
+                               size = 2,
+                               alpha = 0.5,
                                ...) {
   type <- match.arg(type)
   if(is.null(local_only) | !("local" %in% names(x$best)))
@@ -155,14 +159,14 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     }
     if(exists("shapes")) {
       p <- p + ggplot2::geom_point(aes(shape = .data$shape),
-                                   size = 2, alpha = 0.5) +
+                                   size = size, alpha = alpha) +
         ggplot2::scale_shape_manual(values = shapes)
       if("qtl_pos" %in% names(x)) {
         p <- p + ggplot2::aes(chr = .data$chr, qtl_pos = .data$qtl_pos)
       }
     } else {
       p <- p + 
-        ggplot2::geom_point(size = 2, alpha = 0.5)
+        ggplot2::geom_point(size = size, alpha = alpha)
     }
     
     p + 
@@ -185,7 +189,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                             ggplot2::aes(yintercept = .data$value,
                                          col = .data$geno),
                             linetype = "dashed") +
-        ggplot2::geom_point(size = 2) +
+        ggplot2::geom_point(size = size) +
         ggplot2::ylab(ylabel)
       if(type == "alleles") {
         p <- p + ggplot2::ggtitle(main) +

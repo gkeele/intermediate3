@@ -2,6 +2,7 @@
 % Please edit documentation in R/mediation_triad.R
 \name{mediation_triad}
 \alias{mediation_triad}
+\alias{summary.mediation_triad}
 \alias{ggplot_mediation_triad}
 \alias{autoplot.mediation_triad}
 \alias{plot.mediation_triad}
@@ -16,6 +17,8 @@ mediation_triad(
   fitFunction = fitDefault,
   ...
 )
+
+\method{summary}{mediation_triad}(object, ...)
 
 ggplot_mediation_triad(
   x,
@@ -49,6 +52,8 @@ ggplot_mediation_triad(
 
 \item{...}{additional arguments}
 
+\item{object}{object of class \code{mediation_triad}}
+
 \item{x}{object of class \code{mediation_triad}}
 
 \item{tname}{target name (default \code{"target"})}
@@ -66,8 +71,6 @@ ggplot_mediation_triad(
 \item{colors}{named colors to use if \code{fitline} is \code{TRUE}}
 
 \item{size}{size of text (default \code{2})}
-
-\item{object}{object of class \code{mediation_triad}}
 }
 \description{
 Triad plot. Currently relies on \code{sdp} to provide lines, but want to use
@@ -91,7 +94,9 @@ med_triad <- mediation_triad(target = target,
                       driver = Tmem68$driver,
                       covar_tar = Tmem68$covar,
                       sdp = 2)
-                      
+
+summary(med_triad)
+
 ggplot_mediation_triad(med_triad, tname = "Tmem68", mname = "Nnt")
 
 }

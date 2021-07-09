@@ -1,10 +1,13 @@
 Package: intermediate
 Type: Package
 Title: eQTl/pQTL Mediation analysis
-Version: 0.6.6
-Date: 2021-07-05
-Author: Petr Simecek, Steven Munger, Gary Churchill, Daniel Gatti <dan.gatti@jax.org>, Brian Yandell <brian.yandell@wisc.edu>
-Maintainer: Brian Yandell <brian.yandell@wisc.edu>
+Version: 0.6.7
+Date: 2021-07-09
+Authors@R: c(person("Petr Simecek"), role = "aut",
+  person("Steven Munger", role = "aut"),
+  person("Gary Churchill", role = "aut", email = "gary.churchill@jax.org"),
+  person("Daniel Gatti", role = "aut", email = "dan.gatti@jax.org"),
+  person("Brian S Yandell",role = c("aut", "cre"), email = "brian.yandell@wisc.edu"))
 Description: Search for a mediator M that would explain D->T relationship.
 Depends: R (>= 3.5.0)
 Imports: ggplot2,

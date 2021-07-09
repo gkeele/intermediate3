@@ -23,6 +23,8 @@ ggplot_mediation_test(
   lod = FALSE,
   target_index = NULL,
   colors = RColorBrewer::brewer.pal(8, "Dark2"),
+  size = 2,
+  alpha = 0.5,
   ...
 )
 
@@ -66,6 +68,10 @@ mediation_test(
 \item{target_index}{include vertical line at target if not \code{NULL}}
 
 \item{colors}{colors to use with targets and alleles}
+
+\item{size}{size of points (default 2)}
+
+\item{alpha}{symbol transparency (default 0.5)}
 
 \item{target}{vector or 1-column matrix with target values}
 
