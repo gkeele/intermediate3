@@ -70,6 +70,9 @@ ggplot_mediation_effect <- function(object,
     colors <- seq_along(udriver)
     names(colors) <- udriver
   }
+  if(is.null(names(colors))) {
+    names(colors) <- LETTERS[seq_along(colors)]
+  }
   driver_names <- names(colors)
   names(driver_names) <- udriver
   
