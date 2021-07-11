@@ -28,12 +28,39 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom rlang .data
 #' 
-#' @return List with elements:
-#' - best best fit table
-#' - test causal test results in table
-#' - driver list of driver names for target and mediator(s)
-#' - normF Frobenius norm if using both target and mediator drivers
-#' - params list of parameter settings for use by summary and plot methods
+#' @return List with elements (names could be improved):
+#' \describe{
+#'   \item{best}{best triad via causal model selection test per id
+#'   \describe{
+#'     \item{id}{identifier for mediator}
+#'     \item{symbol}{symbol for mediator, such as gene symbol (\code{symbol})}
+#'     \item{facet}{facet for mediator, such as chromosome (\code{chr})}
+#'     \item{index}{index of mediator within facet, such as position (\code{pos})}
+#'     \item{triad}{best model: one of causal, reactive, independent, undecided}
+#'     \item{pvalue}{p-value for causal model selection test}
+#'     \item{alt_test}{best alternative for model test}
+#'     \item{undecided}{p-value for best model vs undecided}
+#'     \item{LR_mediation}{LR score for target on driver adjusted by mediator}
+#'     \item{LR_mediator}{LR score for mediator on driver}
+#'     \item{LR_CMST}{LR score for causal model selection test (see test below)}
+#'     \item{df}{degrees of freedom for best test (see test below)}
+#'     \item{IC}{information criterion (see test below)}
+#'     \item{...}{optional columns from annotation}
+#'   }}
+#'   \item{test}{Four causal test results per id
+#'   \describe{
+#'     \item{id}{mediator identifier}
+#'     \item{ref_test}{reference model being tested}
+#'     \item{LR}{LR score for causal model selection test of ref_test against alt_test}
+#'     \item{df}{difference in model degrees of freedom}
+#'     \item{IC}{information criterion (determined by \code{flavor} option (default \code{"B"} for AIC, or \code{"A"} for AIC))}
+#'     \item{pvalue}{p-value to compare ref_test with alt_test}
+#'     \item{alt_test}{closest alternative for ref_test}
+#'   }}
+#'   \item{driver}{list of driver names for target and mediator(s)}
+#'   \item{normF}{Frobenius norm if using both target and mediator drivers}
+#'   \item{params}{list of parameter settings for use by summary and plot methods}
+#' }
 #' 
 #' @examples
 #' data(Tmem68)
@@ -83,7 +110,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   } else {
     scan_max <- NULL
   }
-  target_LR <- scan_max$LR
+  LR_target <- scan_max$LR
   
   test <- match.arg(test)
   testFunction <- switch(test,
@@ -102,6 +129,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   driver <- driver_blank_names(driver)
   driver_med <- driver_blank_names(driver_med)
 
+  # Return list of test, fit, fitsLR from causal model selection tests by mediator.
   result <- mediation_test_internal(target, mediator, driver, annotation,
                                     covar_tar, covar_med,
                                     driver_med, intcovar,
@@ -111,6 +139,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   if(is.null(result))
     return(NULL)
     
+  # Transpose result. Make sure elemnts of result are data frames.
   result <-
     purrr::map(
       purrr::transpose(result),
@@ -129,6 +158,8 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   if(!is.null(result$normF) && all(is.na(result$normF)))
     result$normF <- NULL
   
+  # Driver names are names of the drivers if separate by mediator.
+  # This only arises if there are separate drivers for target and mediator(s).
   result$driver_names <- {
     if(is.null(driver_med)) NULL
     else {
@@ -137,6 +168,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     }
   }
   
+  # Driver levels are levels of the driver.
   result$driver_levels <- {
     if(!is.null(driver))
       colnames(driver)
@@ -149,40 +181,52 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     }
   }
   
+  # Fix up annotation so it has id column and renames LR to LR_annot if present.
+  # Note that LR_annotation should agree with LR_mediator
   if(is.null(annotation))
     annotation <- data.frame(id = colnames(mediator),
                              stringsAsFactors = FALSE)
+  if("LR" %in% names(annotation)) {
+    annotation <- dplyr::rename(annotation, LR_annotation = "LR")
+  }
   
   decided <- dplyr::filter(
     result$test,
-    .data$model_test != "undecided")
+    .data$ref_test != "undecided")
   
+  # Best mediator causal model among causal, reactive, independent.
+  # Separately report undecided p-value (as "undecided" column).
   result$best <-
     dplyr::select(
       dplyr::arrange(
         dplyr::rename(
           dplyr::left_join(
+            # Join causal model tests ($test) with mediation and mediator LR ($fit).
+            # result$test information
             dplyr::left_join(
-              # join undecided with other tests
+              # join undecided pvalue with other tests as its own column ("undecided").
               dplyr::rename(
                 dplyr::select(
                   dplyr::filter(
                     result$test,
-                    .data$model_test == "undecided"),
+                    .data$ref_test == "undecided"),
                   .data$id, .data$pvalue),
                 undecided = "pvalue"),
               dplyr::left_join(
-                # Join best test with annotation.
+                # Join best test among decided with annotation.
                 dplyr::bind_rows(
                   purrr::map(
                     split(
                       decided,
                       decided$id),
+                      # Pick best of decided models.
+                      # In case of ties, pick in order causal, reactive, independent.
                       function(x) x[which.min(x$pvalue)[1],, drop = FALSE])),
                 annotation,
                by = "id"),
               by = "id"),
-            # Join with mediation and mediator LR.
+            # result$fit information
+            # Mediation and mediator LR information from result$fit.
             dplyr::rename(
               tidyr::pivot_wider(
                 dplyr::filter(
@@ -191,20 +235,22 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                     .data$id, .data$response, .data$LR),
                   .data$response %in% c("mediation", "mediator")),
                 names_from = "response", values_from = "LR"),
-              LRmed = "mediator"),
+              LR_mediation = "mediation", # LR for target on driver given mediator
+              LR_mediator = "mediator"), # LR for mediator on driver
             by = "id"),
-          triad = "model_test"),
+          LR_CMST = "LR",
+          triad = "ref_test"),
         .data$pvalue),
       .data$id, 
       dplyr::matches("symbol"),
       dplyr::matches(facet_name),
       dplyr::matches(index_name),
-      .data$triad, .data$pvalue, .data$alt,
-      .data$undecided, .data$mediation, .data$LRmed, 
+      .data$triad, .data$pvalue, .data$alt_test,
+      .data$undecided, .data$LR_mediation, .data$LR_mediator, 
       dplyr::everything())
   
   result$params <-
-    list(target_LR = target_LR,
+    list(LR_target = LR_target,
          target_name = colnames(target),
          facet_name = facet_name,
          index_name = index_name,
@@ -311,11 +357,12 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
 #' @rdname mediation_test
 #' 
 subset.mediation_test <- function(x, not_type, ...) {
-  attrc <- class(x)
-  x$best <- dplyr::filter(x$best, 
-                          .data$biotype != not_type)
-  class(x) <- attrc
-  
+  if("biotype" %in% names(x$best)) {
+    attrc <- class(x)
+    x$best <- dplyr::filter(x$best, 
+                            .data$biotype != not_type)
+    class(x) <- attrc
+  }
   x
 }
 #' @param object object of class \code{mediation_test}
@@ -328,19 +375,18 @@ summary.mediation_test <- function(object, ..., lod = FALSE) {
       dplyr::arrange(
         object$best,
         pmin(.data$pvalue, .data$undecided), .data$id),
-      mediation = .data$mediation,
       pvalue = signif(.data$pvalue, 3),
-      mediation = signif(.data$mediation, 3),
-      LRmed = signif(.data$LRmed, 3))
+      LR_mediation = signif(.data$LR_mediation, 3),
+      LR_mediator = signif(.data$LR_mediator, 3))
 
   if(lod) {
     out <- 
       dplyr::rename(
         dplyr::mutate(
           out,
-          mediation = .data$mediation / log(10),
-          LRmed = .data$LRmed / log(10)),
-        lodMediator = "LRmed")
+          mediation = .data$LR_mediation / log(10),
+          LR_mediator = .data$LR_mediator / log(10)),
+        lod_mediator = "LR_mediator")
   }
   
   dplyr::arrange(out, .data$pvalue)

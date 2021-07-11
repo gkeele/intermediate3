@@ -17,6 +17,7 @@ autoplot.mediation_test <- function(x, ...)
 #' @param colors colors to use with targets and alleles
 #' @param size size of points (default 2)
 #' @param alpha symbol transparency (default 0.5)
+#' @param show show facets by triad model or difference (default \code{"facets"})
 #' @param ... additional parameters
 #' 
 #' @export
@@ -31,7 +32,13 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                colors = RColorBrewer::brewer.pal(8, "Dark2"),
                                size = 2,
                                alpha = 0.5,
+                               show = c("facets","difference"),
                                ...) {
+  
+  show <- match.arg(show)
+  if(show == "difference") {
+    return(ggplot_mediation_test_diff(x, ...))
+  }
   type <- match.arg(type)
   if(is.null(local_only) | !("local" %in% names(x$best)))
     local_only <- FALSE
@@ -39,7 +46,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     significant <- TRUE
   
   params <- x$params
-  unmediated <- params$target_LR
+  unmediated <- params$LR_target
   index_name <- params$index_name
   
   targetFit <- x$targetFit
@@ -47,7 +54,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
   
   if(lod) {
     unmediated <- unmediated / log(10)
-    x$mediation <- x$mediation / log(10)
+    x$LR_mediation <- x$LR_mediation / log(10)
   }
   
   if(!("symbol" %in% names(x)))
@@ -113,7 +120,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                ggplot2::aes(x = .data$pos,
                             y = -log10(.data$pvalue)) +
                ggplot2::aes(symbol = .data$symbol,
-                            mediation = .data$mediation) +
+                            LR_mediation = .data$LR_mediation) +
                ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
                ggplot2::ylab("-log10 of p-value")
@@ -124,7 +131,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
            },
            pvalue_LR = {
              p <- ggplot2::ggplot(x) +
-               ggplot2::aes(y = .data$mediation,
+               ggplot2::aes(y = .data$LR_mediation,
                             x = -log10(.data$pvalue)) +
                ggplot2::aes(symbol = .data$symbol,
                             position = .data$pos) +
@@ -132,11 +139,11 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                ggplot2::geom_hline(yintercept = unmediated,
                                    col = "darkgrey") +
                ggplot2::xlab("-log10 of p-value") +
-               ggplot2::ylab("Mediation LR")
+               ggplot2::ylab("LR for Mediation")
            },
            pos_LR = {
              p <- ggplot2::ggplot(x) + 
-               ggplot2::aes(y = .data$mediation,
+               ggplot2::aes(y = .data$LR_mediation,
                             x = .data$pos) +
                ggplot2::aes(symbol = .data$symbol,
                             pvalue = .data$pvalue) +
@@ -144,7 +151,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                    col = "darkgrey") +
                ggplot2::facet_grid(~triad, scales = "free_x") +
                ggplot2::xlab("Position (Mbp)") +
-               ggplot2::ylab("Mediation LR")
+               ggplot2::ylab("LR for Mediation")
                ggplot2::scale_color_manual(values = cols)
              if(!is.null(target_index))
                p <- p +
@@ -269,4 +276,24 @@ allele_prep <- function(x, type, col = RColorBrewer::brewer.pal(8, "Dark2")) {
   dplyr::arrange(
     dplyr::ungroup(out),
     .data$pvalue)
+}
+ggplot_mediation_test_diff <- function(x, lod = FALSE, ...) {
+  dat <- x$best
+  dat$LR_target <- x$params$LR_target
+  
+  if(lod) {
+    dat <- dplyr::mutate(
+      dat,
+      LR_target = .data$LR_target / log(10),
+      LR_mediation = .data$LR_mediation / log(10))
+    lr_type <- "LOD"
+  } else {
+    lr_type <- "LR"
+  }
+  
+  ggplot2::ggplot(dplyr::filter(dat, .data$pvalue <= 0.05)) +
+    ggplot2::aes(.data$LR_target - .data$LR_mediation, -log10(.data$pvalue),
+                 col = .data$triad, symbol = .data$symbol) +
+    ggplot2::geom_point(alpha = 1, size = 3) +
+    ggplot2::xlab(paste(lr_type, "target vs mediation"))
 }

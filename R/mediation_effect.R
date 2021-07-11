@@ -7,6 +7,7 @@
 #' @param driver_levels levels of driver
 #' 
 #' @importFrom tidyr pivot_longer
+#' 
 #' @export
 #' 
 #' @examples
@@ -62,16 +63,24 @@ mediation_effect <- function(test_object,
 #' @export
 #' @rdname mediation_effect
 ggplot_mediation_effect <- function(object,
-                              colors = seq_len(length(udriver)),
+                              colors = colors_default,
                               max_facet = 12,
                               size_geom = 2, ...) {
-  udriver <- unique(object$level)
+  # Levels are used for color, but user might change level names by specifying
+  # names to the colors. If names for colors not provided, then use unique levels.
+  udriver <- sort(unique(object$level))
+  
+  # Default colors if not provided.
+  colors_default = seq_len(length(udriver))
+
+  # Make sure colors have same length as udriver.
+  # Repeat if necessary, but then provide names as udriver.
   if(length(colors) != length(udriver)) {
-    colors <- seq_along(udriver)
+    colors <- rep(colors, length = length(udriver))
     names(colors) <- udriver
   }
   if(is.null(names(colors))) {
-    names(colors) <- LETTERS[seq_along(colors)]
+    names(colors) <- udriver
   }
   driver_names <- names(colors)
   names(driver_names) <- udriver
@@ -85,7 +94,7 @@ ggplot_mediation_effect <- function(object,
             .data$pvalue),
           mediator = paste0(.data$mediator, " (", signif(.data$pvalue, 2), " ", .data$triad, ")")),
         .data$mediator %in% unique(.data$mediator)[seq_len(max_facet)]),
-      level = factor(driver_names[.data$level], names(colors)),
+      level = factor(driver_names[.data$level], driver_names),
       mediator = factor(.data$mediator, unique(.data$mediator)))
   
   tmpfn <- function(object) {

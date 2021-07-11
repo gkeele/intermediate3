@@ -84,7 +84,7 @@ med_LR <- med_LR[order(med_LR$col, -med_LR$LR),]
 ```
 
 ```{r}
-ggplot2::autoplot(med_LR)
+ggplot2::autoplot(med_LR, size = 3)
 ```
 
 ## Mediation scan of target adjusted by mediators
@@ -125,21 +125,17 @@ med_test <- mediation_test(target = target,
                       annotation = med_LR,
                       covar_tar = covar,
                       covar_med = covar)
-(sum_med <- dplyr::arrange(summary(med_test), pvalue))
+summary(med_test)
 ```
 
 ```{r}
-ggplot2::autoplot(med_test)
+ggplot2::autoplot(med_test, size = 3)
 ```
 
+Show difference between target and mediation by triad.
+
 ```{r}
-dat <- med_test$best
-dat$LR_tar <- med_test$params$target_LR / log(10)
-dat$LR_med <- dat$mediation / log(10)
-ggplot2::ggplot(dplyr::filter(dat, pvalue <= 0.05)) +
-  ggplot2::aes(LR_tar - LR_med, -log10(pvalue),
-               col = triad, symbol = symbol) +
-  ggplot2::geom_point(alpha = 0.5, size = 2)
+ggplot2::autoplot(med_test, show = "difference")
 ```
 
 ## Driver effects

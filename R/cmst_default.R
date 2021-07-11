@@ -69,14 +69,15 @@ cmst_default <- function(object, driver, target,
       dplyr::mutate(
         dplyr::rename(
           pvalues,
-          model_test = "ref",
+          ref_test = "ref",
+          alt_test = "alt",
           pvalue = "pv"),
-        alt = factor(.data$alt, .data$model_test),
-        model_test = factor(.data$model_test, .data$model_test),
+        alt_test = factor(.data$alt_test, .data$ref_test),
+        ref_test = factor(.data$ref_test, .data$ref_test),
         LR = models$LR,
         df = models$df,
         IC = .data$LR - .data$df * penalty(n_ind, flavor) / 2),
-      .data$model_test, .data$LR, .data$df, .data$IC, .data$pvalue, .data$alt)
+      .data$ref_test, .data$LR, .data$df, .data$IC, .data$pvalue, .data$alt_test)
 
   # target and mediator fits
   fit <- apply(fits$LR * combos[,5:7], 2, sum)

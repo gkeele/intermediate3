@@ -25,6 +25,7 @@ ggplot_mediation_test(
   colors = RColorBrewer::brewer.pal(8, "Dark2"),
   size = 2,
   alpha = 0.5,
+  show = c("facets", "difference"),
   ...
 )
 
@@ -73,6 +74,8 @@ mediation_test(
 
 \item{alpha}{symbol transparency (default 0.5)}
 
+\item{show}{show facets by triad model or difference (default \code{"facets"})}
+
 \item{target}{vector or 1-column matrix with target values}
 
 \item{mediator}{matrix of mediators}
@@ -102,12 +105,39 @@ mediation_test(
 \item{object}{object of class \code{mediation_test}}
 }
 \value{
-List with elements:
-- best best fit table
-- test causal test results in table
-- driver list of driver names for target and mediator(s)
-- normF Frobenius norm if using both target and mediator drivers
-- params list of parameter settings for use by summary and plot methods
+List with elements (names could be improved):
+\describe{
+  \item{best}{best triad via causal model selection test per id
+  \describe{
+    \item{id}{identifier for mediator}
+    \item{symbol}{symbol for mediator, such as gene symbol (\code{symbol})}
+    \item{facet}{facet for mediator, such as chromosome (\code{chr})}
+    \item{index}{index of mediator within facet, such as position (\code{pos})}
+    \item{triad}{best model: one of causal, reactive, independent, undecided}
+    \item{pvalue}{p-value for causal model selection test}
+    \item{alt_test}{best alternative for model test}
+    \item{undecided}{p-value for best model vs undecided}
+    \item{LR_mediation}{LR score for target on driver adjusted by mediator}
+    \item{LR_mediator}{LR score for mediator on driver}
+    \item{LR_CMST}{LR score for causal model selection test (see test below)}
+    \item{df}{degrees of freedom for best test (see test below)}
+    \item{IC}{information criterion (see test below)}
+    \item{...}{optional columns from annotation}
+  }}
+  \item{test}{Four causal test results per id
+  \describe{
+    \item{id}{mediator identifier}
+    \item{ref_test}{reference model being tested}
+    \item{LR}{LR score for causal model selection test of ref_test against alt_test}
+    \item{df}{difference in model degrees of freedom}
+    \item{IC}{information criterion (determined by \code{flavor} option (default \code{"B"} for AIC, or \code{"A"} for AIC))}
+    \item{pvalue}{p-value to compare ref_test with alt_test}
+    \item{alt_test}{closest alternative for ref_test}
+  }}
+  \item{driver}{list of driver names for target and mediator(s)}
+  \item{normF}{Frobenius norm if using both target and mediator drivers}
+  \item{params}{list of parameter settings for use by summary and plot methods}
+}
 }
 \description{
 Develop mediation models from driver, target and mediator

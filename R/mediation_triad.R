@@ -39,6 +39,8 @@
 #' @importFrom stringr str_split
 #' @importFrom ggplot2 aes autoplot facet_wrap geom_hline geom_smooth 
 #' geom_text ggplot ggtitle scale_color_discrete xlab ylab
+#' @importFrom broom tidy
+#' @importFrom stats lm
 #' 
 mediation_triad <- function(target, mediator, driver,
                         covar_tar = NULL, covar_med = NULL,
@@ -131,23 +133,17 @@ triad_data <- function(target, mediator, driver,
 #' @export
 #' 
 summary.mediation_triad <- function(object, ...) {
-    # Add fitted model line.
-    data.frame(slope = object$coef_med[object$med_name],
-               intercept = object$coef_med[object$drivers],
-               col = object$drivers,
-               row.names = object$drivers)
-  form1 <- paste(object$drivers, collapse = "+")
-  form2 <- "group"
-  if(m <- match("Sex", colnames(object$data))) {
-    form1 <- formula(paste0("target ~ 0 + Sex * mediator +", form1))
-    form2 <- formula(paste0("target ~ 0 + Sex * mediator +", form2))
-  } else {
-    form1 <- formula(paste0("target ~ 0 + mediator", form1))
-    form2 <- formula(paste0("target ~ 0 + mediator", form2))
+  lm_tidy <- function(object, driver) {
+    form <- formula(paste("target ~ 0 + mediator",
+      ifelse(match("Sex", colnames(object$data), nomatch = 0),
+             "* Sex +",
+             "+"),
+      driver))
+    broom::tidy(stats::lm(form, object$data))
   }
   dplyr::bind_rows(
-    driver = broom::tidy(lm(form2, object$data)),
-    allele = broom::tidy(lm(form1, object$data)),
+    driver = lm_tidy(object, "group"),
+    allele = lm_tidy(object, paste(object$drivers, collapse = "+")),
     .id = "model")
 }
 #' @param x object of class \code{mediation_triad}
