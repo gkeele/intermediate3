@@ -103,9 +103,10 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     if(all(c("local","qtl_ct") %in% names(x))) {
       # Set up plot symbol.
       shapes <- c(17,16,2,1)
-      names(shapes) <- c("distal", "local", "distal_info", "local_info")
+      names(shapes) <- c("distal", "local", "distal_mult", "local_mult")
       x <- dplyr::mutate(x,
                          shape = names(shapes)[1 + .data$local + 2 * (.data$qtl_ct > 1)])
+      shapes <- shapes[names(shapes) %in% x$shape]
     }
   }
 
