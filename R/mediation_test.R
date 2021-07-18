@@ -268,10 +268,6 @@ mediation_test_internal <- function(target, mediator, driver, annotation,
                                     cmstfn = cmst_default,
                                     ...) {
                                     
-  # Make sure covariates are numeric
-  covar_tar <- covar_df_mx(covar_tar)
-  intcovar <- covar_df_mx(intcovar)
-  
   use_1_driver <- is.null(annotation$driver_names) | is.null(driver_med)
   if(use_1_driver & !is.null(driver_med))
     driver_med <- NULL

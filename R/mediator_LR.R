@@ -43,9 +43,10 @@ mediator_LR <- function(mediator,
 
   # Make sure covariates are numeric
   covar_med <- covar_df_mx(covar_med)
+  intcovar <- covar_df_mx(intcovar)
   
   # Get common data.
-  commons <- common_data(, mediator, driver,, covar_med, intcovar = intcovar)
+  commons <- common_data(NULL, mediator, driver, NULL, covar_med, intcovar = intcovar)
   if(is.null(commons))
     return(NULL)
   

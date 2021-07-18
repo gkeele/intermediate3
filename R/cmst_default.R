@@ -23,11 +23,6 @@ cmst_default <- function(object, driver, target,
   colnames(mediator) <- "mediator"
   rownames(mediator) <- rownames(driver)
   
-  # Make sure covariates are numeric
-  covar_med <- covar_df_mx(covar_med)
-  covar_tar <- covar_df_mx(covar_tar)
-  intcovar <- covar_df_mx(intcovar)
-  
   # Fit models
   fits <- med_fits(driver, target, mediator, fitFunction,
                    covar_tar, covar_med, driver_med,

@@ -21,6 +21,11 @@ med_fits <- function(driver, target, mediator, fitFunction,
     intcovar <- commons$intcovar
   }
   
+  # Make sure covariates are numeric
+  covar_med <- covar_df_mx(covar_med)
+  covar_tar <- covar_df_mx(covar_tar)
+  intcovar <- covar_df_mx(intcovar)
+  
   if(is.null(driver_med)) {
     driver_med <- driver
     normF <- c(target = NA, mediator = NA)

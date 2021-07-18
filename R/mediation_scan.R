@@ -34,9 +34,12 @@
 #'                       annotation = Tmem68$annotation,
 #'                       covar = Tmem68$covar)
 #'                       
+#' summary(med_scan)
+#' 
 #' ggplot_mediation_scan(med_scan)
 #' 
 #' @export
+#' @importFrom purrr map transpose
 
 mediation_scan <- function(target, 
                            mediator, 
@@ -125,7 +128,6 @@ mediation_scan <- function(target,
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
 }
-#' @param x object of class \code{mediation_scan}
 #' @param facets names of facets to subset
 #' @param chrs chromosome names to subset
 #' 
@@ -143,4 +145,24 @@ subset.mediation_scan <- function(x, facets=NULL, chrs = NULL, ...) {
     x <- modify_object(x, new_x)
   }
   x
+}
+#' @export
+#' @rdname mediation_scan
+#' 
+#' @param n maximum number of mediators to show (default 10)
+#' @param minimal show only symbol, facet_name, index_name and LR if \code{TRUE}
+#' 
+#' @importFrom dplyr arrange select
+#' @importFrom rlang .data
+#' @importFrom utils head
+#' 
+summary.mediation_scan <- function(object, n = 10, minimal = FALSE, ...) {
+  if(minimal) {
+    facet_name <- attr(object, "facet_name")
+    index_name <- attr(object, "index_name")
+    cols <- c("symbol", facet_name, index_name, "LR")
+    m <- match(cols, names(object), nomatch = 0)
+    object <- object[, m, drop = FALSE]
+  }
+  utils::head(dplyr::arrange(object, .data$LR), n = n)
 }

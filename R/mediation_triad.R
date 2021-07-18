@@ -47,10 +47,6 @@ mediation_triad <- function(target, mediator, driver,
                         fitFunction = fitDefault,
                         ...) {
   
-  # Make sure covariates are numeric
-  covar_tar <- covar_df_mx(covar_tar)
-  covar_med <- covar_df_mx(covar_med)
-  
   # Convert any blank driver names to V1, V2, ...
   driver <- driver_blank_names(driver)
 
@@ -63,7 +59,7 @@ mediation_triad <- function(target, mediator, driver,
   
   # Fit target and target|mediator models
   fit <- med_fits(driver, target, mediator,
-                  fitFunction, covar_tar, covar_med)
+                  fitFunction, covar_tar, covar_med, ...)
   
   dat <- triad_data(target, mediator, driver, 
                     covar_tar, covar_med, ...)

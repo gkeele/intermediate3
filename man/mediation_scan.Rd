@@ -6,6 +6,7 @@
 \alias{plot.mediation_scan}
 \alias{mediation_scan}
 \alias{subset.mediation_scan}
+\alias{summary.mediation_scan}
 \title{Plot of conditioned LR scores against index}
 \usage{
 ggplot_mediation_scan(
@@ -38,9 +39,11 @@ mediation_scan(
 )
 
 \method{subset}{mediation_scan}(x, facets = NULL, chrs = NULL, ...)
+
+\method{summary}{mediation_scan}(object, n = 10, minimal = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{mediation_scan}}
+\item{x, object}{mediation object}
 
 \item{col}{color of points (default "firebrick4")}
 
@@ -79,6 +82,10 @@ mediation_scan(
 \item{facets}{names of facets to subset}
 
 \item{chrs}{chromosome names to subset}
+
+\item{n}{maximum number of mediators to show (default 10)}
+
+\item{minimal}{show only symbol, facet_name, index_name and LR if \code{TRUE}}
 }
 \description{
 Plot LR statistics calculated by [mediation_scan()] against index
@@ -103,6 +110,8 @@ med_scan <- mediation_scan(target = target,
                       annotation = Tmem68$annotation,
                       covar = Tmem68$covar)
                       
+summary(med_scan)
+
 ggplot_mediation_scan(med_scan)
 
 }

@@ -3,7 +3,7 @@
 #' Plot LR statistics calculated by [mediation_scan()] against index
 #' using ggplot2.
 #'
-#' @param x mediation object
+#' @param x,object mediation object
 #' @param col color of points (default "firebrick4")
 #' @param size character size (default 2)
 #' @param xlab,ylab X and Y axis label (default `index_name` and "Conditioned LR")
@@ -39,10 +39,13 @@ ggplot_mediation_scan <- function(x,
   x <- dplyr::arrange_at(x, c(facet_name, "index"))
 
   p <- ggplot2::ggplot(x) +
-    ggplot2::aes(.data$index, .data$LR, symbol = .data$symbol) +
+    ggplot2::aes(.data$index, .data$LR) +
     ggplot2::facet_grid(stats::formula(paste("~", facet_name)),
                         scales = "free_x", space = "free") +
     ggplot2::xlab(xlab)
+  if("symbol" %in% names(x)) {
+    p <- p + ggplot2::aes(symbol = .data$symbol)
+  }
 
   if(!is.null(x$col)) {
     p <- p +
