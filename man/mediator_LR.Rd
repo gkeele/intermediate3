@@ -14,6 +14,7 @@ mediator_LR(
   index_name = "pos",
   verbose = TRUE,
   fitFunction = fitDefault,
+  signif = 5 * log(10),
   ...
 )
 }
@@ -35,6 +36,8 @@ mediator_LR(
 \item{verbose}{If TRUE display information about the progress}
 
 \item{fitFunction}{function to fit models with driver, target and mediator}
+
+\item{signif}{value of LR to be significant (default `5*log(10)`)}
 
 \item{...}{additional parameters}
 }

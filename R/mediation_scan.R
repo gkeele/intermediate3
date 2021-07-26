@@ -53,17 +53,6 @@ mediation_scan <- function(target,
                            index_name = "pos",
                            verbose=TRUE, ...) {
   
-  # Make sure covariates are numeric
-  covar <- covar_df_mx(covar)
-  intcovar <- covar_df_mx(intcovar)
-  
-  # Fit model without mediation.
-  if(length(dim(driver)) == 2)
-    driver_tar <- driver
-  else
-    driver_tar <- driver[,,1]
-  loglik0 <- fitFunction(driver_tar, target, covar, intcovar, ...)$LR
-  
   # Get common data.
   commons <- common_data(target, mediator, driver, covar, intcovar = intcovar,
                          ...)
@@ -77,6 +66,13 @@ mediation_scan <- function(target,
   intcovar <- commons$intcovar
   common <- commons$common
   rm(commons)
+  
+  # Fit model without mediation.
+  if(length(dim(driver)) == 2)
+    driver_tar <- driver
+  else
+    driver_tar <- driver[,,1]
+  loglik0 <- fitFunction(driver_tar, target, covar, intcovar, ...)$LR
   
   # check input
   stopifnot(c(facet_name, index_name) %in% tolower(names(annotation)))

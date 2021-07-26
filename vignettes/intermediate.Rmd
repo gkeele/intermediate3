@@ -35,8 +35,12 @@ The manuscript ends with mathematical details of mediation.
 ## Tmem68 dataset
 
 The data come from <https://github.com/churchill-lab/intermediate>. 
-This version only contains data for chr 4 and 13, and has had the following changes
-to elements. See [package Tmem68](\href{https://github.com/byandell/Tmem68) for more details.
+This version only contains data for chr 4 and 13, and has had the following changes to elements:
+
+- `covar`: first two columns renamed to `Intercept` and `SexM`;
+- `driver`: renames from the original `qtl.geno`.
+
+See help for `Tmem68` for more details.
 
 ```{r}
 data(Tmem68)
@@ -67,20 +71,14 @@ mediators <- Tmem68$mediator
 
 ## Mediator LR
 
-First fine mediators that have significant LR. This will be used to filter traits to set of potential mediators, and provide annotaton for those mediators.
+First find mediators that have significant LR. This will be used to filter traits to a set of potential mediators, and provide annotaton for those mediators.
 
 ```{r}
 med_LR <- mediator_LR(mediator = mediators,
                         driver = driver,
                         annotation = annotation,
                         covar_med = covar)
-med_signif <- med_LR$id[med_LR$LR >= 5 * log(10)]
-# Add info column.
-med_LR$info <- paste("chr =", med_LR$chr)
-med_col <- rep(1, nrow(med_LR))
-med_col[med_LR$LR >= 5 * log(10)] <- 2
-med_LR$col <- factor(med_col)
-med_LR <- med_LR[order(med_LR$col, -med_LR$LR),]
+med_signif <- med_LR$col == "signif"
 ```
 
 ```{r}

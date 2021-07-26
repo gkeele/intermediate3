@@ -101,7 +101,11 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                           ...) {
   
   ## Need to enable different covariates for different mediators.
-
+  
+  # Get common data. **FIX THIS**
+#  commons <- common_data(target, mediator, driver, covar_tar, covar_med,
+#                         intcovar = intcovar)
+  
   if(is.null(mediator))
     return(NULL)
   

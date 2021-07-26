@@ -16,6 +16,7 @@
 #' @param index_name name of index column (default `pos`)
 #' @param verbose If TRUE display information about the progress
 #' @param fitFunction function to fit models with driver, target and mediator
+#' @param signif value of LR to be significant (default `5*log(10)`) 
 #' @param ... additional parameters
 #' 
 #' @examples
@@ -39,12 +40,9 @@ mediator_LR <- function(mediator,
                          index_name = "pos",
                          verbose=TRUE, 
                          fitFunction = fitDefault,
+                        signif = 5 * log(10),
                          ...) {
 
-  # Make sure covariates are numeric
-  covar_med <- covar_df_mx(covar_med)
-  intcovar <- covar_df_mx(intcovar)
-  
   # Get common data.
   commons <- common_data(NULL, mediator, driver, NULL, covar_med, intcovar = intcovar)
   if(is.null(commons))
@@ -89,6 +87,18 @@ mediator_LR <- function(mediator,
   output$LR <- unlist(
     purrr::map(med_pur, mapfn, driver, covar_med, intcovar,
                rownames(mediator), ...))
+  
+  # Add info column for later use.
+  output$info <- paste("chr =", output$chr)
+  
+  # Set up significance column
+  med_signif <- output$id[output$LR >= signif]
+  
+  med_col <- rep(1, nrow(output))
+  med_col[output$LR >= 5 * log(10)] <- 2
+  output$col <- c("n.s.","signif")[med_col]
+  output <- output[order(output$col, -output$LR),]
+  
   attr(output, "targetFit") <- min(output$LR)
   attr(output, "facet_name") <- facet_name
   attr(output, "index_name") <- index_name
