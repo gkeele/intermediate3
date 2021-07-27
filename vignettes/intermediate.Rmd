@@ -24,11 +24,18 @@ The process of mediation involves a `driver` that affects the `target` and a `me
 
 In many situations, there may be many possible mediators, and even many possible drivers. Some of the routines in this package help investigate these relationships:
 
-- mediator_LR: likelihood ratio driver effect on mediators
-- mediation_scan: scan target adjusted by driver and mediator(s)
+- mediator_LR: likelihood ratio of driver effect on mediators
+- mediation_scan: scan over mediators by position for mediation of driver on target
 - mediation_test: causal model selection test for mediation
-- mediation_effect: driver effects on mediators
+- mediation_effect: effect of driver on target adjusted by mediator 
 - mediation_triad: scatterplot of target on mediator by driver
+
+In this example, there is only one driver and many possible mediators.
+The driver is known to affect the target. The question is whether one or more mediators can explain away the driver effect.
+
+In other settings, there may be different drivers for different mediators,
+and those drivers may be different from the putative target driver. The routine `mediation_test` is set up to allow for this situation, using information from the `annotation` object. Basically, a mediator may have a position, such as the location of the gene associated with mRNA as in `Tmem68`, and may have a driver position. For more information, see
+package 'qtl2mediate'.
 
 The manuscript ends with mathematical details of mediation.
 
@@ -87,6 +94,8 @@ ggplot2::autoplot(med_LR, size = 3)
 
 ## Mediation scan of target adjusted by mediators
 
+Mediation scan regresses the target on driver and mediator, and indexes them by the position of the mediator. A strong mediator would drop the LR down toward 0.
+
 ```{r}
 med_scan <- mediation_scan(target = target,
                       mediator = mediators,
@@ -114,7 +123,8 @@ ggplot2::autoplot(med_scan, size = 3)
 
 ## Mediation test
 
-Causal model selection tests.
+Causal model selection tests are performed to see which of `causal`, `reactive`, or `independent` models best fits the data, using intersection-union formal testing (see Chaibub Neto et al. paper).
+A fourth model, `undecided`, is also examined. See details in the last section.
 
 ```{r}
 med_test <- mediation_test(target = target,
@@ -138,6 +148,8 @@ ggplot2::autoplot(med_test, show = "difference")
 
 ## Driver effects
 
+This routine looks at the effects of the driver on the mediator, on the target, and on the target adjusted by the mediator.
+
 ```{r}
 med_effect <- intermediate::mediation_effect(med_test, "symbol")
 ```
@@ -147,6 +159,10 @@ ggplot2::autoplot(med_effect)
 ```
 
 ## Mediation triad
+
+Mediation triads consider visually how the target and mediator are correlated. The target is regressed on the driver, directly or in reduced form (via `sdp`), and the lines are overlaid on the scatterplot of points identified by their driver value. In this situation, the driver represents the proportion of 8 genotype alleles, and it is possible to guess the allele pair per individual from this information. The `sdp` (SNP distribution pattern) reduction is a coding of the most common allele breakdown, which in this case is `sdp = 2` corresponding to the second allele against the others, or `B:ACDEFGH`.
+
+In this example, with determined driver, the `sdp` is inferred from the target. When there are multiple drivers, the goal is to find drivers with the same `sdp` pattern for target and mediator. That is, the earlier analysis corresponded to using the driver as is, which for `Tmem68` corresponds to allele frequency per sample. With 8 alleles, there are 7 d.f. in the model, making it difficult to detect subtle effects. By reducing to a good choice of `sdp`, the driver becomes only 3 values -- 0, 1, 2 or `ref`erence (0 `B`s), `het`erozygous (`B` and something else), and `alt`ernative (2 `B`s) -- and hence 2 d.f., yielding a more powerful model for mediation.
 
 ```{r}
 m <- match("Nnt", annotation$symbol)
