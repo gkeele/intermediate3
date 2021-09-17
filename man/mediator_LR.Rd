@@ -10,8 +10,7 @@ mediator_LR(
   annotation,
   covar_med = NULL,
   intcovar = NULL,
-  facet_name = "chr",
-  index_name = "pos",
+  annotation_names = c(facet = "chr", index = "pos", driver = NULL),
   verbose = TRUE,
   fitFunction = fitDefault,
   signif = 5 * log(10),
@@ -23,15 +22,13 @@ mediator_LR(
 
 \item{driver}{A matrix, haplotype probabilities at QTL we try to mediate}
 
-\item{annotation}{A data frame with mediators' annotation with columns for `facet_name` and `index_name`}
+\item{annotation}{A data frame with mediators' annotation with columns for facet and index}
 
 \item{covar_med}{A matrix with additive covariates}
 
 \item{intcovar}{A matrix of covariate interacting with driver}
 
-\item{facet_name}{name of facet column (default `chr`)}
-
-\item{index_name}{name of index column (default `pos`)}
+\item{annotation_names}{names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)}
 
 \item{verbose}{If TRUE display information about the progress}
 

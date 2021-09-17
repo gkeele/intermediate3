@@ -5,13 +5,12 @@
 #' @param target A numeric vector with gene/protein expression
 #' @param mediator A matrix, each column is one gene/protein's expression
 #' @param driver A matrix, haplotype probabilities at QTL we try to mediate
-#' @param annotation A data frame with mediators' annotation with columns `facet_name` and `index_name`
+#' @param annotation A data frame with mediators' annotation with columns for facet and index
 #' @param covar A matrix with additive covariates
 #' @param intcovar A matrix of covariate interacting with driver
 #' @param method A method to handle missing cases
 #' @param fitFunction function to fit models
-#' @param facet_name name of facet column (default `chr`)
-#' @param index_name name of index column (default `pos`)
+#' @param annotation_names names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)
 #' @param verbose If TRUE display information about the progress
 #' @param ... additional parameters
 #' 
@@ -49,8 +48,7 @@ mediation_scan <- function(target,
                            intcovar=NULL,
                            method=c("double-LR-diff", "ignore", "LR-diff"), 
                            fitFunction = fitDefault,
-                           facet_name = "chr",
-                           index_name = "pos",
+                           annotation_names = c(facet = "chr", index = "pos", driver = NULL),
                            verbose=TRUE, ...) {
   
   # Get common data.
@@ -75,7 +73,7 @@ mediation_scan <- function(target,
   loglik0 <- fitFunction(driver_tar, target, covar, intcovar, ...)$LR
   
   # check input
-  stopifnot(c(facet_name, index_name) %in% tolower(names(annotation)))
+  stopifnot(all(tolower(annotation_names) %in% tolower(names(annotation))))
   method = match.arg(method)
   
   # Match up annotation with mediators
@@ -119,8 +117,7 @@ mediation_scan <- function(target,
   # Compute Likelihood Ratio
   output$LR <- unlist(purrr::map(med_pur, mapfn, target, covar, driver, loglik0))
   attr(output, "targetFit") <- loglik0
-  attr(output, "facet_name") <- facet_name
-  attr(output, "index_name") <- index_name
+  attr(output, "annotation_names") <- annotation_names
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
 }
@@ -131,7 +128,7 @@ mediation_scan <- function(target,
 #' @rdname mediation_scan
 #' 
 subset.mediation_scan <- function(x, facets=NULL, chrs = NULL, ...) {
-  facet_name <- attr(x, "facet_name")
+  facet_name <- attr(x, "annotation_names")["facet"]
   if(!is.null(facets)) {
     new_x <- x[x[[facet_name]] %in% facets,]
     x <- modify_object(x, new_x)
@@ -146,7 +143,7 @@ subset.mediation_scan <- function(x, facets=NULL, chrs = NULL, ...) {
 #' @rdname mediation_scan
 #' 
 #' @param n maximum number of mediators to show (default 10)
-#' @param minimal show only symbol, facet_name, index_name and LR if \code{TRUE}
+#' @param minimal show only "symbol", annontation_names and "LR" if \code{TRUE}
 #' 
 #' @importFrom dplyr arrange select
 #' @importFrom rlang .data
@@ -154,9 +151,8 @@ subset.mediation_scan <- function(x, facets=NULL, chrs = NULL, ...) {
 #' 
 summary.mediation_scan <- function(object, n = 10, minimal = FALSE, ...) {
   if(minimal) {
-    facet_name <- attr(object, "facet_name")
-    index_name <- attr(object, "index_name")
-    cols <- c("symbol", facet_name, index_name, "LR")
+    annotation_names <- attr(object, "annotation_names")
+    cols <- c("symbol", annotation_names, "LR")
     m <- match(cols, names(object), nomatch = 0)
     object <- object[, m, drop = FALSE]
   }

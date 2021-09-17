@@ -115,7 +115,7 @@ autoplot.mediation_index <- function(x, ...)
 ggplot_mediation_index <- function(x, response = c("pvalue","IC"), alpha = 0.5,
                                    pattern_name = "pattern", ...) {
   response <- match.arg(response)
-  index_name <- x$params$index_name
+  index_name <- as.vector(attr(x, "annotation_names")["index"])
   
   ## Somehow index_name is not propagating through mediation_test.
   ## It seems cmst_default uses chr and pos. Fix earlier?

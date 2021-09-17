@@ -83,7 +83,7 @@ mediation_joint <- function(target, mediator, driver, annotation,
       .id = "id"),
     annotation,
     by = "id")
-  attr(out, "index_name") <- index_name
+  attr(out, "annotation_names") <- c(index = index_name)
   class(out) <- c("mediation_joint", class(out))
   
   out
@@ -137,7 +137,7 @@ autoplot.mediation_joint <- function(x, ...)
 #' @rdname mediation_joint
 ggplot_mediation_joint <- function(x, lod = FALSE,
                                    xlab = index_name, ylab = ylab_name, ...) {
-  index_name <- attr(x, "index_name")
+  index_name <- as.vector(attr(x, "annotation_names")["index"])
   if(index_name != "index" & "index" %in% names(x)) {
     # Make sure we don't clash with column named index.
     x$index <- NULL

@@ -24,8 +24,8 @@ ggplot_mediation_scan <- function(x,
                            col_target = "blue",
                            gap = 25) {
   
-  facet_name <- attr(x, "facet_name")
-  index_name <- attr(x, "index_name")
+  index_name <- as.vector(attr(x, "annotation_names")["index"])
+  facet_name <- as.vector(attr(x, "annotation_names")["facet"])
   if(index_name != "index" & "index" %in% names(x)) {
     # Make sure we don't clash with column named index.
     x$index <- NULL

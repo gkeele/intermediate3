@@ -18,6 +18,7 @@ autoplot.mediation_test <- function(x, ...)
 #' @param size size of points (default 2)
 #' @param alpha symbol transparency (default 0.5)
 #' @param show show facets by triad model or difference (default \code{"facets"})
+#' @param xlab,ylab label for axes
 #' @param ... additional parameters
 #' 
 #' @export
@@ -33,6 +34,8 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                                size = 2,
                                alpha = 0.5,
                                show = c("facets","difference"),
+                               xlab = "Position (Mbp)",
+                               ylab = "-log10 of p-value",
                                ...) {
   
   show <- match.arg(show)
@@ -47,7 +50,9 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
   
   params <- x$params
   unmediated <- params$LR_target
-  index_name <- params$index_name
+  index_name <- as.vector(attr(x, "annotation_names")["index"])
+  facet_name <- as.vector(attr(x, "annotation_names")["facet"])
+  driver_name <- as.vector(attr(x, "annotation_names")["driver"])
   
   targetFit <- x$targetFit
   x <- x$best
@@ -87,17 +92,17 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     # Make sure we don't clash with column named index.
     x$index <- NULL
   }
-  x <- dplyr::rename(x, pos = index_name)
+  x <- dplyr::rename(x, index = index_name)
   
-  # For expression, use qtl_pos if not missing.
+  # For expression, use driver_name if not missing.
   if(!type %in% c("alleles","mediator")) {
     if(local_only)
       x <- dplyr::filter(x, local)
     else {
-      if("qtl_pos" %in% names(x))
+      if(driver_name %in% names(x))
         x <- dplyr::mutate(x,
                            pos = ifelse(.data$local,
-                                        .data$pos, .data$qtl_pos))
+                                        .data$index, .data[[driver_name]]))
     }
     
     if(all(c("local","qtl_ct") %in% names(x))) {
@@ -118,13 +123,13 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
     switch(type,
            pos_pvalue = {
              p <- ggplot2::ggplot(x) +
-               ggplot2::aes(x = .data$pos,
+               ggplot2::aes(x = .data$index,
                             y = -log10(.data$pvalue)) +
                ggplot2::aes(symbol = .data$symbol,
                             LR_mediation = .data$LR_mediation) +
                ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
-               ggplot2::xlab("Position (Mbp)") +
-               ggplot2::ylab("-log10 of p-value")
+               ggplot2::xlab(xlab) +
+               ggplot2::ylab(ylab)
              if(!is.null(target_index))
                p <- p +
                  ggplot2::geom_vline(xintercept = .data$target_index,
@@ -135,7 +140,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
                ggplot2::aes(y = .data$LR_mediation,
                             x = -log10(.data$pvalue)) +
                ggplot2::aes(symbol = .data$symbol,
-                            position = .data$pos) +
+                            position = .data$index) +
                ggplot2::facet_grid(~ .data$triad, scales = "free_x") +
                ggplot2::geom_hline(yintercept = unmediated,
                                    col = "darkgrey") +
@@ -145,7 +150,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
            pos_LR = {
              p <- ggplot2::ggplot(x) + 
                ggplot2::aes(y = .data$LR_mediation,
-                            x = .data$pos) +
+                            x = .data$index) +
                ggplot2::aes(symbol = .data$symbol,
                             pvalue = .data$pvalue) +
                ggplot2::geom_hline(yintercept = unmediated,
@@ -169,8 +174,8 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
       p <- p + ggplot2::geom_point(aes(shape = .data$shape),
                                    size = size, alpha = alpha) +
         ggplot2::scale_shape_manual(values = shapes)
-      if("qtl_pos" %in% names(x)) {
-        p <- p + ggplot2::aes(chr = .data$chr, qtl_pos = .data$qtl_pos)
+      if(driver_name %in% names(x)) {
+        p <- p + ggplot2::aes(facet = .data[[facet_name]], driver = .data[[driver_name]])
       }
     } else {
       p <- p + 
@@ -187,7 +192,7 @@ ggplot_mediation_test <- function(x, type = c("pos_LR","pos_pvalue","pvalue_LR",
         layout = grid::grid.layout(nrow = 2)))
     
     plotfn <- function(x, type, targetCoef, layout.pos.row, ylabel = type) {
-      p <- ggplot2::ggplot(allele_prep(x, type, col = colors)) +
+      p <- ggplot2::ggplot(allele_prep(x, type, facet_name, driver_name, col = colors)) +
         ggplot2::aes(x = -log10(.data$pvalue),
                      y = .data$value,
                      col = .data$geno,
@@ -251,21 +256,21 @@ target_prep <- function(targetFit, type, col = RColorBrewer::brewer.pal(8, "Dark
          mediator = dplyr::mutate(out, value = (.data$value - min(.data$value)) /
                                     diff(range(.data$value))))
 }
-allele_prep <- function(x, type, col = RColorBrewer::brewer.pal(8, "Dark2")) {
+allele_prep <- function(x, type, facet_name, driver_name, col = RColorBrewer::brewer.pal(8, "Dark2")) {
   codes <- LETTERS[seq_along(col)]
   m <- switch(type,
               alleles  = match(codes, names(x)),
               mediator = match(paste(codes, "m", sep = "_"), names(x)))
   
-  col_names <- c("qtl_pos", names(col))
+  col_names <- c(driver_name, names(col))
   names(x)[m] <- col_names
   out <- dplyr::group_by(
     tidyr::pivot_longer(
       dplyr::select(
         x,
-        .data$symbol, .data$triad, .data$pvalue, .data$chr, 
+        .data$symbol, .data$triad, .data$pvalue, .data[[facet_name]], 
         dplyr::one_of(col_names)),
-      -dplyr::any_of(c("symbol", "triad", "pvalue", "chr", "qtl_pos")),
+      -dplyr::any_of(c("symbol", "triad", "pvalue", facet_name, driver_name)),
       names_to = "geno", values_to = "value"),
     .data$symbol
   )

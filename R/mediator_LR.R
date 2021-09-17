@@ -9,11 +9,10 @@
 #'
 #' @param mediator A matrix, each column is one gene/protein's expression
 #' @param driver A matrix, haplotype probabilities at QTL we try to mediate
-#' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
+#' @param annotation A data frame with mediators' annotation with columns for facet and index
 #' @param covar_med A matrix with additive covariates
 #' @param intcovar A matrix of covariate interacting with driver
-#' @param facet_name name of facet column (default `chr`)
-#' @param index_name name of index column (default `pos`)
+#' @param annotation_names names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)
 #' @param verbose If TRUE display information about the progress
 #' @param fitFunction function to fit models with driver, target and mediator
 #' @param signif value of LR to be significant (default `5*log(10)`) 
@@ -32,16 +31,15 @@
 #' @export
 
 mediator_LR <- function(mediator, 
-                         driver, 
-                         annotation, 
-                         covar_med=NULL, 
-                         intcovar = NULL,
-                         facet_name = "chr",
-                         index_name = "pos",
-                         verbose=TRUE, 
-                         fitFunction = fitDefault,
+                        driver, 
+                        annotation, 
+                        covar_med=NULL, 
+                        intcovar = NULL,
+                        annotation_names = c(facet = "chr", index = "pos", driver = NULL),
+                        verbose=TRUE, 
+                        fitFunction = fitDefault,
                         signif = 5 * log(10),
-                         ...) {
+                        ...) {
 
   # Get common data.
   commons <- common_data(NULL, mediator, driver, NULL, covar_med, intcovar = intcovar)
@@ -64,7 +62,7 @@ mediator_LR <- function(mediator,
   if(!is.null(driver)) {
     stopifnot(!any(is.na(driver)))
   }
-  stopifnot(c(facet_name, index_name) %in% tolower(names(annotation)))
+  stopifnot(tolower(annotation_names) %in% tolower(names(annotation)))
 
   # Match up annotation with mediators
   stopifnot(all(!is.na(m <- match(colnames(mediator), annotation$id))))
@@ -100,8 +98,7 @@ mediator_LR <- function(mediator,
   output <- output[order(output$col, -output$LR),]
   
   attr(output, "targetFit") <- min(output$LR)
-  attr(output, "facet_name") <- facet_name
-  attr(output, "index_name") <- index_name
+  attr(output, "annotation_names") <- annotation_names
   class(output) <- c("mediation_scan", "data.frame")
   return(output)
 }

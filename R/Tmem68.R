@@ -43,7 +43,8 @@
 #' 
 #' # Download file from Churchill Lab and load
 #' tmpfile <- tempfile()
-#' file <- paste0("https://raw.githubusercontent.com/churchill-lab/intermediate/master/data/Tmem68.rda")
+#' file <- paste0(file.path("https://raw.githubusercontent.com/churchill-lab",
+#'                          "intermediate/master/data/Tmem68.rda"))
 #' download.file(file, tmpfile)
 #' load(tmpfile)
 #' unlink(tmpfile)

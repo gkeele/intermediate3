@@ -26,6 +26,8 @@ ggplot_mediation_test(
   size = 2,
   alpha = 0.5,
   show = c("facets", "difference"),
+  xlab = "Position (Mbp)",
+  ylab = "-log10 of p-value",
   ...
 )
 
@@ -40,8 +42,7 @@ mediation_test(
   intcovar = NULL,
   test = c("wilcoxon", "binomial", "joint", "normal"),
   fitFunction = fitDefault,
-  facet_name = "chr",
-  index_name = "pos",
+  annotation_names = c(facet = "chr", index = "pos", driver = "qtl_pos"),
   ...
 )
 
@@ -76,13 +77,15 @@ mediation_test(
 
 \item{show}{show facets by triad model or difference (default \code{"facets"})}
 
+\item{xlab, ylab}{label for axes}
+
 \item{target}{vector or 1-column matrix with target values}
 
 \item{mediator}{matrix of mediators}
 
 \item{driver}{vector or matrix with driver values}
 
-\item{annotation}{A data frame with mediators' annotation with columns for `facet_name` and `index_name`}
+\item{annotation}{A data frame with mediators' annotation with columns for facet and index}
 
 \item{covar_tar}{optional covariates for target}
 
@@ -96,9 +99,7 @@ mediation_test(
 
 \item{fitFunction}{function to fit models with driver, target and mediator}
 
-\item{facet_name}{name of facet column (default `chr`)}
-
-\item{index_name}{name of index column (default `pos`)}
+\item{annotation_names}{names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)}
 
 \item{not_type}{biotypes to not include}
 

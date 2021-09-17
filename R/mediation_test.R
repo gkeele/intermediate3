@@ -5,15 +5,14 @@
 #' @param target vector or 1-column matrix with target values
 #' @param mediator matrix of mediators
 #' @param driver vector or matrix with driver values
-#' @param annotation A data frame with mediators' annotation with columns for `facet_name` and `index_name`
+#' @param annotation A data frame with mediators' annotation with columns for facet and index
 #' @param covar_tar optional covariates for target
 #' @param covar_med optional covariates for mediator
 #' @param driver_med optional driver matrix for mediators
 #' @param intcovar optional interactive covariates (assumed same for `mediator` and `target`)
 #' @param test Type of CMST test.
 #' @param fitFunction function to fit models with driver, target and mediator
-#' @param facet_name name of facet column (default `chr`)
-#' @param index_name name of index column (default `pos`)
+#' @param annotation_names names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)
 #' @param ... additional parameters
 #'
 #' @importFrom purrr map transpose
@@ -96,8 +95,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                           driver_med = NULL, intcovar = NULL,
                           test = c("wilcoxon","binomial","joint","normal"),
                           fitFunction = fitDefault,
-                          facet_name = "chr",
-                          index_name = "pos",
+                          annotation_names = c(facet = "chr", index = "pos", driver = "qtl_pos"),
                           ...) {
   
   ## Need to enable different covariates for different mediators.
@@ -142,6 +140,9 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
                                     ...)
   if(is.null(result))
     return(NULL)
+  
+  facet_name <- as.vector(annotation_names["facet"])
+  index_name <- as.vector(annotation_names["index"])
     
   # Transpose result. Make sure elemnts of result are data frames.
   result <-
@@ -256,11 +257,10 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
   result$params <-
     list(LR_target = LR_target,
          target_name = colnames(target),
-         facet_name = facet_name,
-         index_name = index_name,
          test = test)
   result$targetFit <- scan_max
   
+  attr(result, "annotation_names") <- annotation_names
   class(result) <- c("mediation_test", class(result))
   result
 }

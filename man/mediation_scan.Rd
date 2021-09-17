@@ -32,8 +32,7 @@ mediation_scan(
   intcovar = NULL,
   method = c("double-LR-diff", "ignore", "LR-diff"),
   fitFunction = fitDefault,
-  facet_name = "chr",
-  index_name = "pos",
+  annotation_names = c(facet = "chr", index = "pos", driver = NULL),
   verbose = TRUE,
   ...
 )
@@ -63,7 +62,7 @@ mediation_scan(
 
 \item{driver}{A matrix, haplotype probabilities at QTL we try to mediate}
 
-\item{annotation}{A data frame with mediators' annotation with columns `facet_name` and `index_name`}
+\item{annotation}{A data frame with mediators' annotation with columns for facet and index}
 
 \item{covar}{A matrix with additive covariates}
 
@@ -73,9 +72,7 @@ mediation_scan(
 
 \item{fitFunction}{function to fit models}
 
-\item{facet_name}{name of facet column (default `chr`)}
-
-\item{index_name}{name of index column (default `pos`)}
+\item{annotation_names}{names in annotation of columns for facet, index and, optionally, driver (default `c(facet = "chr", index = "pos", driver = NULL)`)}
 
 \item{verbose}{If TRUE display information about the progress}
 
@@ -85,7 +82,7 @@ mediation_scan(
 
 \item{n}{maximum number of mediators to show (default 10)}
 
-\item{minimal}{show only symbol, facet_name, index_name and LR if \code{TRUE}}
+\item{minimal}{show only "symbol", annontation_names and "LR" if \code{TRUE}}
 }
 \description{
 Plot LR statistics calculated by [mediation_scan()] against index
