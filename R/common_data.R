@@ -10,9 +10,9 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
   mediator <- convert_matrix(mediator, "M", rownames(target))
   
   # Make sure covariates are numeric
-  covar_med <- covar_df_mx(covar_med)
-  covar_tar <- covar_df_mx(covar_tar)
-  intcovar <- covar_df_mx(intcovar)
+  covar_med <- covar_matrix(covar_med)
+  covar_tar <- covar_matrix(covar_tar)
+  intcovar <- covar_matrix(intcovar)
   
   covar_tar <- convert_matrix(covar_tar,
                               paste0("covT", seq_len(ncol(covar_tar))), 
@@ -72,8 +72,13 @@ common_data <- function(target = NULL, mediator = NULL, driver = NULL,
     covar_tar <- covar_tar[ind2keep,, drop = FALSE]
   if(!is.null(covar_med))
     covar_med <- covar_med[ind2keep,, drop = FALSE]
-  if(!is.null(driver_med))
-    driver_med <- driver_med[ind2keep,,, drop = FALSE]
+  if(!is.null(driver_med)) {
+    if(length(dim(driver_med)) == 3) { # separate by mediator
+      driver_med <- driver_med[ind2keep,,, drop = FALSE]
+    } else { # created in med_fits as matrix
+      driver_med <- driver_med[ind2keep,, drop = FALSE]
+    }
+  }
   if(!is.null(intcovar))
     intcovar <- intcovar[ind2keep,, drop = FALSE]
   

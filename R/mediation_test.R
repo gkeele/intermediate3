@@ -108,7 +108,7 @@ mediation_test <- function(target, mediator, driver, annotation = NULL,
     return(NULL)
   
   if(!is.null(driver)) {
-    scan_max <- fitFunction(driver, target, covar_df_mx(covar_tar), ...)
+    scan_max <- fitFunction(driver, target, covar_matrix(covar_tar), ...)
   } else {
     scan_max <- NULL
   }

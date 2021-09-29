@@ -1,7 +1,7 @@
-# From qtl2shiny::covar_df_mx
+# From qtl2mediate::covar_matrix
 #' @importFrom stats formula model.matrix
 #' 
-covar_df_mx <- function(addcovar) {
+covar_matrix <- function(addcovar) {
   if(is.null(addcovar))
     return(NULL)
   if(is.data.frame(addcovar)) {

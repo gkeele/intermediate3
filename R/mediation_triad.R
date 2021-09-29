@@ -49,6 +49,11 @@ mediation_triad <- function(target, mediator, driver,
   
   # Convert any blank driver names to V1, V2, ...
   driver <- driver_blank_names(driver)
+  
+  # Only allow one mediator for triad.
+  if(ncol(mediator) > 1) {
+    mediator <- mediator[,1, drop = FALSE]
+  }
 
   # Would like to have option to have line per haplo.
   # But that requires some regression style approach, such as dividing up data

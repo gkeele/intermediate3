@@ -30,7 +30,9 @@ fitDefault <- function(driver,
                   intcovar=NULL, weights=NULL,
                   ...) {
   
-  no.na <- !is.na(target)
+  no.na <- apply(as.matrix(target), 1, function(x) !any(is.na(x)))
+  if(!is.null(driver))
+    no.na <- no.na & apply(driver, 1, function(x) !any(is.na(x)))
   if(!is.null(addcovar))
     no.na <- no.na & apply(addcovar, 1, function(x) !any(is.na(x)))
   driver <- driver[no.na,]
@@ -63,8 +65,9 @@ fitDefault_internal <- function(driver,
                        tol = 1e-16) {
   
   # Construct design matrix X
-  if(is.null(driver))
-    driver <- matrix(1, length(target), 1)
+  if(is.null(driver)) {
+    driver <- matrix(1, nrow(as.matrix(target)), 1)
+  }
   
   # Form model matrix from additive covariates.
   if(!is.null(addcovar)) {

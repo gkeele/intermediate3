@@ -8,19 +8,6 @@ med_fits <- function(driver, target, mediator, fitFunction,
                      common = FALSE,
                      ...) {
   
-  # Need to look where common_data is found to adjust.
-  if(!common) {
-    commons <- common_data(target, mediator, driver,
-                           covar_tar, covar_med, driver_med, intcovar)
-    driver <- commons$driver
-    target <- commons$target
-    mediator <- commons$mediator
-    covar_tar <- commons$covar_tar
-    covar_med <- commons$covar_med
-    driver_med <- commons$driver_med
-    intcovar <- commons$intcovar
-  }
-  
   if(is.null(driver_med)) {
     driver_med <- driver
     normF <- c(target = NA, mediator = NA)
@@ -36,6 +23,39 @@ med_fits <- function(driver, target, mediator, fitFunction,
     perp_tar <- perp_tar$driver
     perp_med <- perp_med$driver
   }
+  
+  # Need to look where common_data is found to adjust.
+  if(!common) {
+    commons <- common_data(target, mediator, driver,
+                           covar_tar, covar_med, driver_med, intcovar)
+    driver <- commons$driver
+    target <- commons$target
+    mediator <- commons$mediator
+    covar_tar <- commons$covar_tar
+    covar_med <- commons$covar_med
+    driver_med <- commons$driver_med
+    intcovar <- commons$intcovar
+  }
+  
+  # Align also on missing data. This may be overkill.
+  no.na <- apply(as.matrix(target), 1, function(x) !any(is.na(x)))
+  if(!is.null(driver))
+    no.na <- no.na & apply(driver, 1, function(x) !any(is.na(x)))
+  if(!is.null(driver_med))
+    no.na <- no.na & apply(driver_med, 1, function(x) !any(is.na(x)))
+  if(!is.null(mediator))
+    no.na <- no.na & apply(mediator, 1, function(x) !any(is.na(x)))
+  if(!is.null(covar_tar))
+    no.na <- no.na & apply(covar_tar, 1, function(x) !any(is.na(x)))
+  if(!is.null(covar_med))
+    no.na <- no.na & apply(covar_med, 1, function(x) !any(is.na(x)))
+  target <- cbind(target)[no.na,]
+  mediator <- mediator[no.na,]
+  driver <- driver[no.na,]
+  driver_med <- driver_med[no.na,]
+  covar_tar <- covar_tar[no.na,]
+  covar_med <- covar_med[no.na,]
+  intcovar <- intcovar[no.na,]
   
   # Fit mediation models.
   fits <- list()
