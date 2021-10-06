@@ -1,0 +1,25 @@
+---
+title: "Connect Example"
+author: "Brian Yandell"
+date: "10/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+devtools::install_github("byandell/intermediate")
+```
+
+```{r}
+library(intermediate)
+```
+
+```{r}
+example(mediation_scan)
+```
+
+
+
