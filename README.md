@@ -7,8 +7,8 @@
 You can install `intermediate` directly from Github using `devtools` package:
 
 ```S
-    # install.packages("devtools")
-    devtools::install_github("simecek/intermediate")
+    install.packages("devtools")
+    devtools::install_github("byandell/intermediate")
 ```
 
 ## Example
@@ -18,18 +18,15 @@ You can install `intermediate` directly from Github using `devtools` package:
   data(Tmem68)
   
   # Let us mediate Tmem68 to other proteins
-  med <- mediation.scan(target = Tmem68$target,
+  med <- mediation_scan(target = Tmem68$target,
                         mediator = Tmem68$mediator,
                         annotation = Tmem68$annotation,
                         covar = Tmem68$covar,
                         qtl.geno = Tmem68$qtl.geno)
                         
   # Plot mediation results and identify the mediator                      
-  plot(med)                        
-  identify(med)
-  
-  # Interactive plot
-  kplot(med)
+  ggplot_mediation_scan(med)                        
+  summary(med)
 ```
 
 
