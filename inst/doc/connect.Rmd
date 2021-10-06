@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+This is an example of installing a package from github via Rstudio Connect.
+This code is in `inst/doc` folder of the `byandell/intermediate` package, and installs the intermediate package.
+
+Larger goal is to run a shiny app in package `byandell/qtl2shiny`, which depends on this package and on `byandell/qtl2mediate`, as well as other packages on CRAN.
+
 ```{r}
 devtools::install_github("byandell/intermediate")
 ```
