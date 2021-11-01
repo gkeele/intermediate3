@@ -22,7 +22,7 @@ You can install `intermediate` directly from Github using `devtools` package:
                         mediator = Tmem68$mediator,
                         annotation = Tmem68$annotation,
                         covar = Tmem68$covar,
-                        qtl.geno = Tmem68$qtl.geno)
+                        driver = Tmem68$qtl.geno)
                         
   # Plot mediation results and identify the mediator                      
   ggplot_mediation_scan(med)                        
